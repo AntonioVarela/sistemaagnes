@@ -39,6 +39,18 @@ Route::view('dashboard', 'dashboard')
     ->middleware(['auth', 'verified'])
     ->name('dashboard');
 
+    Route::get('/usuarios',[administradorController::class,'showUsuarios'])->name('usuarios.index');
+Route::post('/usuariosguardar', [administradorController::class,'storeUsuario'])->name('usuarios.store');
+Route::delete('/usuarios/{id}', [administradorController::class,'destroyUsuario'])->name('usuarios.destroy');
+Route::get('/usuarios/{id}/edit', function ($id) {
+    return view('usuarios.edit', ['id' => $id]);
+})->name('usuarios.edit');
+Route::post('/usuarios/{id}/update', [administradorController::class,'updateUsuario'])->name('usuarios.update');
+
+Route::get('/horarios',[administradorController::class,'showHorarios'])->name('horarios.index');
+Route::post('/horariosguardar', [administradorController::class,'storeHorario'])->name('horarios.store');
+Route::delete('/horarios/{id}', [administradorController::class,'destroyHorario'])->name('horarios.destroy');
+
 Route::middleware(['auth'])->group(function () {
     Route::redirect('settings', 'settings/profile');
 

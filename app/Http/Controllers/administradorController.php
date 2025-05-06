@@ -7,6 +7,7 @@ use App\Models\materia;
 use App\Models\grupo;
 use App\Models\User;
 use App\Models\tarea;
+use App\Models\horario;
 
 class administradorController extends Controller
 {
@@ -25,6 +26,7 @@ class administradorController extends Controller
         $tarea->descripcion = request('descripcion');
         $tarea->archivo = request('archivo');
         $tarea->fecha_entrega = request('fecha_entrega');
+        $tarea->hora_entrega = request('hora_entrega');
         $tarea->grupo = request('grupo');
         $tarea->materia = request('materia');
 
@@ -95,5 +97,42 @@ class administradorController extends Controller
         $materia->delete();
 
         return redirect()->route('materias.index')->with('success', 'Materia eliminada exitosamente.');
+    }
+
+    public function showUsuarios()
+    {
+        $usuarios = User::all();
+        return view("usuarios", compact('usuarios')); // Cambiado a 'usuarios'
+    }
+    public function storeUsuario(Request $request)
+    {
+        $usuario = new User();
+        $usuario->name = $request->name;
+        $usuario->email = $request->email;
+        $usuario->password = bcrypt($request->password);
+        $usuario->rol = $request->rol;
+        $usuario->save();
+        return redirect()->route('usuarios.index')->with('success', 'Usuario creado exitosamente.');
+    }
+
+    public function showHorarios()
+    {
+        $horarios = horario::all();
+        $grupos = grupo::all();
+        $materias = materia::all();
+        $usuarios = User::all();
+        return view("horarios", compact(['horarios','grupos','materias','usuarios'])); // Cambiado a 'horarios'
+    }
+
+    public function storeHorario(Request $request)
+    {
+        $horario = new horario();
+        $horario->grupo = $request->grupo;
+        $horario->materia = $request->materia;
+        $horario->dias = implode(',', $request->dias); // Convertir el array de días en una cadena separada por comas
+        $horario->hora_inicio = $request->hora_inicio;
+        $horario->hora_fin = $request->hora_fin;
+        $horario->save();
+        return redirect()->route('horarios.index')->with('success', 'Horario creado exitosamente.');
     }
 }

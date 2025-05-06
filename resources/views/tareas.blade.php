@@ -21,9 +21,11 @@
                                 placeholder="Ingresa el título" required />
                             <flux:textarea name="descripcion" id="descripcion" label="Descripción" rows="4"
                                 placeholder="Describe la tarea" required />
+                                
                             <flux:input name="archivo" type="file" id="archivo" label="Archivo" />
                             <flux:input name="fecha_entrega" id="fecha_entrega" label="Fecha de Entrega" type="date"
                                 required />
+                                <flux:input name="hora_entrega" type="time" id='hora_entrega' label='Hora de entrega' required/>
                             <flux:select name="grupo" id="grupo" label="Grupo">
                                 @foreach ($grupos as $grupo)
                                     <option value="{{ $grupo->id }}">{{ $grupo->nombre }}</option>
@@ -85,6 +87,7 @@
         </div>
     </div>
     <script>
+        
         $(document).ready(function() {
             $('#myTable').DataTable({
                 language: {

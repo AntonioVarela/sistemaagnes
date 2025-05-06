@@ -46,8 +46,13 @@
     <!-- Modal -->
     <div id="eventModal" class="fixed inset-0 hidden bg-gray-800 bg-opacity-50 flex items-center justify-center z-50">
         <div class="bg-white rounded-lg shadow-lg p-6 w-96">
-            <h2 id="modalTitle" class="text-xl font-bold mb-4"></h2>
+            <h2 class="text-xl font-bold mb-4">Tarea de <span id="modalTitle"></span> </h2>
+            <label class="text-gray-700 mb-2">Descripción:</label> 
             <p id="modalDescription" class="text-gray-700 mb-6"></p>
+            <label class="text-gray-700 mb-2">Fecha de entrega:</label>
+            <p id="modalDate" class="text-gray-700 mb-6"></p>
+            <label class="text-gray-700 mb-2">Recursos:</label>
+            <p id="modalResources" class="text-gray-700 mb-6">No hay recursos disponibles</p>
             <button id="closeModal" class="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700">
                 Cerrar
             </button>
@@ -56,41 +61,31 @@
 </body>
 <script>
     $(document).ready(function () {
+        var tareas = @json($tareas);
+        var eventos = tareas.map(element => {
+            return {
+                title: element.titulo,
+                start: element.created_at,
+                color: 'blue', // Cambia 'blue' por el color que desees
+                allDay:false,
+                extendedProps: {
+                    description: element.descripcion,
+                    fecha_entrega: element.fecha_entrega,
+                    hora_entrega: element.hora_entrega,
+                }
+            };
+        });
+
         var calendarEl = document.getElementById('calendar');
         var calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'listWeek',
             locale: 'es', // Configurar el idioma a español
-            events: [
-                { 
-                    title: 'Matemáticas', 
-                    start: '2025-05-06', 
-                    extendedProps: {
-                        description: 'Descripción del Evento 1'
-                    }
-                },
-                { 
-                    title: 'Español', 
-                    start: '2025-05-06', 
-                    extendedProps: {
-                        description: 'Descripción del Evento 3'
-                    }
-                },
-                { 
-                    title: 'Historia', 
-                    start: '2025-05-07', 
-                    allDay: false,
-                    startTime: '11:00:00',
-                    endTime: '11:30:00',
-                    color: 'red',
-                    extendedProps: {
-                        description: 'Descripción del Evento 2'
-                    }
-                },
-            ],
+            events: eventos,
             eventClick: function(info) {
                 // Mostrar el modal con los datos del evento
                 $('#modalTitle').text(info.event.title);
                 $('#modalDescription').text(info.event.extendedProps.description);
+                $('#modalDate').text(info.event.extendedProps.fecha_entrega + ' ' + info.event.extendedProps.hora_entrega);
                 $('#eventModal').removeClass('hidden');
             }
         });
