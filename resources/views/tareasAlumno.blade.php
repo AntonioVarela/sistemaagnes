@@ -6,6 +6,7 @@
     <title>Semana</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/index.global.min.js'></script>
+    <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/locales/es.global.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4=" crossorigin="anonymous"></script>
 </head>
 <body class="bg-gray-100 text-gray-800">
@@ -58,18 +59,29 @@
         var calendarEl = document.getElementById('calendar');
         var calendar = new FullCalendar.Calendar(calendarEl, {
             initialView: 'listWeek',
+            locale: 'es', // Configurar el idioma a español
             events: [
                 { 
-                    title: 'Evento 1', 
+                    title: 'Matemáticas', 
                     start: '2025-05-06', 
                     extendedProps: {
                         description: 'Descripción del Evento 1'
                     }
                 },
                 { 
-                    title: 'Evento 2', 
+                    title: 'Español', 
+                    start: '2025-05-06', 
+                    extendedProps: {
+                        description: 'Descripción del Evento 3'
+                    }
+                },
+                { 
+                    title: 'Historia', 
                     start: '2025-05-07', 
-                    end: '2025-05-08', 
+                    allDay: false,
+                    startTime: '11:00:00',
+                    endTime: '11:30:00',
+                    color: 'red',
                     extendedProps: {
                         description: 'Descripción del Evento 2'
                     }

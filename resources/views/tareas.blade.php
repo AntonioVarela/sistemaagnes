@@ -3,65 +3,47 @@
         <h1>{{ __('Tareas') }}</h1>
         <div class=''>
             <flux:modal.trigger name="edit-profile">
-                <flux:button icon='plus' variant="primary" >Agregar</flux:button>
+                <flux:button icon='plus' variant="primary">Agregar</flux:button>
             </flux:modal.trigger>
-            <flux:button icon='eye' variant="filled" name="edit-profile"  :href="
-            route('tareas.alumnos')" class="ml-2" > Vista del alumno </flux:button>
+            <flux:button icon='eye' variant="filled" name="edit-profile" :href="route('tareas.alumnos')"
+                class="ml-2"> Vista del alumno </flux:button>
 
-            <flux:modal name="edit-profile" class="md:w-96">
-                <div class="space-y-6">
-                    <div>
-                        <flux:heading size="lg">Tareas</flux:heading>
-                        <flux:text class="mt-2">Make changes to your personal details.</flux:text>
-                    </div>
+            <flux:modal name="edit-profile" class="md:w-96 p-6">
+                <flux:container class="space-y-6">
+                    <flux:heading size="lg">Tareas</flux:heading>
+                    <flux:text class="mt-2">Haz cambios en tus detalles personales.</flux:text>
 
-                    <form action="{{ route('tareas.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                    <form action="{{ route('tareas.store') }}" method="POST" enctype="multipart/form-data"
+                        class="space-y-4">
                         @csrf
-                        <div>
-                            <label for="titulo" class="block text-sm font-medium text-gray-700">{{ __('Título') }}</label>
-                            <input type="text" name="titulo" id="titulo" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
+                        <div class="grid gap-4">
+                            <flux:input name="titulo" id="titulo" label="Título" type="text"
+                                placeholder="Ingresa el título" required />
+                            <flux:textarea name="descripcion" id="descripcion" label="Descripción" rows="4"
+                                placeholder="Describe la tarea" required />
+                            <flux:input name="archivo" type="file" id="archivo" label="Archivo" />
+                            <flux:input name="fecha_entrega" id="fecha_entrega" label="Fecha de Entrega" type="date"
+                                required />
+                            <flux:select name="grupo" id="grupo" label="Grupo">
+                                @foreach ($grupos as $grupo)
+                                    <option value="{{ $grupo->id }}">{{ $grupo->nombre }}</option>
+                                @endforeach
+                            </flux:select>
+                            <flux:select name="materia" id="materia" label="Materia">
+                                @foreach ($materias as $materia)
+                                    <option value="{{ $materia->id }}">{{ $materia->nombre }}</option>
+                                @endforeach
+                            </flux:select>
                         </div>
-        
-                        <div>
-                            <label for="descripcion" class="block text-sm font-medium text-gray-700">{{ __('Descripción') }}</label>
-                            <textarea name="descripcion" id="descripcion" rows="4" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required></textarea>
-                        </div>
-        
-                        <div>
-                            <label for="archivo" class="block text-sm font-medium text-gray-700">{{ __('Archivo') }}</label>
-                            <input type="file" name="archivo" id="archivo" class="mt-1 block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-indigo-50 file:text-indigo-700 hover:file:bg-indigo-100">
-                        </div>
-        
-                        <div>
-                            <label for="fecha_entrega" class="block text-sm font-medium text-gray-700">{{ __('Fecha de Entrega') }}</label>
-                            <input type="date" name="fecha_entrega" id="fecha_entrega" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
-                        </div>
-        
-                        <div>
-                            <label for="grupo" class="block text-sm font-medium text-gray-700">{{ __('Grupo') }}</label>
-                            <select name="grupo" id="grupo" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm" required>
-                                <option value="">{{ __('Seleccione un grupo') }}</option>
-                                <option value="grupo1">{{ __('Grupo 1') }}</option>
-                                <option value="grupo2">{{ __('Grupo 2') }}</option>
-                                <option value="grupo3">{{ __('Grupo 3') }}</option>
-                                <!-- Agrega más opciones según sea necesario -->
-                            </select>
-                        </div>
-        
-                        <div>
-                            <button type="submit" class="inline-flex justify-center rounded-md border border-transparent bg-indigo-600 py-2 px-4 text-sm font-medium text-white shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2">
-                                {{ __('Guardar Tarea') }}
-                            </button>
-                        </div>
+
+                        <flux:footer class="flex justify-between">
+                            <flux:button type="button" variant="filled">Cancelar</flux:button>
+                            <flux:button type="submit" class="ml-3" variant="primary">Guardar Tarea</flux:button>
+                        </flux:footer>
                     </form>
-
-                    <div class="flex">
-                        <flux:spacer />
-
-                        <flux:button type="submit" variant="primary">Save changes</flux:button>
-                    </div>
-                </div>
+                </flux:container>
             </flux:modal>
+
             <table id="myTable" class="display">
                 <thead>
                     <tr>
@@ -69,27 +51,41 @@
                         <th>Fecha entrega</th>
                         <th>Grupo</th>
                         <th>Descripción</th>
+                        <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td>Row 1</td>
-                        <td>Row 1 Data 2</td>
-                        <td>Row 1 Data 2</td>
-                        <td>Row 1 Data 2</td>
-                    </tr>
-                    <tr>
-                        <td>Row 2 Data 1</td>
-                        <td>Row 2 Data 1</td>
-                        <td>Row 2 Data 1</td>
-                        <td>Row 2 Data 2</td>
-                    </tr>
+                    @foreach ($tareas as $tarea )
+                        <tr>
+                            <td>{{ $tarea->titulo }}</td>
+                            <td>{{ $tarea->fecha_entrega }}</td>
+                            @foreach ($grupos as $grupo)
+                                @if ($tarea->grupo == $grupo->id)
+                                    <td>{{ $grupo->nombre }}</td>
+                                @endif
+                            @endforeach
+                            <td>{{ $tarea->descripcion }}</td>
+                            <td>
+                                <flux:button icon='pencil' variant="filled" name="edit-profile"
+                                    :href="route('tareas.edit', $tarea->id)" class="ml-2"> Editar </flux:button>
+                                <form action="{{ route('tareas.destroy', $tarea->id) }}" method="POST"
+                                    class="inline">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="text-red-500 hover:text-red-700">
+                                        <i class="fas fa-trash"></i> Eliminar
+                                    </button>
+                                </form>
+                            </td>
+                        </tr>
+                        
+                    @endforeach
                 </tbody>
             </table>
         </div>
     </div>
     <script>
-        $(document).ready(function () {
+        $(document).ready(function() {
             $('#myTable').DataTable({
                 language: {
                     url: 'https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json',
@@ -98,4 +94,3 @@
         });
     </script>
 </x-layouts.app>
-
