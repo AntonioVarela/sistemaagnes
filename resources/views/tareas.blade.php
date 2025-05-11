@@ -17,30 +17,35 @@
                         class="space-y-4">
                         @csrf
                         <div class="grid gap-4">
-                            <flux:input name="titulo" id="titulo" label="Título" type="text"
-                                placeholder="Ingresa el título" required />
-                            <flux:textarea name="descripcion" id="descripcion" label="Descripción" rows="4"
-                                placeholder="Describe la tarea" required />
-                                
-                            <flux:input name="archivo" type="file" id="archivo" label="Archivo" />
-                            <flux:input name="fecha_entrega" id="fecha_entrega" label="Fecha de Entrega" type="date"
-                                required />
-                                <flux:input name="hora_entrega" type="time" id='hora_entrega' label='Hora de entrega' required/>
-                            <flux:select name="grupo" id="grupo" label="Grupo">
-                                @foreach ($grupos as $grupo)
-                                    <option value="{{ $grupo->id }}">{{ $grupo->nombre }}</option>
-                                @endforeach
-                            </flux:select>
-                            <flux:select name="materia" id="materia" label="Materia">
+                            {{-- <flux:input name="titulo" id="titulo" label="Título" type="text"
+                                placeholder="Ingresa el título" required /> --}}
+                                <flux:select name="materia" id="materia" label="Materia">
                                 @foreach ($materias as $materia)
                                     <option value="{{ $materia->id }}">{{ $materia->nombre }}</option>
                                 @endforeach
                             </flux:select>
+                            <flux:textarea name="descripcion" id="descripcion" label="Descripción" rows="4"
+                                placeholder="Describe la tarea" required />
+                                
+                            <flux:input name="archivo" type="file" id="archivo" label="Archivo" accept=".pdf" />
+                            <flux:input name="fecha_entrega" id="fecha_entrega" label="Fecha de Entrega" type="date"
+                                required />
+                                <flux:input name="hora_entrega" type="time" id='hora_entrega' label='Hora de entrega' required/>
+                            <flux:select name="grupo" id="grupo" label="Grupo">
+                                @foreach ( $horarios as $horario)
+                                    @foreach ($grupos as $grupo)
+                                        @if ($horario->grupo == $grupo->id)
+                                            <option value="{{ $grupo->id }}">{{ $grupo->nombre }}</option>
+                                        @endif
+                                    @endforeach
+                                @endforeach
+                            </flux:select>
+                            
                         </div>
 
                         <flux:footer class="flex justify-between">
                             <flux:button type="button" variant="filled">Cancelar</flux:button>
-                            <flux:button type="submit" class="ml-3" variant="primary">Guardar Tarea</flux:button>
+                            <flux:button type="submit" class="ml-3" variant="primary">Guardar tarea</flux:button>
                         </flux:footer>
                     </form>
                 </flux:container>

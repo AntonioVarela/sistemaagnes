@@ -8,7 +8,16 @@ Route::get('/', function () {
     return view('welcome');
 })->name('home');
 
-Route::get('/tareas', [administradorController::class,'index'])->name('tareas.index');
+
+
+Route::middleware(['auth'])->group(function () {
+    Route::redirect('settings', 'settings/profile');
+
+    Volt::route('settings/profile', 'settings.profile')->name('settings.profile');
+    Volt::route('settings/password', 'settings.password')->name('settings.password');
+    Volt::route('settings/appearance', 'settings.appearance')->name('settings.appearance');
+
+    Route::get('/tareas', [administradorController::class,'index'])->name('tareas.index');
 Route::post('/tareasguardar', [administradorController::class,'store'])->name('tareas.store');
 Route::get('/tareasalumno', [administradorController::class,'showAlumnos'])->name('tareas.alumnos');//Cambiar a volt
 Route::get("/grupos",[administradorController::class,'showGrupos'])->name('grupos.index');
@@ -50,13 +59,6 @@ Route::post('/usuarios/{id}/update', [administradorController::class,'updateUsua
 Route::get('/horarios',[administradorController::class,'showHorarios'])->name('horarios.index');
 Route::post('/horariosguardar', [administradorController::class,'storeHorario'])->name('horarios.store');
 Route::delete('/horarios/{id}', [administradorController::class,'destroyHorario'])->name('horarios.destroy');
-
-Route::middleware(['auth'])->group(function () {
-    Route::redirect('settings', 'settings/profile');
-
-    Volt::route('settings/profile', 'settings.profile')->name('settings.profile');
-    Volt::route('settings/password', 'settings.password')->name('settings.password');
-    Volt::route('settings/appearance', 'settings.appearance')->name('settings.appearance');
 });
 
 

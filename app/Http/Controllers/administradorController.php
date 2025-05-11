@@ -8,21 +8,27 @@ use App\Models\grupo;
 use App\Models\User;
 use App\Models\tarea;
 use App\Models\horario;
+use Illuminate\Support\Facades\Auth;
 
 class administradorController extends Controller
 {
     public function index()
     {
+        $materiasUsuario = Auth::user()->materias->pluck('id');
+        $horarios = horario::with(['materia', 'grupo'])->whereIn('materia', $materiasUsuario)->get();
         $grupos = grupo::all();
-        $materias = materia::all();
+        $materias = Auth::user()->materias;
         $tareas = tarea::all();
-        return view('tareas',compact('grupos','materias','tareas')); // Cambiado a 'tareas'
+
+        return view('tareas',compact('grupos','materias','tareas','horarios')); // Cambiado a 'tareas'
     }
 
     public function store(REQUEST $request)
     {
+        $materia = Auth::user()->materia;
         $tarea = new tarea();
-        $tarea->titulo = request('titulo');
+        $materia = materia::find($request->materia);
+        $tarea->titulo = "Tarea de " . $materia->nombre;
         $tarea->descripcion = request('descripcion');
         $tarea->archivo = request('archivo');
         $tarea->fecha_entrega = request('fecha_entrega');
