@@ -39,11 +39,6 @@
                                     <option value="{{ $materia->id }}">{{ $materia->nombre }}</option>
                                 @endforeach
                             </flux:select>
-                            <flux:select name="maestro_id" id="maestro_id" label="Maestro">
-                                @foreach ($usuarios as $usuario)
-                                    <option value="{{ $usuario->id }}">{{ $usuario->name }}</option>
-                                @endforeach
-                            </flux:select>
                         </div>
 
                         <flux:footer class="flex justify-between">
@@ -58,28 +53,43 @@
             <table id="myTable" class="display">
                 <thead>
                     <tr>
-                        <th>Hora Inicio</th>
-                        <th>Hora Fin</th>
-                        <th>Grupo</th>
                         <th>Materia</th>
+                        <th>Grupo</th>
+                        <th>Horario</th>
+                        <th>Maestro</th>
+                        <th>Días de la Semana</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
                 <tbody>
                     @foreach ($horarios as $horario)
                         <tr>
-                            <td>{{ $horario->hora_inicio }}</td>
-                            <td>{{ $horario->hora_fin }}</td>
-                            @foreach ($grupos as $grupo)
-                                @if ($horario->grupo_id == $grupo->id)
-                                    <td>{{ $grupo->nombre }}</td>
-                                @endif
-                            @endforeach
                             @foreach ($materias as $materia)
-                                @if ($horario->materia_id == $materia->id)
+                                @if ($horario->materia == $materia->id)
                                     <td>{{ $materia->nombre }}</td>
                                 @endif
                             @endforeach
+                            @foreach ($grupos as $grupo)
+                                @if ($horario->grupo == $grupo->id)
+                                    <td>{{ $grupo->nombre }}</td>
+                                @endif
+                            @endforeach
+                            <td>{{ $horario->hora_inicio }} - {{ $horario->hora_fin }}</td>
+                            <td>
+                                @foreach ( $materias as $materia)
+                                    @if ($horario->materia == $materia->id)
+                                        @foreach ($usuarios as $usuario)
+                                            @if ($materia->maestro == $usuario->id)
+                                                {{ $usuario->name }}
+                                            @endif
+                                        @endforeach
+                                    @endif
+                                @endforeach
+                            </td>
+                            <td>
+                            {{$horario->dias}}
+                                   
+                            </td>
                             <td>
                                 <flux:button icon='pencil' variant="filled" name="edit-profile"
                                     :href="route('grupos.edit', $horario->id)" class="ml-2"> Editar </flux:button>

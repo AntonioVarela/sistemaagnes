@@ -11,4 +11,12 @@ class materia extends Model
     {
         return $this->hasOne(horario::class, 'materia');
     }
+    public function maestro()
+    {
+        return $this->belongsTo(User::class, 'maestro');
+    }
+    public function tareas()
+    {
+        return $this->hasMany(tarea::class, 'materia');
+    }
 }

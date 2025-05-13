@@ -5,8 +5,7 @@
             <flux:modal.trigger name="edit-profile">
                 <flux:button icon='plus' variant="primary">Agregar</flux:button>
             </flux:modal.trigger>
-            <flux:button icon='eye' variant="filled" name="edit-profile" :href="route('tareas.alumnos')"
-                class="ml-2"> Vista del alumno </flux:button>
+            
 
             <flux:modal name="edit-profile" class="md:w-96 p-6">
                 <flux:container class="space-y-6">
@@ -24,9 +23,8 @@
                                     <option value="{{ $materia->id }}">{{ $materia->nombre }}</option>
                                 @endforeach
                             </flux:select>
-                            <flux:textarea name="descripcion" id="descripcion" label="Descripción" rows="4"
-                                placeholder="Describe la tarea" required />
-                                
+                            {{-- <flux:textarea name="descripcion" id="descripcion" label="Descripción" rows="4"
+                                placeholder="Describe la tarea" required /> --}}                                
                             <flux:input name="archivo" type="file" id="archivo" label="Archivo" accept=".pdf" />
                             <flux:input name="fecha_entrega" id="fecha_entrega" label="Fecha de Entrega" type="date"
                                 required />

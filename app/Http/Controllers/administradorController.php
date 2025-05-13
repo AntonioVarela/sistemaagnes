@@ -12,6 +12,14 @@ use Illuminate\Support\Facades\Auth;
 
 class administradorController extends Controller
 {
+    public function indexDashboard()
+    {
+        $materias = Auth::user()->materias;
+        $grupos = grupo::all();
+        $usuarios = User::all();
+        return view('dashboard', compact(['materias','grupos','usuarios'])); // Cambiado a 'dashboard'
+    }
+
     public function index()
     {
         $materiasUsuario = Auth::user()->materias->pluck('id');
@@ -47,12 +55,12 @@ class administradorController extends Controller
         // Logic to store a new task
     }
 
-    public function showAlumnos()
+    public function showAlumnos($id)
     {
         $grupos = grupo::all();
         $materias = materia::all();
         $usuarios = User::all();
-        $tareas = tarea::all();
+        $tareas = tarea::where('grupo', $id)->get(); // Cambiado a 'tareas'
         return view("tareasAlumno", compact(['grupos','materias','usuarios', 'tareas'])); // Cambiado a 'tareasAlumno'
  
     }
@@ -133,8 +141,8 @@ class administradorController extends Controller
     public function storeHorario(Request $request)
     {
         $horario = new horario();
-        $horario->grupo = $request->grupo;
-        $horario->materia = $request->materia;
+        $horario->grupo = $request->grupo_id;
+        $horario->materia = $request->materia_id;
         $horario->dias = implode(',', $request->dias); // Convertir el array de días en una cadena separada por comas
         $horario->hora_inicio = $request->hora_inicio;
         $horario->hora_fin = $request->hora_fin;

@@ -19,7 +19,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/tareas', [administradorController::class,'index'])->name('tareas.index');
 Route::post('/tareasguardar', [administradorController::class,'store'])->name('tareas.store');
-Route::get('/tareasalumno', [administradorController::class,'showAlumnos'])->name('tareas.alumnos');//Cambiar a volt
+Route::get('/actividades/{id}', [administradorController::class,'showAlumnos'])->name('tareas.alumnos');//Cambiar a volt
 Route::get("/grupos",[administradorController::class,'showGrupos'])->name('grupos.index');
 Route::post('/gruposguardar', [administradorController::class,'storeGrupo'])->name('grupos.store');
 Route::delete('/grupos/{id}', [administradorController::class,'destroyGrupo'])->name('grupos.destroy');
@@ -43,10 +43,7 @@ Route::get('/tareas/{id}/delete', function ($id) {
     return view('tareas.delete', ['id' => $id]);
 })->name('tareas.delete');
 Route::post('/tareas/{id}/destroy', [administradorController::class,'destroy'])->name('tareas.destroy');
-
-Route::view('dashboard', 'dashboard')
-    ->middleware(['auth', 'verified'])
-    ->name('dashboard');
+Route::get('/dashboard', [administradorController::class,'indexDashboard'])->name('dashboard')->middleware(['auth', 'verified']);
 
     Route::get('/usuarios',[administradorController::class,'showUsuarios'])->name('usuarios.index');
 Route::post('/usuariosguardar', [administradorController::class,'storeUsuario'])->name('usuarios.store');
