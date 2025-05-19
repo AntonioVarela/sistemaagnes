@@ -23,8 +23,8 @@
                                     <option value="{{ $materia->id }}">{{ $materia->nombre }}</option>
                                 @endforeach
                             </flux:select>
-                            {{-- <flux:textarea name="descripcion" id="descripcion" label="Descripción" rows="4"
-                                placeholder="Describe la tarea" required /> --}}                                
+                            <flux:textarea name="descripcion" id="descripcion" label="Descripción" rows="4"
+                                placeholder="Describe la tarea" required />                                
                             <flux:input name="archivo" type="file" id="archivo" label="Archivo" accept=".pdf" />
                             <flux:input name="fecha_entrega" id="fecha_entrega" label="Fecha de Entrega" type="date"
                                 required />
