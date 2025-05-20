@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('grupos', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre')->unique();
+            $table->string('nombre');
             $table->string('seccion');
             $table->bigInteger('titular')->unsigned();
             $table->foreign('titular')->references('id')->on('users')->onDelete('cascade');

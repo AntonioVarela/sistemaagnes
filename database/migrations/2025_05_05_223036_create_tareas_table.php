@@ -16,7 +16,7 @@ return new class extends Migration
             $table->string('titulo');
             $table->string('descripcion');
             $table->date('fecha_entrega');
-            $table->time('hora_entrega');
+            $table->time('hora_entrega')->nullable();
             $table->string('archivo')->nullable();
             $table->bigInteger('grupo')->unsigned(); // Corregido
             $table->bigInteger('materia')->unsigned(); // Corregido

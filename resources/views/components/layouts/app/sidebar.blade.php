@@ -15,15 +15,18 @@
                 <flux:navlist.group :heading="__('Control escolar')" class="grid">
                     <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
                     <flux:navlist.item icon="book-open" :href="route('tareas.index')" :current="request()->routeIs('tareas.index')" wire:navigate>{{ __('Tareas') }}</flux:navlist.item>
-                    <flux:navlist.item icon="device-tablet" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Anuncios') }}</flux:navlist.item>
-                    <flux:navlist.item icon="calendar-days" :href="route('horarios.index')" :current="request()->routeIs('horarios.index')" wire:navigate>{{ __('Horarios') }}</flux:navlist.item>
-                    <flux:navlist.item icon="list-bullet" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Planeaciones') }}</flux:navlist.item>
+                    <flux:navlist.item icon="device-tablet" style="display:none;" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Anuncios') }}</flux:navlist.item>
+                    @if (Auth::user()->rol == "administrador")
+                        <flux:navlist.item icon="calendar-days" :href="route('horarios.index')" :current="request()->routeIs('horarios.index')" wire:navigate>{{ __('Horarios') }}</flux:navlist.item>
+                    @endif
+                    <flux:navlist.item icon="list-bullet" style="display:none;" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Planeaciones') }}</flux:navlist.item>
                 </flux:navlist.group>
             </flux:navlist>
 
             <flux:spacer />
 
-            <flux:navlist variant="outline">
+            @if (Auth::user()->rol == "administrador")
+                <flux:navlist variant="outline">
                 <flux:navlist.item icon="user" :href="route('usuarios.index')">
                 {{ __('Usuarios') }}
                 </flux:navlist.item>
@@ -36,6 +39,8 @@
                 {{ __('Materias') }}
                 </flux:navlist.item>
             </flux:navlist>
+            @endif
+            
 
             <!-- Desktop User Menu -->
             <flux:dropdown position="bottom" align="start">

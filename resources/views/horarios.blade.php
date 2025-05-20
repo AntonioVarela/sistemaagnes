@@ -15,6 +15,23 @@
                         class="space-y-4">
                         @csrf
                         <div class="grid gap-4">
+                            <flux:select name="grupo_id" id="grupo_id" label="Grupo">
+                                @foreach ($grupos as $grupo)
+                                    <option value="{{ $grupo->id }}">{{ $grupo->nombre }} - {{ $grupo->seccion }}
+                                    </option>
+                                @endforeach
+                            </flux:select>
+                            <flux:select name="materia_id" id="materia_id" label="Materia">
+                                @foreach ($materias as $materia)
+                                    <option value="{{ $materia->id }}">{{ $materia->nombre }}</option>
+                                @endforeach
+                            </flux:select>
+                            <flux:select name="maestro_id" id="maestro_id" label="Maestro">
+                                @foreach ($usuarios as $usuario)
+                                    <option value="{{ $usuario->id }}">{{ $usuario->name }}</option>
+                                @endforeach
+                            </flux:select>
+
                             <flux:input name="hora_inicio" id="hora_inicio" label="Hora de Inicio" type="time"
                                 placeholder="Ingresa la hora de inicio" required />
                             <flux:input name="hora_fin" id="hora_fin" label="Hora de Fin" type="time"
@@ -29,16 +46,7 @@
                                 <flux:checkbox name="dias[]" id="viernes" value="viernes" label="Viernes" />
                             </flux:fieldset>
 
-                            <flux:select name="grupo_id" id="grupo_id" label="Grupo">
-                                @foreach ($grupos as $grupo)
-                                    <option value="{{ $grupo->id }}">{{ $grupo->nombre }}</option>
-                                @endforeach
-                            </flux:select>
-                            <flux:select name="materia_id" id="materia_id" label="Materia">
-                                @foreach ($materias as $materia)
-                                    <option value="{{ $materia->id }}">{{ $materia->nombre }}</option>
-                                @endforeach
-                            </flux:select>
+
                         </div>
 
                         <flux:footer class="flex justify-between">
@@ -65,30 +73,26 @@
                     @foreach ($horarios as $horario)
                         <tr>
                             @foreach ($materias as $materia)
-                                @if ($horario->materia == $materia->id)
+                                @if ($horario->materia_id == $materia->id)
                                     <td>{{ $materia->nombre }}</td>
                                 @endif
                             @endforeach
                             @foreach ($grupos as $grupo)
-                                @if ($horario->grupo == $grupo->id)
+                                @if ($horario->grupo_id == $grupo->id)
                                     <td>{{ $grupo->nombre }}</td>
                                 @endif
                             @endforeach
                             <td>{{ $horario->hora_inicio }} - {{ $horario->hora_fin }}</td>
                             <td>
-                                @foreach ( $materias as $materia)
-                                    @if ($horario->materia == $materia->id)
-                                        @foreach ($usuarios as $usuario)
-                                            @if ($materia->maestro == $usuario->id)
-                                                {{ $usuario->name }}
-                                            @endif
-                                        @endforeach
+                                @foreach ($usuarios as $usuario)
+                                    @if ($horario->maestro_id == $usuario->id)
+                                        {{ $usuario->name }}
                                     @endif
                                 @endforeach
                             </td>
                             <td>
-                            {{$horario->dias}}
-                                   
+                                {{ $horario->dias }}
+
                             </td>
                             <td>
                                 <flux:button icon='pencil' variant="filled" name="edit-profile"
@@ -97,11 +101,11 @@
                                     class="inline-block">
                                     @csrf
                                     @method('DELETE')
-                                    <flux:button type="submit" icon='trash' variant="filled" class="ml-2">Eliminar</flux:button>
+                                    <flux:button type="submit" icon='trash' variant="filled" class="ml-2">Eliminar
+                                    </flux:button>
                                 </form>
                             </td>
                         </tr>
-
                     @endforeach
                 </tbody>
             </table>

@@ -18,13 +18,6 @@
                         <div class="grid gap-4">
                             <flux:input name="nombre" id="nombre" label="Nombre de la materia" type="text"
                                 placeholder="Ingresa el nombre de la materia" required />
-                            <flux:input name="clave" id="clave" label="Clave de la materia" type="text"
-                                placeholder="Ingresa la clave de la materia" required />
-                            <flux:select name="maestro_id" id="maestro_id" label="Maestro">
-                                @foreach ($usuarios as $usuario)
-                                    <option value="{{ $usuario->id }}">{{ $usuario->name }}</option>
-                                @endforeach
-                            </flux:select>
                         </div>
 
                         <flux:footer class="flex justify-between">
@@ -40,8 +33,6 @@
                 <thead>
                     <tr>
                         <th>Nombre</th>
-                        <th>Clave</th>
-                        <th>Maestro</th>
                         <th>Acciones</th>
                     </tr>
                 </thead>
@@ -49,12 +40,6 @@
                     @foreach ($materias as $materia)
                         <tr>
                             <td>{{ $materia->nombre }}</td>
-                            <td>{{ $materia->clave }}</td>
-                            @foreach ($usuarios as $usuario)
-                                @if ($materia->maestro == $usuario->id)
-                                    <td>{{ $usuario->name }}</td>
-                                @endif
-                            @endforeach
                             <td>
                                 <flux:button icon='pencil' variant="filled" name="edit-profile"
                                     :href="route('grupos.edit', $materia->id)" class="ml-2"> Editar </flux:button>

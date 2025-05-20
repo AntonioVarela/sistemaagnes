@@ -60,9 +60,4 @@ class User extends Authenticatable
             ->implode('');
     }
 
-    public function materias()
-    {
-        return $this->hasMany(materia::class, "maestro");
-    }
-
 }

@@ -13,10 +13,7 @@ return new class extends Migration
     {
         Schema::create('materias', function (Blueprint $table) {
             $table->id();
-            $table->string('nombre')->unique();
-            $table->string('clave')->unique();
-            $table->bigInteger('maestro')->unsigned();
-            $table->foreign('maestro')->references('id')->on('users')->onDelete('cascade');
+            $table->string('nombre');
             $table->timestamps();
         });
     }

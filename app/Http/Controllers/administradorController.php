@@ -14,21 +14,21 @@ class administradorController extends Controller
 {
     public function indexDashboard()
     {
-        $materias = Auth::user()->materias;
+        
         $grupos = grupo::all();
         $usuarios = User::all();
-        return view('dashboard', compact(['materias','grupos','usuarios'])); // Cambiado a 'dashboard'
+        return view('dashboard', compact(['grupos','usuarios'])); // Cambiado a 'dashboard'
     }
 
     public function index()
     {
-        $materiasUsuario = Auth::user()->materias->pluck('id');
-        $horarios = horario::with(['materia', 'grupo'])->whereIn('materia', $materiasUsuario)->get();
+        $horario = horario::where('maestro_id', Auth::user()->id)->get();
+        $seccion = grupo::select('seccion')->whereIn('id', $horario->pluck('grupo_id'))->get();
         $grupos = grupo::all();
-        $materias = Auth::user()->materias;
+        $materias = materia::all();
         $tareas = tarea::all();
 
-        return view('tareas',compact('grupos','materias','tareas','horarios')); // Cambiado a 'tareas'
+        return view('tareas',compact('grupos','materias','tareas','horario','seccion')); // Cambiado a 'tareas'
     }
 
     public function store(REQUEST $request)
@@ -100,8 +100,6 @@ class administradorController extends Controller
     {
         $materia = new materia();
         $materia->nombre = $request->nombre;
-        $materia->clave = $request->clave;
-        $materia->maestro = $request->maestro_id;
         $materia->save();
         return redirect()->route('materias.index')->with('success', 'Materia creada exitosamente.');
     }
@@ -134,15 +132,16 @@ class administradorController extends Controller
         $horarios = horario::all();
         $grupos = grupo::all();
         $materias = materia::all();
-        $usuarios = User::all();
+        $usuarios = User::where('rol', 'maestro')->get();
         return view("horarios", compact(['horarios','grupos','materias','usuarios'])); // Cambiado a 'horarios'
     }
 
     public function storeHorario(Request $request)
     {
         $horario = new horario();
-        $horario->grupo = $request->grupo_id;
-        $horario->materia = $request->materia_id;
+        $horario->grupo_id = $request->grupo_id;
+        $horario->materia_id = $request->materia_id;
+        $horario->maestro_id = $request->maestro_id;
         $horario->dias = implode(',', $request->dias); // Convertir el array de días en una cadena separada por comas
         $horario->hora_inicio = $request->hora_inicio;
         $horario->hora_fin = $request->hora_fin;

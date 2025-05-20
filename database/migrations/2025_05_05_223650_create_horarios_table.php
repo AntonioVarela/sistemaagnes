@@ -13,13 +13,15 @@ return new class extends Migration
     {
         Schema::create('horarios', function (Blueprint $table) {
             $table->id();
-            $table->bigInteger('grupo')->unsigned();
-            $table->bigInteger('materia')->unsigned();
+            $table->bigInteger('grupo_id')->unsigned();
+            $table->bigInteger('materia_id')->unsigned();
+            $table->bigInteger('maestro_id')->unsigned();
             $table->string('dias');
             $table->string('hora_inicio');
             $table->string('hora_fin');           
-            $table->foreign('grupo')->references('id')->on('grupos')->onDelete('cascade');
-            $table->foreign('materia')->references('id')->on('materias')->onDelete('cascade');
+            $table->foreign('grupo_id')->references('id')->on('grupos')->onDelete('cascade');
+            $table->foreign('materia_id')->references('id')->on('materias')->onDelete('cascade');
+            $table->foreign('maestro_id')->references('id')->on('users')->onDelete('cascade');
             $table->timestamps();
         });
     }
