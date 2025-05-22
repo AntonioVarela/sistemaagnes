@@ -21,7 +21,6 @@
             transition: all 0.2s ease-in-out !important;
         }
         .fc-event:hover {
-            background: #4338CA !important;
             transform: translateY(-1px);
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
         }
@@ -205,7 +204,7 @@
                 headerToolbar: {
                     left: 'prev,next today',
                     center: 'title',
-                    right: 'dayGridMonth,timeGridWeek,listWeek'
+                    right: 'listWeek'
                 },
                 buttonText: {
                     today: 'Hoy',
