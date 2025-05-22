@@ -4,50 +4,71 @@
         @include('partials.head')
     </head>
     <body class="min-h-screen bg-white dark:bg-zinc-800">
-        <flux:sidebar sticky stashable class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900">
+        <flux:sidebar sticky stashable class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 transition-all duration-300" x-data="{ minimized: false }" x-bind:class="minimized ? 'w-25' : 'w-64'">
+            <div class="flex items-center justify-between" x-bind:class="minimized ? 'px-0' : 'px-4'">
+                <a href="{{ route('dashboard') }}" class="flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
+                    <x-app-logo x-bind:class="minimized ? 'w-8 h-8' : 'w-10 h-10'" />
+                </a>
+                <button @click="minimized = !minimized" class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700">
+                    <svg x-show="!minimized" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                    </svg>
+                    <svg x-show="minimized" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                    </svg>
+                </button>
+            </div>
+
             <flux:sidebar.toggle class="lg:hidden" icon="x-mark" />
 
-            <a href="{{ route('dashboard') }}" class="me-5 flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
-                <x-app-logo />
-            </a>
-
-            <flux:navlist variant="outline">
-                <flux:navlist.group :heading="__('Control escolar')" class="grid">
-                    <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Dashboard') }}</flux:navlist.item>
-                    <flux:navlist.item icon="book-open" :href="route('tareas.index')" :current="request()->routeIs('tareas.index')" wire:navigate>{{ __('Tareas') }}</flux:navlist.item>
-                    <flux:navlist.item icon="device-tablet" style="display:none;" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Anuncios') }}</flux:navlist.item>
+            <flux:navlist variant="outline" x-bind:class="minimized ? 'items-center px-0' : 'px-4'">
+                <flux:navlist.group x-bind:heading="minimized ? '' : '{{ __('Control escolar') }}'" class="grid">
+                    <flux:navlist.item icon="home" class="text-2xl"  :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
+                        <span x-show="!minimized">{{ __('Dashboard') }}</span>
+                    </flux:navlist.item>
+                    <flux:navlist.item icon="book-open" :href="route('tareas.index')" :current="request()->routeIs('tareas.index')" wire:navigate>
+                        <span x-show="!minimized">{{ __('Tareas') }}</span>
+                    </flux:navlist.item>
+                    <flux:navlist.item icon="device-tablet" style="display:none;" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
+                        <span x-show="!minimized">{{ __('Anuncios') }}</span>
+                    </flux:navlist.item>
                     @if (Auth::user()->rol == "administrador")
-                        <flux:navlist.item icon="calendar-days" :href="route('horarios.index')" :current="request()->routeIs('horarios.index')" wire:navigate>{{ __('Horarios') }}</flux:navlist.item>
+                        <flux:navlist.item icon="calendar-days" :href="route('horarios.index')" :current="request()->routeIs('horarios.index')" wire:navigate>
+                            <span x-show="!minimized">{{ __('Horarios') }}</span>
+                        </flux:navlist.item>
                     @endif
-                    <flux:navlist.item icon="list-bullet" style="display:none;" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>{{ __('Planeaciones') }}</flux:navlist.item>
+                    <flux:navlist.item icon="list-bullet" style="display:none;" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
+                        <span x-show="!minimized">{{ __('Planeaciones') }}</span>
+                    </flux:navlist.item>
                 </flux:navlist.group>
             </flux:navlist>
 
             <flux:spacer />
 
             @if (Auth::user()->rol == "administrador")
-                <flux:navlist variant="outline">
-                <flux:navlist.item icon="user" :href="route('usuarios.index')">
-                {{ __('Usuarios') }}
-                </flux:navlist.item>
+                <flux:navlist variant="outline" x-bind:class="minimized ? 'items-center px-2' : 'px-4'">
+                    <flux:navlist.item icon="user" :href="route('usuarios.index')">
+                        <span x-show="!minimized">{{ __('Usuarios') }}</span>
+                    </flux:navlist.item>
 
-                <flux:navlist.item icon="user-group" :href="route('grupos.index')">
-                {{ __('Grupos') }}
-                </flux:navlist.item>
+                    <flux:navlist.item icon="user-group" :href="route('grupos.index')">
+                        <span x-show="!minimized">{{ __('Grupos') }}</span>
+                    </flux:navlist.item>
 
-                <flux:navlist.item icon="book-open-text" :href="route('materias.index')">
-                {{ __('Materias') }}
-                </flux:navlist.item>
-            </flux:navlist>
+                    <flux:navlist.item icon="book-open-text" :href="route('materias.index')">
+                        <span x-show="!minimized">{{ __('Materias') }}</span>
+                    </flux:navlist.item>
+                </flux:navlist>
             @endif
             
 
             <!-- Desktop User Menu -->
-            <flux:dropdown position="bottom" align="start">
+            <flux:dropdown position="bottom" align="start" x-bind:class="minimized ? 'w-full' : ''">
                 <flux:profile
                     :name="auth()->user()->name"
                     :initials="auth()->user()->initials()"
                     icon-trailing="chevrons-up-down"
+                    x-bind:class="minimized ? 'justify-center' : ''"
                 />
 
                 <flux:menu class="w-[220px]">

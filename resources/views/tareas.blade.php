@@ -1,5 +1,5 @@
 <x-layouts.app :title="__('Dashboard')">
-    <div class="flex h-full w-full flex-1 flex-col gap-6 rounded-xl bg-white dark:bg-gray-800 p-6 shadow-sm">
+    <div class="flex h-full w-full flex-1 flex-col gap-6 rounded-xl bg-white dark:bg-gray-700 p-6 shadow-sm">
         <div class="flex items-center justify-between">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('Tareas') }}</h1>
@@ -12,7 +12,7 @@
             </flux:modal.trigger>
         </div>
 
-        <div class="overflow-hidden rounded-lg border border-gray-200 dark:border-gray-700">
+        <div class="overflow-hidden rounded-lg">
             <table id="myTable" class="w-full">
                 <thead class="bg-gray-50 dark:bg-gray-700">
                     <tr>
@@ -23,7 +23,7 @@
                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Acciones</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody class="bg-white dark:bg-gray-600 divide-y divide-gray-200 dark:divide-gray-700">
                     @foreach ($tareas as $tarea)
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                             <td class="px-6 py-4 whitespace-nowrap">
@@ -82,12 +82,7 @@
     <flux:modal name="edit-profile" class="md:w-[500px] p-6">
         <flux:container class="space-y-6">
             <div class="flex items-center justify-between">
-                <flux:heading size="lg" class="dark:text-white">Nueva Tarea</flux:heading>
-                <div class="h-10 w-10 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center">
-                    <svg class="h-6 w-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
-                    </svg>
-                </div>
+                <flux:heading size="xl" class="dark:text-white">Nueva Tarea</flux:heading>
             </div>
             <flux:separator class="dark:border-gray-700" />
 
@@ -120,7 +115,7 @@
                 </div>
 
                 <flux:footer class="flex justify-end gap-3">
-                    <flux:button type="button" variant="filled">Cancelar</flux:button>
+                    <flux:button type="button" variant="filled" onclick="closeModal('edit-profile')">Cancelar</flux:button>
                     <flux:button type="submit" variant="primary">Guardar tarea</flux:button>
                 </flux:footer>
             </form>
@@ -132,11 +127,6 @@
         <flux:container class="space-y-6">
             <div class="flex items-center justify-between">
                 <flux:heading size="lg" class="dark:text-white">Editar Tarea</flux:heading>
-                <div class="h-10 w-10 rounded-full bg-indigo-100 dark:bg-indigo-900 flex items-center justify-center">
-                    <svg class="h-6 w-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
-                    </svg>
-                </div>
             </div>
             <flux:separator class="dark:border-gray-700" />
 
@@ -155,7 +145,7 @@
                 </div>
 
                 <flux:footer class="flex justify-end gap-3">
-                    <flux:button type="button" variant="filled">Cancelar</flux:button>
+                    <flux:button type="button" variant="filled" onclick="closeModal('edit-task')">Cancelar</flux:button>
                     <flux:button type="submit" variant="primary">Actualizar tarea</flux:button>
                 </flux:footer>
             </form>
@@ -177,6 +167,13 @@
                 ]
             });
         });
+
+        function closeModal(modalName) {
+            const modal = document.querySelector(`[data-modal="${modalName}"]`);
+            if (modal) {
+                modal.close();
+            }
+        }
 
         function prepareEditModal(id, descripcion, fecha_entrega, hora_entrega) {
             const form = document.getElementById('edit-task-form');
