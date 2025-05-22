@@ -17,8 +17,8 @@
                             <flux:input name="nombre" id="nombre" label="Nombre del grupo" type="text"
                                 placeholder="Ingresa el nombre del grupo" required />
                                 <flux:select name="seccion" id="seccion" label="Sección">
-                                    <option value="primaria">Primaria</option>
-                                    <option value="secundaria">Secundaria</option>
+                                    <option value="Primaria">Primaria</option>
+                                    <option value="Secundaria">Secundaria</option>
                                 </flux:select>
                             <flux:select name="titular_id" id="titular_id" label="Titular">
                                 @foreach ($usuarios as $usuario)

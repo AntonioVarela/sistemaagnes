@@ -25,7 +25,7 @@ class administradorController extends Controller
         $horario = horario::where('maestro_id', Auth::user()->id)->get();
         $seccion = grupo::select('seccion')->whereIn('id', $horario->pluck('grupo_id'))->get();
         $grupos = grupo::all();
-        $materias = materia::all();
+        $materias = materia::whereIn('id', $horario->pluck('materia_id'))->get();
         $tareas = tarea::all();
 
         return view('tareas',compact('grupos','materias','tareas','horario','seccion')); // Cambiado a 'tareas'
@@ -68,11 +68,11 @@ class administradorController extends Controller
 
     public function showAlumnos($id)
     {
-        $grupos = grupo::all();
+        $grupo = grupo::find($id);
         $materias = materia::all();
         $usuarios = User::all();
         $tareas = tarea::where('grupo', $id)->get(); // Cambiado a 'tareas'
-        return view("tareasAlumno", compact(['grupos','materias','usuarios', 'tareas'])); // Cambiado a 'tareasAlumno'
+        return view("tareasAlumno", compact(['grupo','materias','usuarios', 'tareas'])); // Cambiado a 'tareasAlumno'
  
     }
 

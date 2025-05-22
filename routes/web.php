@@ -19,7 +19,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::get('/tareas', [administradorController::class,'index'])->name('tareas.index');
 Route::post('/tareasguardar', [administradorController::class,'store'])->name('tareas.store');
-Route::get('/actividades/{id}', [administradorController::class,'showAlumnos'])->name('tareas.alumnos');//Cambiar a volt
+
 Route::get("/grupos",[administradorController::class,'showGrupos'])->name('grupos.index');
 Route::post('/gruposguardar', [administradorController::class,'storeGrupo'])->name('grupos.store');
 Route::delete('/grupos/{id}', [administradorController::class,'destroyGrupo'])->name('grupos.destroy');
@@ -43,6 +43,6 @@ Route::post('/horariosguardar', [administradorController::class,'storeHorario'])
 Route::delete('/horarios/{id}', [administradorController::class,'destroyHorario'])->name('horarios.destroy');
 });
 
-
+Route::get('/actividades/{id}', [administradorController::class,'showAlumnos'])->name('tareas.alumnos');//Cambiar a volt
 
 require __DIR__.'/auth.php';

@@ -46,7 +46,7 @@
                                 @foreach ($grupos as $grupo)
                                     @if ($tarea->grupo == $grupo->id)
                                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
-                                            {{ $grupo->nombre }}
+                                            {{ $grupo->nombre }} {{ $grupo->seccion }}
                                         </span>
                                     @endif
                                 @endforeach
@@ -100,7 +100,7 @@
                         <div class="grid grid-cols-2 gap-4">
                             <flux:select name="grupo" id="grupo" label="Grupo">
                                 @foreach ($grupos as $grupo)
-                                    <option value="{{ $grupo->id }}">{{ $grupo->nombre }}</option>
+                                    <option value="{{ $grupo->id }}">{{ $grupo->nombre }} {{ $grupo->seccion}}</option>
                                 @endforeach
                             </flux:select>
                             <flux:select name="materia" id="materia" label="Materia">

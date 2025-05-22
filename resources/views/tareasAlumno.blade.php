@@ -85,7 +85,7 @@
         <!-- Header -->
         <header class="bg-white shadow-sm">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                <h1 class="text-3xl font-bold text-gray-900">Panel de Actividades</h1>
+                <h1 class="text-3xl font-bold text-gray-900">Panel de Actividades de {{ $grupo->nombre }} {{ $grupo->seccion }}</h1>
             </div>
         </header>
 
@@ -111,7 +111,10 @@
                                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                         </svg>
-                                        Entrega: {{ $tarea->fecha_entrega }} {{ $tarea->hora_entrega }}
+                                        Entrega: {{ $tarea->fecha_entrega }}
+                                        <br>
+                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        Hora: {{ $tarea->hora_entrega }}
                                     </div>
                                 </div>
                                 @endforeach
@@ -157,18 +160,23 @@
             </div>
             
             <div class="space-y-6">
-                <div>
+                <div class="text-gray-600">
                     <h3 class="text-lg font-semibold text-indigo-600 mb-2" id="modalTitle"></h3>
+                    <hr>
+                    <small>¿Qué tengo que hacer?</small>
                     <div class="bg-indigo-50 rounded-lg p-4">
                         <p id="modalDescription" class="text-gray-700"></p>
                     </div>
                 </div>
 
-                <div class="flex items-center text-gray-600">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                    </svg>
-                    <span id="modalDate" class="font-medium"></span>
+                <div class="text-gray-600">
+                    
+                    <small>¿Cuándo tengo que entregarla?</small>
+                    <br>
+                    <div class="bg-indigo-50 rounded-lg p-4">
+                        <p id="modalDate" class="font-medium"></p>
+                    </div>
+                    
                 </div>
 
                 <div class="border-t border-gray-200 pt-4">
@@ -185,7 +193,7 @@
             var eventos = tareas.map(element => {
                 return {
                     title: element.titulo,
-                    start: element.created_at,
+                    start: element.fecha_entrega,
                     color: '#4F46E5',
                     allDay: false,
                     extendedProps: {
@@ -202,9 +210,9 @@
                 initialView: 'listWeek',
                 locale: 'es',
                 headerToolbar: {
-                    left: 'prev,next today',
+                    left: 'prev',
                     center: 'title',
-                    right: 'listWeek'
+                    right: 'next today'
                 },
                 buttonText: {
                     today: 'Hoy',
@@ -221,7 +229,15 @@
                 eventClick: function(info) {
                     $('#modalTitle').text(info.event.title);
                     $('#modalDescription').text(info.event.extendedProps.description);
-                    $('#modalDate').text('Fecha de entrega: ' + info.event.extendedProps.fecha_entrega + ' ' + info.event.extendedProps.hora_entrega);
+                    $('#modalDate').text(new Date(info.event.extendedProps.fecha_entrega + 'T00:00:00').toLocaleDateString('es-ES', {
+                        weekday: 'long',
+                        year: 'numeric',
+                        month: 'long',
+                        day: 'numeric'
+                    }));
+                    if(info.event.extendedProps.hora_entrega != null){
+                        $('#modalDate').append(' a las ' + info.event.extendedProps.hora_entrega);
+                    }
                     
                     if (info.event.extendedProps.archivo) {
                         $('#modalResources').html(`<a href="/storage/${info.event.extendedProps.archivo}" class="text-indigo-600 hover:text-indigo-800" target="_blank">Ver archivo adjunto</a>`);
