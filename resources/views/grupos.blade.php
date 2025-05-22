@@ -116,7 +116,7 @@
             </div>
             <flux:separator />
 
-            <form id="edit-task-form" method="POST" class="space-y-4">
+            <form id="edit-task-form" action="{{ route('grupos.update', $grupo->id) }}" method="POST" class="space-y-4">
                 @csrf
                 <div class="grid gap-4">
                     <flux:input name="nombre" id="edit_nombre" label="Nombre del grupo" type="text"

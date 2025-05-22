@@ -42,7 +42,11 @@
                     <div class="space-y-3">
                         <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-200">
                             <flux:icon name="user" class="w-4 h-4" />
-                            <span>{{ $horario->maestro }}</span>
+                            @foreach ($usuarios as $usuario)    
+                                @if ($usuario->id == $horario->maestro_id)
+                                    <span>{{ $usuario->name }}</span>
+                                @endif
+                            @endforeach
                         </div>
                         <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-200">
                             <flux:icon name="clock" class="w-4 h-4" />

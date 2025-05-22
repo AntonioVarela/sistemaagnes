@@ -23,11 +23,12 @@ Route::post('/tareasguardar', [administradorController::class,'store'])->name('t
 Route::get("/grupos",[administradorController::class,'showGrupos'])->name('grupos.index');
 Route::post('/gruposguardar', [administradorController::class,'storeGrupo'])->name('grupos.store');
 Route::delete('/grupos/{id}', [administradorController::class,'destroyGrupo'])->name('grupos.destroy');
+Route::post('/grupos/{id}/update', [administradorController::class,'updateGrupo'])->name('grupos.update');
 
 Route::get('/materias',[administradorController::class,'showMaterias'])->name('materias.index');
 Route::post('/materiasguardar', [administradorController::class,'storeMateria'])->name('materias.store');
 Route::delete('/materias/{id}', [administradorController::class,'destroyMateria'])->name('materias.destroy');
-
+Route::post('/materias/{id}/update', [administradorController::class,'updateMateria'])->name('materias.update');
 
 Route::post('/tareas/{id}/update', [administradorController::class,'update'])->name('tareas.update');
 Route::post('/tareas/{id}/destroy', [administradorController::class,'destroyTarea'])->name('tareas.destroy');
@@ -41,6 +42,7 @@ Route::post('/usuarios/{id}/update', [administradorController::class,'updateUsua
 Route::get('/horarios',[administradorController::class,'showHorarios'])->name('horarios.index');
 Route::post('/horariosguardar', [administradorController::class,'storeHorario'])->name('horarios.store');
 Route::delete('/horarios/{id}', [administradorController::class,'destroyHorario'])->name('horarios.destroy');
+Route::post('/horarios/{id}/update', [administradorController::class,'updateHorario'])->name('horarios.update');
 });
 
 Route::get('/actividades/{id}', [administradorController::class,'showAlumnos'])->name('tareas.alumnos');//Cambiar a volt
