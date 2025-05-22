@@ -93,7 +93,9 @@
                         label='Descripción' rows="4"
                         placeholder="Describe la tarea" required />
                     <div class="grid grid-cols-2 gap-4">
-                        <flux:input name="fecha_entrega" id="fecha_entrega" label="Fecha de Entrega" type="date" required />
+                        <flux:input name="fecha_entrega" id="fecha_entrega" label="Fecha de Entrega" type="date" required 
+                            x-bind:min="new Date().toISOString().split('T')[0]"
+                            onchange="validarFecha(this)" />
                         <flux:input name="hora_entrega" type="time" id='hora_entrega' label='Hora de entrega' />
                     </div>
                     @if ($seccion->count() > 1)
@@ -137,7 +139,9 @@
                         label='Descripción' rows="4"
                         placeholder="Describe la tarea" required />
                     <div class="grid grid-cols-2 gap-4">
-                        <flux:input name="fecha_entrega" id="edit_fecha_entrega" label="Fecha de Entrega" type="date" required />
+                        <flux:input name="fecha_entrega" id="edit_fecha_entrega" label="Fecha de Entrega" type="date" required 
+                            x-bind:min="new Date().toISOString().split('T')[0]"
+                            onchange="validarFecha(this)" />
                         <flux:input name="hora_entrega" type="time" id='edit_hora_entrega' label='Hora de entrega' />
                     </div>
                     <flux:input name="archivo" type="file" id="edit_archivo" label="Archivo adjunto" accept=".pdf">
@@ -153,6 +157,19 @@
     </flux:modal>
 
     <script>
+        function validarFecha(input) {
+            const fecha = new Date(input.value);
+            const dia = fecha.getDay();
+            
+            // 0 es domingo, 6 es sábado
+            if (dia === 0 || dia === 6) {
+                alert('No se pueden seleccionar fines de semana');
+                input.value = '';
+                return false;
+            }
+            return true;
+        }
+
         $(document).ready(function() {
             $('#myTable').DataTable({
                 language: {
