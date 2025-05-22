@@ -186,4 +186,10 @@ class administradorController extends Controller
         $tarea->save();
         return redirect()->route('tareas.index')->with('success', 'Tarea actualizada exitosamente.');
     }
+    public function destroy($id)
+    {
+        $tarea = tarea::findOrFail($id);
+        $tarea->delete();
+        return redirect()->route('tareas.index')->with('success', 'Tarea eliminada exitosamente.');
+    }
 }

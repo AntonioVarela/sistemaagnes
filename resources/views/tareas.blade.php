@@ -65,9 +65,8 @@
                                     </flux:modal.trigger>
                                     <form action="{{ route('tareas.destroy', $tarea->id) }}" method="POST" class="inline">
                                         @csrf
-                                        @method('DELETE')
                                         <button type="submit" class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors">
-                                            <i class="fas fa-trash"></i>
+                                            <flux:icon name="trash" />
                                         </button>
                                     </form>
                                 </div>
@@ -143,7 +142,6 @@
 
             <form id="edit-task-form" method="POST" enctype="multipart/form-data" class="space-y-4">
                 @csrf
-                @method('PUT')
                 <div class="grid gap-4">
                     <flux:textarea name="descripcion" id="edit_descripcion"
                         label='Descripción' rows="4"
