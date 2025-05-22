@@ -143,7 +143,7 @@ class administradorController extends Controller
         $horarios = horario::all();
         $grupos = grupo::all();
         $materias = materia::all();
-        $usuarios = User::where('rol', 'maestro')->get();
+        $usuarios = User::where('rol', 'Maestro')->get();
         return view("horarios", compact(['horarios','grupos','materias','usuarios'])); // Cambiado a 'horarios'
     }
 

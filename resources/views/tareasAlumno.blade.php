@@ -41,6 +41,44 @@
             background-color: #4338CA !important;
             border-color: #4338CA !important;
         }
+
+        /* Estilos responsivos para el calendario */
+        @media (max-width: 768px) {
+            .fc-toolbar {
+                flex-direction: column !important;
+                gap: 1rem !important;
+            }
+            .fc-toolbar-title {
+                font-size: 1.25rem !important;
+            }
+            .fc-button {
+                padding: 6px 12px !important;
+                font-size: 0.875rem !important;
+            }
+            .fc-header-toolbar {
+                margin-bottom: 1rem !important;
+            }
+            .fc-view-harness {
+                min-height: 400px !important;
+            }
+            .fc-event {
+                font-size: 0.875rem !important;
+                padding: 2px 4px !important;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .fc-toolbar-title {
+                font-size: 1rem !important;
+            }
+            .fc-button {
+                padding: 4px 8px !important;
+                font-size: 0.75rem !important;
+            }
+            .fc-view-harness {
+                min-height: 300px !important;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
@@ -176,6 +214,11 @@
                     list: 'Lista'
                 },
                 events: eventos,
+                height: 'auto',
+                contentHeight: 'auto',
+                aspectRatio: 1.35,
+                handleWindowResize: true,
+                windowResizeDelay: 200,
                 eventClick: function(info) {
                     $('#modalTitle').text(info.event.title);
                     $('#modalDescription').text(info.event.extendedProps.description);
