@@ -26,7 +26,7 @@ class administradorController extends Controller
         $seccion = grupo::select('seccion')->whereIn('id', $horario->pluck('grupo_id'))->get();
         $grupos = grupo::all();
         $materias = materia::whereIn('id', $horario->pluck('materia_id'))->get();
-        $tareas = tarea::all();
+        $tareas = tarea::whereIn('materia', $horario->pluck('materia_id'))->get();
 
         return view('tareas',compact('grupos','materias','tareas','horario','seccion')); // Cambiado a 'tareas'
     }
