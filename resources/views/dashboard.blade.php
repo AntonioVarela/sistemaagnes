@@ -16,7 +16,7 @@
             @foreach ($horario as $horario)
                 @foreach ($grupos as $grupo)
                     @if ($horario->grupo_id == $grupo->id)
-                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg overflow-hidden transform transition duration-300 hover:scale-105">
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg transform transition duration-300 hover:scale-105">
                             <div class="p-4 sm:p-6">
                                 <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-4">
                                     <h2 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">
@@ -43,7 +43,7 @@
                                     </div>
                                 </div>
 
-                                <div class="mt-4 sm:mt-6 flex flex-col sm:flex-row justify-end gap-2 sm:gap-3">
+                                <div class="mt-4 sm:mt-6 flex flex-col justify-end gap-2 sm:gap-3">
                                     <flux:button icon='eye' variant="filled" name="view-students" 
                                         :href="route('tareas.alumnos', $grupo->id)"
                                         class="bg-blue-600 hover:bg-blue-700 text-sm sm:text-base w-full sm:w-auto">
