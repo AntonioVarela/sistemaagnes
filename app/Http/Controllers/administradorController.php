@@ -14,10 +14,10 @@ class administradorController extends Controller
 {
     public function indexDashboard()
     {
-        
+        $horario = horario::where('maestro_id', Auth::user()->id)->get();
         $grupos = grupo::all();
         $usuarios = User::all();
-        return view('dashboard', compact(['grupos','usuarios'])); // Cambiado a 'dashboard'
+        return view('dashboard', compact(['grupos','usuarios','horario'])); // Cambiado a 'dashboard'
     }
 
     public function index()
@@ -33,16 +33,27 @@ class administradorController extends Controller
 
     public function store(REQUEST $request)
     {
-        $materia = Auth::user()->materia;
+        $horario = horario::where('maestro_id', Auth::user()->id)->get();
+        // dd($horario);
         $tarea = new tarea();
-        $materia = materia::find($request->materia);
-        $tarea->titulo = "Tarea de " . $materia->nombre;
         $tarea->descripcion = request('descripcion');
         $tarea->archivo = request('archivo');
         $tarea->fecha_entrega = request('fecha_entrega');
         $tarea->hora_entrega = request('hora_entrega');
-        $tarea->grupo = request('grupo');
-        $tarea->materia = request('materia');
+        if(count($horario) == 1){
+            $materia = materia::find($horario[0]->materia_id);
+            // dd($materia);
+            $tarea->titulo = "Tarea de " . $materia->nombre;
+            $tarea->grupo = $horario[0]->grupo_id;
+            $tarea->materia = $horario[0]->materia_id;
+        }
+        else{
+            $materia = materia::find($request->materia);
+            $tarea->titulo = "Tarea de " . $materia->nombre;
+            $tarea->grupo = request('grupo');
+            $tarea->materia = request('materia');
+        }
+        
 
         if ($request->hasFile('archivo')) {
             $archivo = $request->file('archivo');
@@ -147,5 +158,32 @@ class administradorController extends Controller
         $horario->hora_fin = $request->hora_fin;
         $horario->save();
         return redirect()->route('horarios.index')->with('success', 'Horario creado exitosamente.');
+    }
+
+    public function update(Request $request, $id)
+    {
+        $tarea = tarea::findOrFail($id);
+        $tarea->descripcion = $request->descripcion;
+        $tarea->fecha_entrega = $request->fecha_entrega;
+        $tarea->hora_entrega = $request->hora_entrega;
+        
+        if ($request->hasFile('archivo')) {
+            $archivo = $request->file('archivo');
+            $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
+            $rutaArchivo = $archivo->storeAs('archivos', $nombreArchivo, 'public');
+            $tarea->archivo = $rutaArchivo;
+        }
+
+        if ($request->has('grupo')) {
+            $tarea->grupo = $request->grupo;
+        }
+        if ($request->has('materia')) {
+            $materia = materia::find($request->materia);
+            $tarea->titulo = "Tarea de " . $materia->nombre;
+            $tarea->materia = $request->materia;
+        }
+
+        $tarea->save();
+        return redirect()->route('tareas.index')->with('success', 'Tarea actualizada exitosamente.');
     }
 }
