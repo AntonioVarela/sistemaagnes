@@ -43,6 +43,12 @@ Route::get('/horarios',[administradorController::class,'showHorarios'])->name('h
 Route::post('/horariosguardar', [administradorController::class,'storeHorario'])->name('horarios.store');
 Route::delete('/horarios/{id}', [administradorController::class,'destroyHorario'])->name('horarios.destroy');
 Route::post('/horarios/{id}/update', [administradorController::class,'updateHorario'])->name('horarios.update');
+
+Route::get('/anuncios',[administradorController::class,'showAnuncios'])->name('anuncios.index');
+Route::post('/anunciosguardar', [administradorController::class,'storeAnuncio'])->name('anuncios.store');
+Route::delete('/anuncios/{id}', [administradorController::class,'destroyAnuncio'])->name('anuncios.destroy');
+Route::post('/anuncios/{id}/update', [administradorController::class,'updateAnuncio'])->name('anuncios.update');
+
 });
 
 Route::get('/actividades/{id}', [administradorController::class,'showAlumnos'])->name('tareas.alumnos');//Cambiar a volt

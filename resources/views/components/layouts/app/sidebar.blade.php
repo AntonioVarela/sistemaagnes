@@ -29,7 +29,7 @@
                     <flux:navlist.item icon="book-open" :href="route('tareas.index')" :current="request()->routeIs('tareas.index')" wire:navigate>
                         <span x-show="!minimized">{{ __('Tareas') }}</span>
                     </flux:navlist.item>
-                    <flux:navlist.item icon="device-tablet" style="display:none;" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
+                    <flux:navlist.item icon="device-tablet" :href="route('anuncios.index')" :current="request()->routeIs('anuncios.index')" wire:navigate>
                         <span x-show="!minimized">{{ __('Anuncios') }}</span>
                     </flux:navlist.item>
                     @if (Auth::user()->rol == "administrador")

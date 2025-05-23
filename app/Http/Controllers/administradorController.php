@@ -8,6 +8,7 @@ use App\Models\grupo;
 use App\Models\User;
 use App\Models\tarea;
 use App\Models\horario;
+use App\Models\anuncio;
 use Illuminate\Support\Facades\Auth;
 
 class administradorController extends Controller
@@ -244,4 +245,46 @@ class administradorController extends Controller
         return redirect()->route('horarios.index')->with('success', 'Horario actualizado exitosamente.');
     }   
 
+    //Anuncios
+    public function showAnuncios()
+    {
+        $anuncios = anuncio::all();
+        return view("anuncios", compact('anuncios')); // Cambiado a 'anuncios'
+    }
+    public function storeAnuncio(Request $request)
+    {
+        $anuncio = new anuncio();
+        $anuncio->titulo = $request->titulo;
+        $anuncio->contenido = $request->contenido;
+        if ($request->hasFile('archivo')) {
+            $archivo = $request->file('archivo');
+            $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
+            $rutaArchivo = $archivo->storeAs('archivos', $nombreArchivo, 'public');
+            $anuncio->archivo = $rutaArchivo;
+        }
+        $anuncio->save();
+        return redirect()->route('anuncios.index')->with('success', 'Anuncio creado exitosamente.');
+    }
+    
+    public function destroyAnuncio($id)
+    {
+        $anuncio = anuncio::findOrFail($id);
+        $anuncio->delete();
+        return redirect()->route('anuncios.index')->with('success', 'Anuncio eliminado exitosamente.');
+    }
+    public function updateAnuncio(Request $request, $id)
+    {
+        $anuncio = anuncio::findOrFail($id);
+        $anuncio->titulo = $request->titulo;
+        $anuncio->contenido = $request->contenido;
+        if ($request->hasFile('archivo')) {
+            $archivo = $request->file('archivo');
+            $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
+            $rutaArchivo = $archivo->storeAs('archivos', $nombreArchivo, 'public');
+            $anuncio->archivo = $rutaArchivo;
+        }
+        $anuncio->save();
+        return redirect()->route('anuncios.index')->with('success', 'Anuncio actualizado exitosamente.');
+    }
+    
 }
