@@ -157,19 +157,7 @@
     </flux:modal>
 
     <script>
-        function validarFecha(input) {
-            const fecha = new Date(input.value);
-            const dia = fecha.getDay();
-            
-            // 0 es domingo, 6 es sábado
-            if (dia === 0 || dia === 6) {
-                alert('No se pueden seleccionar fines de semana');
-                input.value = '';
-                return false;
-            }
-            return true;
-        }
-
+        
         $(document).ready(function() {
             $('#myTable').DataTable({
                 language: {
