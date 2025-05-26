@@ -15,7 +15,12 @@ class administradorController extends Controller
 {
     public function indexDashboard()
     {
-        $horario = horario::where('maestro_id', Auth::user()->id)->get();
+        if(Auth::user()->rol == 'Administrador'){
+            $horario = horario::all();
+        }
+        else{
+            $horario = horario::where('maestro_id', Auth::user()->id)->get();
+        }
         $grupos = grupo::all();
         $usuarios = User::all();
         return view('dashboard', compact(['grupos','usuarios','horario'])); // Cambiado a 'dashboard'
@@ -24,7 +29,11 @@ class administradorController extends Controller
     //Tareas   
     public function index()
     {
-        $horario = horario::where('maestro_id', Auth::user()->id)->get();
+        if(Auth::user()->rol == 'Administrador'){
+            $horario = horario::all();
+        } else{
+            $horario = horario::where('maestro_id', Auth::user()->id)->get();
+        }
         $seccion = grupo::select('seccion')->whereIn('id', $horario->pluck('grupo_id'))->get();
         $grupos = grupo::all();
         $materias = materia::whereIn('id', $horario->pluck('materia_id'))->get();
