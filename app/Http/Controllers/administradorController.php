@@ -15,7 +15,7 @@ class administradorController extends Controller
 {
     public function indexDashboard()
     {
-        if(Auth::user()->rol == 'Administrador'){
+        if(Auth::user()->rol == 'administrador'){
             $horario = horario::all();
         }
         else{
@@ -29,7 +29,7 @@ class administradorController extends Controller
     //Tareas   
     public function index()
     {
-        if(Auth::user()->rol == 'Administrador'){
+        if(Auth::user()->rol == 'administrador'){
             $horario = horario::all();
         } else{
             $horario = horario::where('maestro_id', Auth::user()->id)->get();
