@@ -4,12 +4,12 @@
         @include('partials.head')
     </head>
     <body class="min-h-screen bg-white dark:bg-zinc-800">
-        <flux:sidebar sticky stashable class="border-e border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 transition-all duration-300" x-data="{ minimized: false }" x-bind:class="minimized ? 'w-25' : 'w-64'">
+        <flux:sidebar sticky stashable class="border-e  border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 transition-all duration-300" x-data="{ minimized: false }" x-bind:class="minimized ? 'w-25' : 'w-64'">
             <div class="flex items-center justify-between" x-bind:class="minimized ? 'px-0' : 'px-4'">
                 <a href="{{ route('dashboard') }}" class="flex items-center space-x-2 rtl:space-x-reverse" wire:navigate>
                     <x-app-logo x-bind:class="minimized ? 'w-8 h-8' : 'w-10 h-10'" />
                 </a>
-                <button @click="minimized = !minimized" class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700">
+                <button @click="minimized = !minimized" class="p-2 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-700 sm:hidden">
                     <svg x-show="!minimized" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
                         <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                     </svg>

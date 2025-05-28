@@ -73,7 +73,7 @@
             </div>
             <flux:separator />
 
-            <form action="{{ route('anuncios.store') }}" method="POST" class="space-y-4">
+            <form action="{{ route('anuncios.store') }}" method="POST" class="space-y-4" enctype="multipart/form-data">
                 @csrf
                 <div class="grid gap-4">
                     <flux:input name="titulo" id="titulo" label="Título" type="text"
@@ -81,6 +81,12 @@
                     <flux:textarea name="contenido" id="contenido" label="Contenido"
                         placeholder="Ingresa el contenido del anuncio" required />
                     <flux:input name="archivo" id="archivo" label="Archivo" type="file" />
+                    @if(count($horario) > 1)
+                        <flux:input name="materia_id" id="materia_id" label="Materia" type="text"
+                            placeholder="Ingresa el id de la materia" required />
+                        <flux:input name="grupo_id" id="grupo_id" label="Grupo" type="text"
+                            placeholder="Ingresa el id del grupo" required />
+                    @endif
                 </div>
 
                 <flux:footer class="flex justify-end gap-3">
@@ -99,14 +105,14 @@
             </div>
             <flux:separator />
 
-            <form id="edit-announcement-form"  method="POST" class="space-y-4">
+            <form id="edit-announcement-form"  method="POST" class="space-y-4" enctype="multipart/form-data">
                 @csrf
-                @method('PUT')
                 <div class="grid gap-4">
                     <flux:input name="titulo" id="edit_titulo" label="Título" type="text"
                         placeholder="Ingresa el título del anuncio" required />
                     <flux:textarea name="contenido" id="edit_contenido" label="Contenido"
                         placeholder="Ingresa el contenido del anuncio" required />
+                    <flux:input name="archivo" id="edit_archivo" label="Archivo" type="file" />
                 </div>
 
                 <flux:footer class="flex justify-end gap-3">
@@ -146,6 +152,7 @@
             
             document.getElementById('edit_titulo').value = titulo;
             document.getElementById('edit_contenido').value = contenido;
+            document.getElementById('edit_archivo').value = archivo;
         }
     </script>
 </x-layouts.app>

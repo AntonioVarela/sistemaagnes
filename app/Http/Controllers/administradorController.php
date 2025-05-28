@@ -42,7 +42,7 @@ class administradorController extends Controller
         return view('tareas',compact('grupos','materias','tareas','horario','seccion')); // Cambiado a 'tareas'
     }
 
-    public function update(Request $request, $id)
+    public function updateTareas(Request $request, $id)
     {
         $tarea = tarea::findOrFail($id);
         $tarea->descripcion = $request->descripcion;
@@ -68,14 +68,14 @@ class administradorController extends Controller
         $tarea->save();
         return redirect()->route('tareas.index')->with('success', 'Tarea actualizada exitosamente.');
     }
-    public function destroy($id)
+    public function destroyTarea($id)
     {
         $tarea = tarea::findOrFail($id);
         $tarea->delete();
         return redirect()->route('tareas.index')->with('success', 'Tarea eliminada exitosamente.');
     }
 
-    public function store(REQUEST $request)
+    public function store(Request $request)
     {
         $horario = horario::where('maestro_id', Auth::user()->id)->get();
         $tarea = new tarea();
@@ -115,7 +115,8 @@ class administradorController extends Controller
         $materias = materia::all();
         $usuarios = User::all();
         $tareas = tarea::where('grupo', $id)->get(); // Cambiado a 'tareas'
-        return view("tareasAlumno", compact(['grupo','materias','usuarios', 'tareas'])); // Cambiado a 'tareasAlumno'
+        $anuncios = anuncio::where('grupo_id', $id)->get();
+        return view("tareasAlumno", compact(['grupo','materias','usuarios', 'tareas', 'anuncios'])); // Cambiado a 'tareasAlumno'
  
     }
 
@@ -164,6 +165,7 @@ class administradorController extends Controller
     {
         $materia = new materia();
         $materia->nombre = $request->nombre;
+        $materia->color = $request->color;
         $materia->save();
         return redirect()->route('materias.index')->with('success', 'Materia creada exitosamente.');
     }
@@ -177,6 +179,7 @@ class administradorController extends Controller
     {
         $materia = materia::findOrFail($id);
         $materia->nombre = $request->nombre;
+        $materia->color = $request->color;
         $materia->save();
         return redirect()->route('materias.index')->with('success', 'Materia actualizada exitosamente.');
     }
@@ -258,18 +261,35 @@ class administradorController extends Controller
     public function showAnuncios()
     {
         $anuncios = anuncio::all();
-        return view("anuncios", compact('anuncios')); // Cambiado a 'anuncios'
+        $horario = horario::where('maestro_id', Auth::user()->id)->get();
+        return view("anuncios", compact(['anuncios','horario'])); // Cambiado a 'anuncios'
     }
     public function storeAnuncio(Request $request)
     {
+        $horario = horario::where('maestro_id', Auth::user()->id)->get();
         $anuncio = new anuncio();
         $anuncio->titulo = $request->titulo;
         $anuncio->contenido = $request->contenido;
+        $anuncio->usuario_id = Auth::user()->id;
         if ($request->hasFile('archivo')) {
             $archivo = $request->file('archivo');
             $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
             $rutaArchivo = $archivo->storeAs('archivos', $nombreArchivo, 'public');
             $anuncio->archivo = $rutaArchivo;
+        }
+        if(count($horario) == 1){
+            $materia = materia::find($horario[0]->materia_id);
+            $grupo = grupo::find($horario[0]->grupo_id);
+            $anuncio->grupo_id = $horario[0]->grupo_id;
+            $anuncio->materia_id = $horario[0]->materia_id;
+            $anuncio->seccion = $grupo->seccion;
+        }
+        else{
+            $materia = materia::find($request->materia_id);
+            $grupo = grupo::find($request->grupo_id);
+            $anuncio->grupo_id = $request->grupo_id;
+            $anuncio->materia_id = $request->materia_id;
+            $anuncio->seccion = $grupo->seccion;
         }
         $anuncio->save();
         return redirect()->route('anuncios.index')->with('success', 'Anuncio creado exitosamente.');
@@ -291,6 +311,14 @@ class administradorController extends Controller
             $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
             $rutaArchivo = $archivo->storeAs('archivos', $nombreArchivo, 'public');
             $anuncio->archivo = $rutaArchivo;
+        }
+        $horario = horario::where('maestro_id', Auth::user()->id)->get();
+        if(count($horario) > 1){
+            $materia = materia::find($request->materia_id);
+            $grupo = grupo::find($request->grupo_id);
+            $anuncio->grupo_id = $request->grupo_id;
+            $anuncio->materia_id = $request->materia_id;
+            $anuncio->seccion = $grupo->seccion;
         }
         $anuncio->save();
         return redirect()->route('anuncios.index')->with('success', 'Anuncio actualizado exitosamente.');

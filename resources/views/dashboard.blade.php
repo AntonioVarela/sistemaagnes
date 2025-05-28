@@ -39,7 +39,12 @@
                                         <svg class="w-4 h-4 sm:w-5 sm:h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
                                         </svg>
-                                        <span>Días: {{ $horario->dias }}</span>
+                                        <div class="flex flex-wrap gap-1">
+                                            <span class="font-medium">Días:</span>
+                                            @foreach(explode(',', $horario->dias) as $dia)
+                                                <span class="px-2 py-0.5 bg-gray-100 dark:bg-gray-700 rounded-full text-sm">{{ trim($dia) }}</span>
+                                            @endforeach
+                                        </div>
                                     </div>
                                 </div>
 

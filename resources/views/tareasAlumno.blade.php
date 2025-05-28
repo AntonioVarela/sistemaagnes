@@ -102,19 +102,34 @@
                             Anuncios Importantes
                         </h2>
                         <div class="space-y-4">
-                            @if(count($tareas) == 0)
-                                @foreach($tareas as $tarea)
+                            @if(count($anuncios) > 0)
+                                @foreach($anuncios as $anuncio)
                                 <div class="bg-indigo-50 rounded-lg p-4 border border-indigo-100 hover:border-indigo-200 transition-colors">
-                                    <h3 class="text-lg font-semibold text-indigo-900">{{ $tarea->titulo }}</h3>
-                                    <p class="text-sm text-indigo-700 mt-1">{{ $tarea->descripcion }}</p>
-                                    <div class="mt-3 flex items-center text-xs text-indigo-600">
-                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                                        </svg>
-                                        Entrega: {{ $tarea->fecha_entrega }}
-                                        <br>
-                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        Hora: {{ $tarea->hora_entrega }}
+                                    <div class="flex justify-between items-start">
+                                        <h3 class="text-lg font-semibold text-indigo-900">{{ $anuncio->titulo }}</h3>
+                                        <span class="text-xs text-indigo-600 bg-indigo-100 px-2 py-1 rounded-full">
+                                            {{ $anuncio->created_at->format('d M Y') }}
+                                        </span>
+                                    </div>
+                                    <p class="text-sm text-indigo-700 mt-2">{{ $anuncio->contenido }}</p>
+                                    
+                                    <div class="mt-4 flex items-center justify-between">
+                                        <div class="flex items-center text-xs text-indigo-600">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            {{ $anuncio->created_at->format('h:i A') }}
+                                        </div>
+                                        @if($anuncio->archivo)
+                                            <a href="/storage/{{ $anuncio->archivo }}" 
+                                               class="inline-flex items-center px-3 py-1 text-sm text-indigo-600 bg-indigo-100 rounded-full hover:bg-indigo-200 transition-colors" 
+                                               target="_blank">
+                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                                                </svg>
+                                                Ver archivo
+                                            </a>
+                                        @endif
                                     </div>
                                 </div>
                                 @endforeach
@@ -261,6 +276,7 @@
                     $(this).addClass('hidden');
                 }
             });
+            
         });
     </script>
 </body>

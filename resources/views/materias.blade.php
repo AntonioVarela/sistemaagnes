@@ -74,6 +74,10 @@
                     <flux:input name="nombre" id="nombre" label="Nombre de la materia" type="text"
                         placeholder="Ingresa el nombre de la materia" required />
                 </div>
+                <div class="grid gap-4">
+                    <flux:input name="color" id="color" label="Color de la materia" type="color"
+                        placeholder="Selecciona el color de la materia" required />
+                </div>
 
                 <flux:footer class="flex justify-end gap-3">
                     <flux:button type="button" variant="filled" onclick="closeModal('edit-profile')">Cancelar</flux:button>
@@ -97,6 +101,11 @@
                     <flux:input name="nombre" id="edit_nombre" label="Nombre de la materia" type="text"
                         placeholder="Ingresa el nombre de la materia" required />
                 </div>
+                <div class="grid gap-4">
+                    <flux:input name="color" id="edit_color" label="Color de la materia" type="color"
+                        placeholder="Selecciona el color de la materia" required />
+                </div>
+
 
                 <flux:footer class="flex justify-end gap-3">
                     <flux:button type="button" variant="filled" onclick="closeModal('edit-task')">Cancelar</flux:button>
@@ -129,11 +138,12 @@
             }
         }
 
-        function prepareEditModal(id, nombre) {
+        function prepareEditModal(id, nombre, color) {
             const form = document.getElementById('edit-task-form');
             form.action = `/materias/${id}/update`;
             
             document.getElementById('edit_nombre').value = nombre;
+            document.getElementById('edit_color').value = color;
         }
     </script>
 </x-layouts.app>

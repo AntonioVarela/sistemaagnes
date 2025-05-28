@@ -30,7 +30,7 @@ Route::post('/materiasguardar', [administradorController::class,'storeMateria'])
 Route::delete('/materias/{id}', [administradorController::class,'destroyMateria'])->name('materias.destroy');
 Route::post('/materias/{id}/update', [administradorController::class,'updateMateria'])->name('materias.update');
 
-Route::post('/tareas/{id}/update', [administradorController::class,'update'])->name('tareas.update');
+Route::post('/tareas/{id}/update', [administradorController::class,'updateTareas'])->name('tareas.update');
 Route::post('/tareas/{id}/destroy', [administradorController::class,'destroyTarea'])->name('tareas.destroy');
 Route::get('/dashboard', [administradorController::class,'indexDashboard'])->name('dashboard')->middleware(['auth', 'verified']);
 
