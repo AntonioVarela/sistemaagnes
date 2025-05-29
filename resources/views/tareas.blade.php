@@ -58,7 +58,7 @@
                                 <div class="flex items-center gap-2">
                                     <flux:modal.trigger name="edit-task">
                                         <flux:button icon='pencil' variant="filled" 
-                                            onclick="prepareEditModal({{ $tarea->id }}, '{{ $tarea->descripcion }}', '{{ $tarea->fecha_entrega }}', '{{ $tarea->hora_entrega }}')" 
+                                            onclick="prepareEditModal({{ $tarea->id }}, `{{ addslashes($tarea->descripcion) }}`, '{{ $tarea->fecha_entrega }}', '{{ $tarea->hora_entrega }}')" 
                                             class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300">
                                             Editar
                                         </flux:button>
