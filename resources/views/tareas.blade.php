@@ -52,7 +52,7 @@
                                 @endforeach
                             </td>
                             <td class="px-6 py-4">
-                                <div class="text-sm text-gray-900 dark:text-white line-clamp-2">{{ $tarea->descripcion }}</div>
+                                <div class="text-sm text-gray-900 dark:text-white line-clamp-2">{!! $tarea->descripcion !!}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex items-center gap-2">
@@ -89,9 +89,13 @@
             <form action="{{ route('tareas.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
                 @csrf
                 <div class="grid gap-4">
-                    <flux:textarea name="descripcion" id="descripcion"
-                        label='Descripción' rows="4"
-                        placeholder="Describe la tarea" required />
+
+                    <flux:header
+                    <div id="editor-nueva" class="h-64">
+                        
+                    </div>
+
+                    <textarea name="descripcion" class="hidden" id="descripcion" required ></textarea>
                     <div class="grid grid-cols-2 gap-4">
                         <flux:input name="fecha_entrega" id="fecha_entrega" label="Fecha de Entrega" type="date" required 
                             x-bind:min="new Date().toISOString().split('T')[0]"
@@ -135,9 +139,10 @@
             <form id="edit-task-form" method="POST" enctype="multipart/form-data" class="space-y-4">
                 @csrf
                 <div class="grid gap-4">
-                    <flux:textarea name="descripcion" id="edit_descripcion"
-                        label='Descripción' rows="4"
-                        placeholder="Describe la tarea" required />
+                    <div id="editor-editar" class="h-64">
+                        
+                    </div>
+                    <textarea name="descripcion" id="edit_descripcion" class="hidden" required></textarea>
                     <div class="grid grid-cols-2 gap-4">
                         <flux:input name="fecha_entrega" id="edit_fecha_entrega" label="Fecha de Entrega" type="date" required 
                             x-bind:min="new Date().toISOString().split('T')[0]"
@@ -155,7 +160,6 @@
             </form>
         </flux:container>
     </flux:modal>
-
     <script>
         
         $(document).ready(function() {
@@ -171,6 +175,50 @@
                     { orderable: false, targets: -1 }
                 ]
             });
+
+            // Configuración del editor Quill para nueva tarea
+            var quillNueva = new Quill('#editor-nueva', {
+                theme: 'snow',
+                modules: {
+                    toolbar: [
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        [{ 'direction': 'rtl' }],
+                        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                        [{ 'color': [] }, { 'background': [] }],
+                        [{ 'font': [] }],
+                        [{ 'align': [] }],
+                        ['clean']
+                    ]
+                }
+            });
+
+            quillNueva.on('text-change', function(delta, oldDelta, source) {
+                var html = quillNueva.root.innerHTML;
+                document.getElementById('descripcion').value = html;
+            });
+            
+            // Configuración del editor Quill para editar tarea
+            var quillEditar = new Quill('#editor-editar', {
+                theme: 'snow',
+                modules: {
+                    toolbar: [
+                        ['bold', 'italic', 'underline', 'strike'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        [{ 'direction': 'rtl' }],
+                        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                        [{ 'color': [] }, { 'background': [] }],
+                        [{ 'font': [] }],
+                        [{ 'align': [] }],
+                        ['clean']
+                    ]
+                }
+            });
+
+            quillEditar.on('text-change', function(delta, oldDelta, source) {
+                var html = quillEditar.root.innerHTML;
+                document.getElementById('edit_descripcion').value = html;
+            });
         });
 
         function closeModal(modalName) {
@@ -184,7 +232,19 @@
             const form = document.getElementById('edit-task-form');
             form.action = `/tareas/${id}/update`;
             
-            document.getElementById('edit_descripcion').value = descripcion;
+            // Establecer el contenido del editor Quill
+            const quillEditor = document.querySelector('#editor-editar .ql-editor');
+            if (quillEditor) {
+                // Decodificar las entidades HTML antes de establecer el contenido
+                const decodedContent = descripcion
+                    .replace(/&lt;/g, '<')
+                    .replace(/&gt;/g, '>')
+                    .replace(/&quot;/g, '"')
+                    .replace(/&#039;/g, "'")
+                    .replace(/&amp;/g, '&');
+                quillEditor.innerHTML = decodedContent;
+            }
+            
             document.getElementById('edit_fecha_entrega').value = fecha_entrega;
             document.getElementById('edit_hora_entrega').value = hora_entrega;
         }

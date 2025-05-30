@@ -180,7 +180,7 @@
                     <hr>
                     <small>¿Qué tengo que hacer?</small>
                     <div class="bg-indigo-50 rounded-lg p-4">
-                        <p id="modalDescription" class="text-gray-700"></p>
+                        <div id="modalDescription" class="text-gray-700 ql-editor" style="padding: 0;"></div>
                     </div>
                 </div>
 
@@ -243,7 +243,7 @@
                 windowResizeDelay: 200,
                 eventClick: function(info) {
                     $('#modalTitle').text(info.event.title);
-                    $('#modalDescription').text(info.event.extendedProps.description);
+                    $('#modalDescription').html(info.event.extendedProps.description);
                     $('#modalDate').text(new Date(info.event.extendedProps.fecha_entrega + 'T00:00:00').toLocaleDateString('es-ES', {
                         weekday: 'long',
                         year: 'numeric',

@@ -21,7 +21,7 @@ class administradorController extends Controller
         else{
             $horario = horario::where('maestro_id', Auth::user()->id)->get();
         }
-        $grupos = grupo::all();
+        $grupos = grupo::orderBy('nombre')->get();
         $usuarios = User::all();
         return view('dashboard', compact(['grupos','usuarios','horario'])); // Cambiado a 'dashboard'
     }
@@ -35,7 +35,7 @@ class administradorController extends Controller
             $horario = horario::where('maestro_id', Auth::user()->id)->get();
         }
         $seccion = grupo::select('seccion')->whereIn('id', $horario->pluck('grupo_id'))->get();
-        $grupos = grupo::all();
+        $grupos = grupo::all(); 
         $materias = materia::whereIn('id', $horario->pluck('materia_id'))->get();
         $tareas = tarea::whereIn('materia', $horario->pluck('materia_id'))->whereIn('grupo', $horario->pluck('grupo_id'))->get();
 
