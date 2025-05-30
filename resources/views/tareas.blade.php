@@ -58,7 +58,7 @@
                                 <div class="flex items-center gap-2">
                                     <flux:modal.trigger name="edit-task">
                                         <flux:button icon='pencil' variant="filled" 
-                                            onclick="prepareEditModal({{ $tarea->id }}, `{{ addslashes($tarea->descripcion) }}`, '{{ $tarea->fecha_entrega }}', '{{ $tarea->hora_entrega }}')" 
+                                            onclick="prepareEditModal({{ $tarea->id }}, `{{ addslashes($tarea->descripcion) }}`, '{{ $tarea->fecha_entrega }}', '{{ $tarea->hora_entrega }}', '{{ $tarea->grupo }}', '{{ $tarea->materia }}')" 
                                             class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300">
                                             Editar
                                         </flux:button>
@@ -102,16 +102,18 @@
                             onchange="validarFecha(this)" />
                         <flux:input name="hora_entrega" type="time" id='hora_entrega' label='Hora de entrega' />
                     </div>
-                    @if ($seccion->count() > 1)
+                    @if ($materias->count() > 1)
                         <div class="grid grid-cols-2 gap-4">
-                            <flux:select name="grupo" id="grupo" label="Grupo">
+                            <flux:select name="grupo" id="grupo" label="Grupo" onchange="filtrarMaterias(this.value)">
+                                <option value="">Selecciona un grupo</option>
                                 @foreach ($grupos as $grupo)
                                     <option value="{{ $grupo->id }}">{{ $grupo->nombre }} {{ $grupo->seccion}}</option>
                                 @endforeach
                             </flux:select>
                             <flux:select name="materia" id="materia" label="Materia">
+                                <option value="">Selecciona una materia</option>
                                 @foreach ($materias as $materia)
-                                    <option value="{{ $materia->id }}">{{ $materia->nombre }}</option>
+                                    <option value="{{ $materia->id }}" data-grupos="{{ json_encode($materia->grupos->pluck('id')) }}">{{ $materia->nombre }}</option>
                                 @endforeach
                             </flux:select>
                         </div>
@@ -149,6 +151,22 @@
                             onchange="validarFecha(this)" />
                         <flux:input name="hora_entrega" type="time" id='edit_hora_entrega' label='Hora de entrega' />
                     </div>
+                    @if ($materias->count() > 1)
+                        <div class="grid grid-cols-2 gap-4">
+                            <flux:select name="grupo" id="edit_grupo" label="Grupo" onchange="filtrarMateriasEditar(this.value)">
+                                <option value="">Selecciona un grupo</option>
+                                @foreach ($grupos as $grupo)
+                                    <option value="{{ $grupo->id }}">{{ $grupo->nombre }} {{ $grupo->seccion}}</option>
+                                @endforeach
+                            </flux:select>
+                            <flux:select name="materia" id="edit_materia" label="Materia">
+                                <option value="">Selecciona una materia</option>
+                                @foreach ($materias as $materia)
+                                    <option value="{{ $materia->id }}" data-grupos="{{ json_encode($materia->grupos->pluck('id')) }}">{{ $materia->nombre }}</option>
+                                @endforeach
+                            </flux:select>
+                        </div>
+                    @endif
                     <flux:input name="archivo" type="file" id="edit_archivo" label="Archivo adjunto" accept=".pdf">
                     </flux:input>
                 </div>
@@ -228,25 +246,96 @@
             }
         }
 
-        function prepareEditModal(id, descripcion, fecha_entrega, hora_entrega) {
+        function filtrarMaterias(grupoId) {
+            const materiaSelect = document.getElementById('materia');
+            const opciones = materiaSelect.getElementsByTagName('option');
+            
+            // Ocultar todas las opciones primero
+            for (let opcion of opciones) {
+                if (opcion.value === '') continue; // Saltar la opción por defecto si existe
+                opcion.style.display = 'none';
+            }
+            
+            // Mostrar solo las materias del grupo seleccionado
+            for (let opcion of opciones) {
+                if (opcion.value === '') continue; // Saltar la opción por defecto si existe
+                const grupos = JSON.parse(opcion.getAttribute('data-grupos'));
+                if (grupos.includes(parseInt(grupoId))) {
+                    opcion.style.display = '';
+                }
+            }
+            
+            // Seleccionar la primera materia visible
+            for (let opcion of opciones) {
+                if (opcion.style.display !== 'none') {
+                    materiaSelect.value = opcion.value;
+                    break;
+                }
+            }
+        }
+
+        function filtrarMateriasEditar(grupoId) {
+            const materiaSelect = document.getElementById('edit_materia');
+            const opciones = materiaSelect.getElementsByTagName('option');
+            
+            // Ocultar todas las opciones primero
+            for (let opcion of opciones) {
+                if (opcion.value === '') continue; // Saltar la opción por defecto si existe
+                opcion.style.display = 'none';
+            }
+            
+            // Mostrar solo las materias del grupo seleccionado
+            for (let opcion of opciones) {
+                if (opcion.value === '') continue; // Saltar la opción por defecto si existe
+                const grupos = JSON.parse(opcion.getAttribute('data-grupos'));
+                if (grupos.includes(parseInt(grupoId))) {
+                    opcion.style.display = '';
+                }
+            }
+            
+            // Seleccionar la primera materia visible
+            for (let opcion of opciones) {
+                if (opcion.style.display !== 'none') {
+                    materiaSelect.value = opcion.value;
+                    break;
+                }
+            }
+        }
+
+        function prepareEditModal(id, descripcion, fecha_entrega, hora_entrega, grupo_id, materia_id) {
             const form = document.getElementById('edit-task-form');
             form.action = `/tareas/${id}/update`;
             
             // Establecer el contenido del editor Quill
             const quillEditor = document.querySelector('#editor-editar .ql-editor');
             if (quillEditor) {
-                // Decodificar las entidades HTML antes de establecer el contenido
-                const decodedContent = descripcion
-                    .replace(/&lt;/g, '<')
-                    .replace(/&gt;/g, '>')
-                    .replace(/&quot;/g, '"')
-                    .replace(/&#039;/g, "'")
-                    .replace(/&amp;/g, '&');
-                quillEditor.innerHTML = decodedContent;
+                quillEditor.innerHTML = descripcion;
             }
             
             document.getElementById('edit_fecha_entrega').value = fecha_entrega;
             document.getElementById('edit_hora_entrega').value = hora_entrega;
+            
+            // Establecer grupo y materia
+            if (grupo_id) {
+                document.getElementById('edit_grupo').value = grupo_id;
+                filtrarMateriasEditar(grupo_id);
+                if (materia_id) {
+                    document.getElementById('edit_materia').value = materia_id;
+                }
+            }
         }
+
+        // Filtrar materias al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            const grupoSelect = document.getElementById('grupo');
+            if (grupoSelect) {
+                filtrarMaterias(grupoSelect.value);
+            }
+            
+            const editGrupoSelect = document.getElementById('edit_grupo');
+            if (editGrupoSelect) {
+                filtrarMateriasEditar(editGrupoSelect.value);
+            }
+        });
     </script>
 </x-layouts.app>

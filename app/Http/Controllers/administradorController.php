@@ -31,11 +31,13 @@ class administradorController extends Controller
     {
         if(Auth::user()->rol == 'administrador'){
             $horario = horario::all();
+            $grupos = grupo::all(); 
         } else{
             $horario = horario::where('maestro_id', Auth::user()->id)->get();
+            $grupos = grupo::whereIn('id', $horario->pluck('grupo_id'))->get();
         }
-        $seccion = grupo::select('seccion')->whereIn('id', $horario->pluck('grupo_id'))->get();
-        $grupos = grupo::all(); 
+        $seccion = grupo::select('seccion')->whereIn('id', $horario->pluck('grupo_id'))->groupBy('seccion')->get();
+        
         $materias = materia::whereIn('id', $horario->pluck('materia_id'))->get();
         $tareas = tarea::whereIn('materia', $horario->pluck('materia_id'))->whereIn('grupo', $horario->pluck('grupo_id'))->get();
 
