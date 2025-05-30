@@ -262,9 +262,16 @@ class administradorController extends Controller
     //Anuncios
     public function showAnuncios()
     {
+        if(Auth::user()->rol == 'administrador'){
+            $horario = horario::all();
+            $grupos = grupo::all(); 
+        } else{
+            $horario = horario::where('maestro_id', Auth::user()->id)->get();
+            $grupos = grupo::whereIn('id', $horario->pluck('grupo_id'))->get();
+        }
+        $materias = materia::whereIn('id', $horario->pluck('materia_id'))->get();
         $anuncios = anuncio::all();
-        $horario = horario::where('maestro_id', Auth::user()->id)->get();
-        return view("anuncios", compact(['anuncios','horario'])); // Cambiado a 'anuncios'
+        return view("anuncios", compact(['anuncios','horario','grupos','materias'])); // Cambiado a 'anuncios'
     }
     public function storeAnuncio(Request $request)
     {

@@ -43,7 +43,7 @@
                                     <div class="flex items-center gap-2">
                                         <flux:modal.trigger name="edit-announcement">
                                             <flux:button icon='pencil' variant="filled" 
-                                                onclick="prepareEditModal({{ $anuncio->id }}, '{{ $anuncio->titulo }}', '{{ $anuncio->contenido }}')" 
+                                                onclick="prepareEditModal({{ $anuncio->id }}, '{{ $anuncio->titulo }}', '{{ $anuncio->contenido }}', '{{ $anuncio->grupo_id }}', '{{ $anuncio->materia_id }}')" 
                                                 class="text-indigo-600 hover:text-indigo-900">
                                                 Editar
                                             </flux:button>
@@ -82,10 +82,20 @@
                         placeholder="Ingresa el contenido del anuncio" required />
                     <flux:input name="archivo" id="archivo" label="Archivo" type="file" />
                     @if(count($horario) > 1)
-                        <flux:input name="materia_id" id="materia_id" label="Materia" type="text"
-                            placeholder="Ingresa el id de la materia" required />
-                        <flux:input name="grupo_id" id="grupo_id" label="Grupo" type="text"
-                            placeholder="Ingresa el id del grupo" required />
+                        <div class="grid grid-cols-2 gap-4">
+                            <flux:select name="grupo_id" id="grupo" label="Grupo" onchange="filtrarMaterias(this.value)">
+                                <option value="">Selecciona un grupo</option>
+                                @foreach ($grupos as $grupo)
+                                    <option value="{{ $grupo->id }}">{{ $grupo->nombre }} {{ $grupo->seccion}}</option>
+                                @endforeach
+                            </flux:select>
+                            <flux:select name="materia_id" id="materia" label="Materia">
+                                <option value="">Selecciona una materia</option>
+                                @foreach ($materias as $materia)
+                                    <option value="{{ $materia->id }}" data-grupos="{{ json_encode($materia->grupos->pluck('id')) }}">{{ $materia->nombre }}</option>
+                                @endforeach
+                            </flux:select>
+                        </div>
                     @endif
                 </div>
 
@@ -113,6 +123,22 @@
                     <flux:textarea name="contenido" id="edit_contenido" label="Contenido"
                         placeholder="Ingresa el contenido del anuncio" required />
                     <flux:input name="archivo" id="edit_archivo" label="Archivo" type="file" />
+                    @if(count($horario) > 1)
+                        <div class="grid grid-cols-2 gap-4">
+                            <flux:select name="grupo_id" id="edit_grupo" label="Grupo" onchange="filtrarMateriasEditar(this.value)">
+                                <option value="">Selecciona un grupo</option>
+                                @foreach ($grupos as $grupo)
+                                    <option value="{{ $grupo->id }}">{{ $grupo->nombre }} {{ $grupo->seccion}}</option>
+                                @endforeach
+                            </flux:select>
+                            <flux:select name="materia_id" id="edit_materia" label="Materia">
+                                <option value="">Selecciona una materia</option>
+                                @foreach ($materias as $materia)
+                                    <option value="{{ $materia->id }}" data-grupos="{{ json_encode($materia->grupos->pluck('id')) }}">{{ $materia->nombre }}</option>
+                                @endforeach
+                            </flux:select>
+                        </div>
+                    @endif
                 </div>
 
                 <flux:footer class="flex justify-end gap-3">
@@ -137,6 +163,12 @@
                     { orderable: false, targets: -1 }
                 ]
             });
+
+            // Filtrar materias al cargar la página
+            const grupoSelect = document.getElementById('grupo');
+            if (grupoSelect) {
+                filtrarMaterias(grupoSelect.value);
+            }
         });
 
         function closeModal(modalName) {
@@ -146,13 +178,77 @@
             }
         }
 
-        function prepareEditModal(id, titulo, contenido) {
+        function filtrarMaterias(grupoId) {
+            const materiaSelect = document.getElementById('materia');
+            const opciones = materiaSelect.getElementsByTagName('option');
+            
+            // Ocultar todas las opciones primero
+            for (let opcion of opciones) {
+                if (opcion.value === '') continue; // Saltar la opción por defecto si existe
+                opcion.style.display = 'none';
+            }
+            
+            // Mostrar solo las materias del grupo seleccionado
+            for (let opcion of opciones) {
+                if (opcion.value === '') continue; // Saltar la opción por defecto si existe
+                const grupos = JSON.parse(opcion.getAttribute('data-grupos'));
+                if (grupos.includes(parseInt(grupoId))) {
+                    opcion.style.display = '';
+                }
+            }
+            
+            // Seleccionar la primera materia visible
+            for (let opcion of opciones) {
+                if (opcion.style.display !== 'none') {
+                    materiaSelect.value = opcion.value;
+                    break;
+                }
+            }
+        }
+
+        function filtrarMateriasEditar(grupoId) {
+            const materiaSelect = document.getElementById('edit_materia');
+            const opciones = materiaSelect.getElementsByTagName('option');
+            
+            // Ocultar todas las opciones primero
+            for (let opcion of opciones) {
+                if (opcion.value === '') continue; // Saltar la opción por defecto si existe
+                opcion.style.display = 'none';
+            }
+            
+            // Mostrar solo las materias del grupo seleccionado
+            for (let opcion of opciones) {
+                if (opcion.value === '') continue; // Saltar la opción por defecto si existe
+                const grupos = JSON.parse(opcion.getAttribute('data-grupos'));
+                if (grupos.includes(parseInt(grupoId))) {
+                    opcion.style.display = '';
+                }
+            }
+            
+            // Seleccionar la primera materia visible
+            for (let opcion of opciones) {
+                if (opcion.style.display !== 'none') {
+                    materiaSelect.value = opcion.value;
+                    break;
+                }
+            }
+        }
+
+        function prepareEditModal(id, titulo, contenido, grupo_id, materia_id) {
             const form = document.getElementById('edit-announcement-form');
             form.action = `/anuncios/${id}/update`;
             
             document.getElementById('edit_titulo').value = titulo;
             document.getElementById('edit_contenido').value = contenido;
-            document.getElementById('edit_archivo').value = archivo;
+            
+            // Establecer grupo y materia
+            if (grupo_id) {
+                document.getElementById('edit_grupo').value = grupo_id;
+                filtrarMateriasEditar(grupo_id);
+                if (materia_id) {
+                    document.getElementById('edit_materia').value = materia_id;
+                }
+            }
         }
     </script>
 </x-layouts.app>
