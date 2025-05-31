@@ -102,7 +102,7 @@
                             onchange="validarFecha(this)" />
                         <flux:input name="hora_entrega" type="time" id='hora_entrega' label='Hora de entrega' />
                     </div>
-                    @if ($materias->count() > 1)
+                    @if ($grupos->count() > 1)
                         <div class="grid grid-cols-2 gap-4">
                             <flux:select name="grupo" id="grupo" label="Grupo" onchange="filtrarMaterias(this.value)">
                                 <option value="">Selecciona un grupo</option>
@@ -151,7 +151,7 @@
                             onchange="validarFecha(this)" />
                         <flux:input name="hora_entrega" type="time" id='edit_hora_entrega' label='Hora de entrega' />
                     </div>
-                    @if ($materias->count() > 1)
+                    @if ($grupos->count() > 1)
                         <div class="grid grid-cols-2 gap-4">
                             <flux:select name="grupo" id="edit_grupo" label="Grupo" onchange="filtrarMateriasEditar(this.value)">
                                 <option value="">Selecciona un grupo</option>
