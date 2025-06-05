@@ -11,7 +11,7 @@
             <main class="flex flex-col items-center justify-center min-h-[calc(100vh-4rem)] px-4">
                 <div class="max-w-4xl w-full text-center">
                     <div class="mb-8">
-                        <img src="{{ asset('storage/img/logo.png') }}" alt="Logo" class="h-16 w-auto mx-auto mb-6">
+                        <img src="{{ asset('logo.png') }}" alt="Logo" class="h-16 w-auto mx-auto mb-6">
                         <h1 class="text-4xl font-semibold mb-4 dark:text-white">Sistema de Gestión</h1>
                         <p class="text-lg text-neutral-600 dark:text-neutral-400 mb-8">
                             Una solución integral para la gestión eficiente de tu organización
