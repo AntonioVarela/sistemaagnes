@@ -43,7 +43,7 @@
                                                 Editar
                                             </flux:button>
                                         </flux:modal.trigger>
-                                        <form action="{{ route('materias.destroy', $materia->id) }}" method="POST" class="inline">
+                                        <form action="{{ route('materias.destroy', $materia->id) }}" method="POST" class="form-eliminar inline">
                                             @csrf
                                             @method('DELETE')
                                             <button type="submit" class="text-red-600 hover:text-red-900 transition-colors">
@@ -115,6 +115,9 @@
         </flux:container>
     </flux:modal>
 
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script>
         $(document).ready(function() {
             $('#myTable').DataTable({
@@ -145,5 +148,44 @@
             document.getElementById('edit_nombre').value = nombre;
             document.getElementById('edit_color').value = color;
         }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const forms = document.querySelectorAll('.form-eliminar');
+            forms.forEach(form => {
+                form.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: '¿Estás seguro?',
+                        text: "¡Esta acción no se puede deshacer!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Sí, eliminar',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
+        });
+
+        @if(session('toast'))
+            Toastify({
+                text: "{{ session('toast.message') }}",
+                duration: 3500,
+                gravity: "top",
+                position: "right",
+                backgroundColor: 
+                    @if(session('toast.type') == 'success') "#22c55e"
+                    @elseif(session('toast.type') == 'error') "#ef4444"
+                    @elseif(session('toast.type') == 'warning') "#f59e42"
+                    @else "#3b82f6" @endif,
+                stopOnFocus: true,
+                close: true
+            }).showToast();
+        @endif
     </script>
 </x-layouts.app>

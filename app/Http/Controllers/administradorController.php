@@ -68,13 +68,21 @@ class administradorController extends Controller
         }
 
         $tarea->save();
-        return redirect()->route('tareas.index')->with('success', 'Tarea actualizada exitosamente.');
+        session()->flash('toast', [
+            'type' => 'success',
+            'message' => '¡Tarea actualizada exitosamente!'
+        ]);
+        return redirect()->route('tareas.index');
     }
     public function destroyTarea($id)
     {
         $tarea = tarea::findOrFail($id);
         $tarea->delete();
-        return redirect()->route('tareas.index')->with('success', 'Tarea eliminada exitosamente.');
+        session()->flash('toast', [
+            'type' => 'success',
+            'message' => '¡Tarea eliminada exitosamente!'
+        ]);
+        return redirect()->route('tareas.index');
     }
 
     public function store(Request $request)
@@ -106,7 +114,11 @@ class administradorController extends Controller
             $tarea->archivo = $rutaArchivo; // Guardar la ruta en la base de datos
         }
         $tarea->save();
-        return redirect()->route('tareas.index')->with('success', 'Tarea creada exitosamente.');
+        session()->flash('toast', [
+            'type' => 'success',
+            'message' => '¡Tarea creada exitosamente!'
+        ]);
+        return redirect()->route('tareas.index');
         // Logic to store a new task
     }
 
@@ -138,13 +150,21 @@ class administradorController extends Controller
         $grupo->seccion = $request->seccion;
         $grupo->titular = $request->titular_id;
         $grupo->save();
-        return redirect()->route('grupos.index')->with('success', 'Grupo creado exitosamente.');
+        session()->flash('toast', [
+            'type' => 'success',
+            'message' => '¡Grupo creado exitosamente!'
+        ]);
+        return redirect()->route('grupos.index');
     }
     public function destroyGrupo($id)
     {
         $grupo = grupo::findOrFail($id);
         $grupo->delete();
-        return redirect()->route('grupos.index')->with('success', 'Grupo eliminado exitosamente.');
+        session()->flash('toast', [
+            'type' => 'success',
+            'message' => '¡Grupo eliminado exitosamente!'
+        ]);
+        return redirect()->route('grupos.index');
     }
     public function updateGrupo(Request $request, $id)
     {
@@ -153,7 +173,11 @@ class administradorController extends Controller
         $grupo->seccion = $request->seccion;
         $grupo->titular = $request->titular_id;
         $grupo->save();
-        return redirect()->route('grupos.index')->with('success', 'Grupo actualizado exitosamente.');
+        session()->flash('toast', [
+            'type' => 'success',
+            'message' => '¡Grupo actualizado exitosamente!'
+        ]);
+        return redirect()->route('grupos.index');
     }
     //Materias
     public function showMaterias()
@@ -169,13 +193,21 @@ class administradorController extends Controller
         $materia->nombre = $request->nombre;
         $materia->color = $request->color;
         $materia->save();
-        return redirect()->route('materias.index')->with('success', 'Materia creada exitosamente.');
+        session()->flash('toast', [
+            'type' => 'success',
+            'message' => '¡Materia creada exitosamente!'
+        ]);
+        return redirect()->route('materias.index');
     }
     public function destroyMateria($id)
     {
         $materia = materia::findOrFail($id);
         $materia->delete();
-        return redirect()->route('materias.index')->with('success', 'Materia eliminada exitosamente.');
+        session()->flash('toast', [
+            'type' => 'success',
+            'message' => '¡Materia eliminada exitosamente!'
+        ]);
+        return redirect()->route('materias.index');
     }
     public function updateMateria(Request $request, $id)
     {
@@ -183,7 +215,11 @@ class administradorController extends Controller
         $materia->nombre = $request->nombre;
         $materia->color = $request->color;
         $materia->save();
-        return redirect()->route('materias.index')->with('success', 'Materia actualizada exitosamente.');
+        session()->flash('toast', [
+            'type' => 'success',
+            'message' => '¡Materia actualizada exitosamente!'
+        ]);
+        return redirect()->route('materias.index');
     }
 
     //Usuarios
@@ -200,13 +236,21 @@ class administradorController extends Controller
         $usuario->password = bcrypt($request->password);
         $usuario->rol = $request->rol;
         $usuario->save();
-        return redirect()->route('usuarios.index')->with('success', 'Usuario creado exitosamente.');
+        session()->flash('toast', [
+            'type' => 'success',
+            'message' => '¡Usuario creado exitosamente!'
+        ]);
+        return redirect()->route('usuarios.index');
     }
     public function destroyUsuario($id)
     {
         $usuario = User::findOrFail($id);
         $usuario->delete();
-        return redirect()->route('usuarios.index')->with('success', 'Usuario eliminado exitosamente.');
+        session()->flash('toast', [
+            'type' => 'success',
+            'message' => '¡Usuario eliminado exitosamente!'
+        ]);
+        return redirect()->route('usuarios.index');
     }
     public function updateUsuario(Request $request, $id)
     {
@@ -216,7 +260,11 @@ class administradorController extends Controller
         $usuario->password = bcrypt($request->password);
         $usuario->rol = $request->rol;
         $usuario->save();
-        return redirect()->route('usuarios.index')->with('success', 'Usuario actualizado exitosamente.');
+        session()->flash('toast', [
+            'type' => 'success',
+            'message' => '¡Usuario actualizado exitosamente!'
+        ]);
+        return redirect()->route('usuarios.index');
     }
     //Horarios
     public function showHorarios()
@@ -238,13 +286,21 @@ class administradorController extends Controller
         $horario->hora_inicio = $request->hora_inicio;
         $horario->hora_fin = $request->hora_fin;
         $horario->save();
-        return redirect()->route('horarios.index')->with('success', 'Horario creado exitosamente.');
+        session()->flash('toast', [
+            'type' => 'success',
+            'message' => '¡Horario creado exitosamente!'
+        ]);
+        return redirect()->route('horarios.index');
     }
     public function destroyHorario($id)
     {
         $horario = horario::findOrFail($id);
         $horario->delete();
-        return redirect()->route('horarios.index')->with('success', 'Horario eliminado exitosamente.');
+        session()->flash('toast', [
+            'type' => 'success',
+            'message' => '¡Horario eliminado exitosamente!'
+        ]);
+        return redirect()->route('horarios.index');
     }
     public function updateHorario(Request $request, $id)
     {
@@ -256,7 +312,11 @@ class administradorController extends Controller
         $horario->hora_inicio = $request->hora_inicio;
         $horario->hora_fin = $request->hora_fin;
         $horario->save();
-        return redirect()->route('horarios.index')->with('success', 'Horario actualizado exitosamente.');
+        session()->flash('toast', [
+            'type' => 'success',
+            'message' => '¡Horario actualizado exitosamente!'
+        ]);
+        return redirect()->route('horarios.index');
     }   
 
     //Anuncios
@@ -301,14 +361,22 @@ class administradorController extends Controller
             $anuncio->seccion = $grupo->seccion;
         }
         $anuncio->save();
-        return redirect()->route('anuncios.index')->with('success', 'Anuncio creado exitosamente.');
+        session()->flash('toast', [
+            'type' => 'success',
+            'message' => '¡Anuncio creado exitosamente!'
+        ]);
+        return redirect()->route('anuncios.index');
     }
     
     public function destroyAnuncio($id)
     {
         $anuncio = anuncio::findOrFail($id);
         $anuncio->delete();
-        return redirect()->route('anuncios.index')->with('success', 'Anuncio eliminado exitosamente.');
+        session()->flash('toast', [
+            'type' => 'success',
+            'message' => '¡Anuncio eliminado exitosamente!'
+        ]);
+        return redirect()->route('anuncios.index');
     }
     public function updateAnuncio(Request $request, $id)
     {
@@ -330,7 +398,11 @@ class administradorController extends Controller
             $anuncio->seccion = $grupo->seccion;
         }
         $anuncio->save();
-        return redirect()->route('anuncios.index')->with('success', 'Anuncio actualizado exitosamente.');
+        session()->flash('toast', [
+            'type' => 'success',
+            'message' => '¡Anuncio actualizado exitosamente!'
+        ]);
+        return redirect()->route('anuncios.index');
     }
     
 }
