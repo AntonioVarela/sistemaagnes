@@ -15,25 +15,48 @@ class administradorController extends Controller
 {
     public function indexDashboard()
     {
-        if(Auth::user()->rol == 'administrador' || Auth::user()->rol == 'Coordinador'){
+        if(Auth::user()->rol == 'Coordinador Primaria'){
+            // Primero verificamos los grupos de primaria
+            $gruposPrimaria = grupo::where('seccion', 'Primaria')->get();
+            
+            // Luego obtenemos los horarios para estos grupos
+            $horarios = horario::with(['grupo', 'materia'])
+                ->whereIn('grupo_id', $gruposPrimaria->pluck('id'))
+                ->orderBy('grupo_id')
+                ->get();
+            
+            $grupos = $gruposPrimaria->whereIn('id', $horarios->pluck('grupo_id')->unique())
+                ->sortBy('nombre');
+
+        } else if(Auth::user()->rol == 'Coordinador Secundaria'){
+            // Primero verificamos los grupos de secundaria
+            $gruposSecundaria = grupo::where('seccion', 'Secundaria')->get();
+            
+            // Luego obtenemos los horarios para estos grupos
+            $horarios = horario::with(['grupo', 'materia'])
+                ->whereIn('grupo_id', $gruposSecundaria->pluck('id'))
+                ->orderBy('grupo_id')
+                ->get();
+            
+            $grupos = $gruposSecundaria->whereIn('id', $horarios->pluck('grupo_id')->unique())
+                ->sortBy('nombre');
+        }
+        if(Auth::user()->rol == 'administrador'){
             $horarios = horario::with(['grupo', 'materia'])
                 ->orderBy('grupo_id')
                 ->get();
-            $grupos = grupo::whereIn('id', $horarios->pluck('grupo_id')->unique())
-                ->orderBy('nombre')
-                ->get();
+            $grupos = grupo::all();
         }
-        else{
+        if(Auth::user()->rol == 'Maestro'){
             $horarios = horario::with(['grupo', 'materia'])
                 ->where('maestro_id', Auth::user()->id)
                 ->orderBy('grupo_id')
                 ->get();
-            $grupos = grupo::whereIn('id', $horarios->pluck('grupo_id')->unique())
-                ->orderBy('nombre')
-                ->get();
+            $grupos = grupo::whereIn('id', $horarios->pluck('grupo_id'))->get();
         }
-        $usuarios = User::all();
-        return view('dashboard', compact(['grupos','usuarios','horarios']));
+
+
+        return view('dashboard', compact('horarios', 'grupos'));
     }
 
     //Tareas   

@@ -90,7 +90,8 @@
                         <option value="" disabled selected>Selecciona un rol</option>
                         <option value="Administrador">Administrador</option>
                         <option value="Maestro">Maestro</option>
-                        <option value="Coordinador">Coordinador</option>
+                        <option value="Coordinador Primaria">Coordinador Primaria</option>
+                        <option value="Coordinador Secundaria">Coordinador Secundaria</option>
                     </flux:select>
                 </div>
 
@@ -122,7 +123,8 @@
                     <flux:select name="rol" id="edit_rol" label="Rol">
                         <option value="Administrador">Administrador</option>
                         <option value="Maestro">Maestro</option>
-                        <option value="Coordinador">Coordinador</option>
+                        <option value="Coordinador Primaria">Coordinador Primaria</option>
+                        <option value="Coordinador Secundaria">Coordinador Secundaria</option>
                     </flux:select>
                 </div>
 
