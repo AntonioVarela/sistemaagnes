@@ -33,6 +33,19 @@
                                 <div class="border-t border-gray-200 dark:border-gray-700 pt-3">
                                     <h3 class="text-md font-semibold text-gray-800 dark:text-gray-200 mb-2">
                                         {{ $horario->materia->nombre }}
+                                        @php
+                                            $inicioSemana = now()->startOfWeek();
+                                            $finSemana = now()->endOfWeek();
+                                            $tareasSemana = \App\Models\Tarea::where('materia', $horario->materia->id)
+                                                ->where('grupo', $grupo->id)
+                                                ->whereBetween('fecha_entrega', [$inicioSemana, $finSemana])
+                                                ->count();
+                                        @endphp
+                                        @if(Auth::user()->rol == 'administrador' || Auth::user()->rol == 'Coordinador')
+                                            <flux:badge color="lime" class="text-xs">
+                                                {{ $tareasSemana }} tarea{{ $tareasSemana != 1 ? 's' : '' }} esta semana
+                                            </flux:badge>
+                                        @endif
                                     </h3>
                                     <div class="space-y-2">
                                         <div class="flex items-center text-sm text-gray-600 dark:text-gray-300">
