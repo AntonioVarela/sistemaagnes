@@ -42,7 +42,7 @@
                                                 ->whereBetween('fecha_entrega', [$inicioSemana, $finSemana])
                                                 ->count();
                                         @endphp
-                                        @if(Auth::user()->rol == 'administrador' || Auth::user()->rol == 'Coordinador')
+                                        @if(Auth::user()->rol == 'administrador' || Auth::user()->rol == 'Coordinador Primaria' || Auth::user()->rol == 'Coordinador Secundaria')
                                             <flux:badge color="lime" class="text-xs">
                                                 {{ $tareasSemana }} tarea{{ $tareasSemana != 1 ? 's' : '' }} esta semana
                                             </flux:badge>
