@@ -197,7 +197,6 @@
                 });
             });
         });
-    </script>
 
     @if(session('toast'))
         Toastify({
@@ -214,4 +213,5 @@
             close: true
         }).showToast();
     @endif
+    </script>
 </x-layouts.app>

@@ -16,12 +16,14 @@
                     <flux:navlist.item icon="home" class="text-2xl"  :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                         <span>{{ __('Dashboard') }}</span>
                     </flux:navlist.item>
-                    <flux:navlist.item icon="book-open" :href="route('tareas.index')" :current="request()->routeIs('tareas.index')" wire:navigate>
-                        <span>{{ __('Tareas') }}</span>
-                    </flux:navlist.item>
                     <flux:navlist.item icon="device-tablet" :href="route('anuncios.index')" :current="request()->routeIs('anuncios.index')" wire:navigate>
                         <span>{{ __('Anuncios') }}</span>
                     </flux:navlist.item>
+                    @if (Auth::user()->rol != "Coordinador")
+                    <flux:navlist.item icon="book-open" :href="route('tareas.index')" :current="request()->routeIs('tareas.index')" wire:navigate>
+                        <span>{{ __('Tareas') }}</span>
+                    </flux:navlist.item>
+                    
                     @if (Auth::user()->rol == "administrador")
                         <flux:navlist.item icon="calendar-days" :href="route('horarios.index')" :current="request()->routeIs('horarios.index')" wire:navigate>
                             <span>{{ __('Horarios') }}</span>
@@ -30,6 +32,7 @@
                     <flux:navlist.item icon="list-bullet" style="display:none;" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                         <span>{{ __('Planeaciones') }}</span>
                     </flux:navlist.item>
+                    @endif
                 </flux:navlist.group>
             </flux:navlist>
 

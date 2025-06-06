@@ -12,6 +12,44 @@
             </flux:modal.trigger>
         </div>
 
+        <form action="{{ route('horarios.index') }}" method="GET" class="mb-6">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <flux:input 
+                    name="search" 
+                    type="text" 
+                    placeholder="Buscar por nombre..." 
+                    value="{{ request('search') }}"
+                    class="w-full"
+                />
+                <flux:select name="grupo_filter" class="w-full">
+                    <option value="">Todos los grupos</option>
+                    @foreach ($grupos as $grupo)
+                        <option value="{{ $grupo->id }}" {{ request('grupo_filter') == $grupo->id ? 'selected' : '' }}>
+                            {{ $grupo->nombre }} {{ $grupo->seccion }}
+                        </option>
+                    @endforeach
+                </flux:select>
+                <flux:select name="materia_filter" class="w-full">
+                    <option value="">Todas las materias</option>
+                    @foreach ($materias as $materia)
+                        <option value="{{ $materia->id }}" {{ request('materia_filter') == $materia->id ? 'selected' : '' }}>
+                            {{ $materia->nombre }}
+                        </option>
+                    @endforeach
+                </flux:select>
+                <div class="flex gap-2">
+                    <flux:button type="submit" variant="primary" class="flex-1">
+                        Filtrar
+                    </flux:button>
+                    <a href="{{ route('horarios.index') }}" class="flex-1">
+                        <flux:button type="button" variant="filled" class="w-full">
+                            Limpiar
+                        </flux:button>
+                    </a>
+                </div>
+            </div>
+        </form>
+
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             @foreach ($horarios as $horario)
                 <div class="bg-white dark:bg-gray-700 rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">

@@ -21,6 +21,14 @@ class DatabaseSeeder extends Seeder
             'password' => bcrypt('22Agk#04'),
             'rol' => 'administrador',
         ]);
+
+        User::factory()->create([
+            'name' => 'Profesor',
+            'email' => 'profesor@colegioagnes.edu.mx',
+            'password' => bcrypt('22Agk#04'),
+            'rol' => 'profesor',
+        ]);
+        
         
     }
 }

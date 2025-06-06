@@ -98,8 +98,7 @@
                     <textarea name="descripcion" class="hidden" id="descripcion" required ></textarea>
                     <div class="grid grid-cols-2 gap-4">
                         <flux:input name="fecha_entrega" id="fecha_entrega" label="Fecha de Entrega" type="date" required 
-                            x-bind:min="new Date().toISOString().split('T')[0]"
-                            onchange="validarFecha(this)" />
+                            x-bind:min="new Date().toISOString().split('T')[0]" />
                         <flux:input name="hora_entrega" type="time" id='hora_entrega' label='Hora de entrega' />
                     </div>
                     @if ($grupos->count() > 1)
@@ -118,7 +117,7 @@
                             </flux:select>
                         </div>
                     @endif
-                    <flux:input name="archivo" type="file" id="archivo" label="Archivo adjunto" accept=".pdf">
+                    <flux:input name="archivo" type="file" id="archivo" label="Archivo adjunto (opcional)" accept=".pdf">
                     </flux:input>
                 </div>
 
@@ -147,8 +146,7 @@
                     <textarea name="descripcion" id="edit_descripcion" class="hidden" required></textarea>
                     <div class="grid grid-cols-2 gap-4">
                         <flux:input name="fecha_entrega" id="edit_fecha_entrega" label="Fecha de Entrega" type="date" required 
-                            x-bind:min="new Date().toISOString().split('T')[0]"
-                            onchange="validarFecha(this)" />
+                            x-bind:min="new Date().toISOString().split('T')[0]"/>
                         <flux:input name="hora_entrega" type="time" id='edit_hora_entrega' label='Hora de entrega' />
                     </div>
                     @if ($grupos->count() > 1)

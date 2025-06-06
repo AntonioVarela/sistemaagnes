@@ -15,15 +15,25 @@ class administradorController extends Controller
 {
     public function indexDashboard()
     {
-        if(Auth::user()->rol == 'administrador'){
-            $horario = horario::all();
+        if(Auth::user()->rol == 'administrador' || Auth::user()->rol == 'Coordinador'){
+            $horarios = horario::with(['grupo', 'materia'])
+                ->orderBy('grupo_id')
+                ->get();
+            $grupos = grupo::whereIn('id', $horarios->pluck('grupo_id')->unique())
+                ->orderBy('nombre')
+                ->get();
         }
         else{
-            $horario = horario::where('maestro_id', Auth::user()->id)->get();
+            $horarios = horario::with(['grupo', 'materia'])
+                ->where('maestro_id', Auth::user()->id)
+                ->orderBy('grupo_id')
+                ->get();
+            $grupos = grupo::whereIn('id', $horarios->pluck('grupo_id')->unique())
+                ->orderBy('nombre')
+                ->get();
         }
-        $grupos = grupo::orderBy('nombre')->get();
         $usuarios = User::all();
-        return view('dashboard', compact(['grupos','usuarios','horario'])); // Cambiado a 'dashboard'
+        return view('dashboard', compact(['grupos','usuarios','horarios']));
     }
 
     //Tareas   
@@ -269,11 +279,31 @@ class administradorController extends Controller
     //Horarios
     public function showHorarios()
     {
-        $horarios = horario::all();
+        $query = horario::query();
+
+        // Aplicar filtros si existen
+        if (request('search')) {
+            $query->whereHas('materia', function($q) {
+                $q->where('nombre', 'like', '%' . request('search') . '%');
+            })->orWhereHas('grupo', function($q) {
+                $q->where('nombre', 'like', '%' . request('search') . '%')
+                  ->orWhere('seccion', 'like', '%' . request('search') . '%');
+            });
+        }
+
+        if (request('grupo_filter')) {
+            $query->where('grupo_id', request('grupo_filter'));
+        }
+
+        if (request('materia_filter')) {
+            $query->where('materia_id', request('materia_filter'));
+        }
+
+        $horarios = $query->get();
         $grupos = grupo::all();
         $materias = materia::all();
         $usuarios = User::where('rol', 'Maestro')->get();
-        return view("horarios", compact(['horarios','grupos','materias','usuarios'])); // Cambiado a 'horarios'
+        return view("horarios", compact(['horarios','grupos','materias','usuarios']));
     }
 
     public function storeHorario(Request $request)
@@ -322,7 +352,7 @@ class administradorController extends Controller
     //Anuncios
     public function showAnuncios()
     {
-        if(Auth::user()->rol == 'administrador'){
+        if(Auth::user()->rol == 'administrador' || Auth::user()->rol == 'Coordinador'){
             $horario = horario::all();
             $grupos = grupo::all(); 
         } else{

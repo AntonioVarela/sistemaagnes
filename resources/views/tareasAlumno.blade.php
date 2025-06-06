@@ -205,20 +205,45 @@
     <script>
         $(document).ready(function () {
             var tareas = @json($tareas);
-            var eventos = tareas.map(element => {
-                return {
-                    title: element.titulo,
-                    start: element.fecha_entrega,
-                    color: '#4F46E5',
-                    allDay: false,
-                    extendedProps: {
-                        description: element.descripcion,
-                        fecha_entrega: element.fecha_entrega,
-                        hora_entrega: element.hora_entrega,
-                        archivo: element.archivo
-                    }
-                };
-            });
+            var grupo = @json($grupo); 
+            var eventos;
+            
+            if(grupo.seccion == 'Primaria') {
+                eventos = tareas.map(function(element) {
+                    // Restar un día a la fecha para primaria
+                    let date = new Date(element.fecha_entrega);
+                    date.setDate(date.getDate() - 1);
+                    let startDate = date.toISOString().split('T')[0];
+
+                    return {
+                        title: element.titulo,
+                        start: startDate,
+                        color: '#4F46E5',
+                        allDay: false,
+                        extendedProps: {
+                            description: element.descripcion,
+                            fecha_entrega: element.fecha_entrega,
+                            hora_entrega: element.hora_entrega,
+                            archivo: element.archivo
+                        }
+                    };
+                });
+            } else {
+                eventos = tareas.map(function(element) {
+                    return {
+                        title: element.titulo,
+                        start: element.fecha_entrega,
+                        color: '#4F46E5',
+                        allDay: false,
+                        extendedProps: {
+                            description: element.descripcion,
+                            fecha_entrega: element.fecha_entrega,
+                            hora_entrega: element.hora_entrega,
+                            archivo: element.archivo
+                        }
+                    };
+                });
+            }
 
             var calendarEl = document.getElementById('calendar');
             var calendar = new FullCalendar.Calendar(calendarEl, {
@@ -278,6 +303,7 @@
             });
             
         });
+        
     </script>
 </body>
 </html>
