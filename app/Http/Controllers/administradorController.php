@@ -22,6 +22,12 @@ class administradorController extends Controller
             $grupos = grupo::whereIn('id', $horarios->pluck('grupo_id')->unique())
                 ->orderBy('nombre')
                 ->get();
+                $inicioSemana = now()->startOfWeek();
+                $finSemana = now()->endOfWeek();
+                $tareasSemana = \App\Models\Tarea::where('materia', $horario->materia->id)
+                ->where('grupo', $grupo->id)
+                ->whereBetween('fecha_entrega', [$inicioSemana, $finSemana])
+                ->count();
         }
         else{
             $horarios = horario::with(['grupo', 'materia'])
