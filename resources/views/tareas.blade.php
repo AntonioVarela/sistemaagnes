@@ -89,27 +89,30 @@
             <form action="{{ route('tareas.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
                 @csrf
                 <div class="grid gap-4">
-
-                    <flux:header
-                    <div id="editor-nueva" class="h-64">
-                        
+                    <div class="dark:text-white">
+                        <flux:header
+                        <div id="editor-nueva" class="h-64 dark:bg-gray-700 dark:text-white">
+                            
+                        </div>
                     </div>
 
                     <textarea name="descripcion" class="hidden" id="descripcion" required ></textarea>
                     <div class="grid grid-cols-2 gap-4">
-                        <flux:input name="fecha_entrega" id="fecha_entrega" label="Fecha de Entrega" type="date" required 
-                            x-bind:min="new Date().toISOString().split('T')[0]" />
-                        <flux:input name="hora_entrega" type="time" id='hora_entrega' label='Hora de entrega' />
+                        <flux:input name="fecha_entrega" id="fecha_entrega" label="Fecha de Entrega *" type="date" required 
+                            x-bind:min="new Date().toISOString().split('T')[0]" class="dark:text-white" />
+                        <div id="hora_entrega_container">
+                            <flux:input name="hora_entrega" type="time" id='hora_entrega' label='Hora de entrega (opcional)' class="dark:text-white" />
+                        </div>
                     </div>
                     @if ($grupos->count() > 1)
                         <div class="grid grid-cols-2 gap-4">
-                            <flux:select name="grupo" id="grupo" label="Grupo" onchange="filtrarMaterias(this.value)">
+                            <flux:select name="grupo" id="grupo" label="Grupo *" onchange="filtrarMaterias(this.value)" required class="dark:text-white">
                                 <option value="">Selecciona un grupo</option>
                                 @foreach ($grupos as $grupo)
                                     <option value="{{ $grupo->id }}">{{ $grupo->nombre }} {{ $grupo->seccion}}</option>
                                 @endforeach
                             </flux:select>
-                            <flux:select name="materia" id="materia" label="Materia">
+                            <flux:select name="materia" id="materia" label="Materia *" required class="dark:text-white">
                                 <option value="">Selecciona una materia</option>
                                 @foreach ($materias as $materia)
                                     <option value="{{ $materia->id }}" data-grupos="{{ json_encode($materia->grupos->pluck('id')) }}">{{ $materia->nombre }}</option>
@@ -117,12 +120,12 @@
                             </flux:select>
                         </div>
                     @endif
-                    <flux:input name="archivo" type="file" id="archivo" label="Archivo adjunto (opcional)" accept=".pdf">
+                    <flux:input name="archivo" type="file" id="archivo" label="Archivo adjunto (opcional)" accept=".pdf" class="dark:text-white">
                     </flux:input>
                 </div>
 
                 <flux:footer class="flex justify-end gap-3">
-                    <flux:button type="button" variant="filled" onclick="closeModal('edit-profile')">Cancelar</flux:button>
+                    <flux:button type="button" variant="filled" onclick="closeModal('edit-profile')" class="dark:text-white">Cancelar</flux:button>
                     <flux:button type="submit" variant="primary">Guardar tarea</flux:button>
                 </flux:footer>
             </form>
@@ -140,24 +143,28 @@
             <form id="edit-task-form" method="POST" enctype="multipart/form-data" class="space-y-4">
                 @csrf
                 <div class="grid gap-4">
-                    <div id="editor-editar" class="h-64">
-                        
+                    <div class="dark:text-white">
+                        <div id="editor-editar" class="h-64 dark:bg-gray-700 dark:text-white">
+                            
+                        </div>
                     </div>
                     <textarea name="descripcion" id="edit_descripcion" class="hidden" required></textarea>
                     <div class="grid grid-cols-2 gap-4">
-                        <flux:input name="fecha_entrega" id="edit_fecha_entrega" label="Fecha de Entrega" type="date" required 
-                            x-bind:min="new Date().toISOString().split('T')[0]"/>
-                        <flux:input name="hora_entrega" type="time" id='edit_hora_entrega' label='Hora de entrega' />
+                        <flux:input name="fecha_entrega" id="edit_fecha_entrega" label="Fecha de Entrega *" type="date" required 
+                            x-bind:min="new Date().toISOString().split('T')[0]" class="dark:text-white"/>
+                        <div id="edit_hora_entrega_container">
+                            <flux:input name="hora_entrega" type="time" id='edit_hora_entrega' label='Hora de entrega (opcional)' class="dark:text-white" />
+                        </div>
                     </div>
                     @if ($grupos->count() > 1)
                         <div class="grid grid-cols-2 gap-4">
-                            <flux:select name="grupo" id="edit_grupo" label="Grupo" onchange="filtrarMateriasEditar(this.value)">
+                            <flux:select name="grupo" id="edit_grupo" label="Grupo *" onchange="filtrarMateriasEditar(this.value)" required class="dark:text-white">
                                 <option value="">Selecciona un grupo</option>
                                 @foreach ($grupos as $grupo)
                                     <option value="{{ $grupo->id }}">{{ $grupo->nombre }} {{ $grupo->seccion}}</option>
                                 @endforeach
                             </flux:select>
-                            <flux:select name="materia" id="edit_materia" label="Materia">
+                            <flux:select name="materia" id="edit_materia" label="Materia *" required class="dark:text-white">
                                 <option value="">Selecciona una materia</option>
                                 @foreach ($materias as $materia)
                                     <option value="{{ $materia->id }}" data-grupos="{{ json_encode($materia->grupos->pluck('id')) }}">{{ $materia->nombre }}</option>
@@ -165,12 +172,12 @@
                             </flux:select>
                         </div>
                     @endif
-                    <flux:input name="archivo" type="file" id="edit_archivo" label="Archivo adjunto" accept=".pdf">
+                    <flux:input name="archivo" type="file" id="edit_archivo" label="Archivo adjunto (opcional)" accept=".pdf" class="dark:text-white">
                     </flux:input>
                 </div>
 
                 <flux:footer class="flex justify-end gap-3">
-                    <flux:button type="button" variant="filled" onclick="closeModal('edit-task')">Cancelar</flux:button>
+                    <flux:button type="button" variant="filled" onclick="closeModal('edit-task')" class="dark:text-white">Cancelar</flux:button>
                     <flux:button type="submit" variant="primary">Actualizar tarea</flux:button>
                 </flux:footer>
             </form>
@@ -238,6 +245,34 @@
                 var html = quillEditar.root.innerHTML;
                 document.getElementById('edit_descripcion').value = html;
             });
+
+            // Agregar estilos para modo oscuro en los editores Quill
+            const style = document.createElement('style');
+            style.textContent = `
+                .dark .ql-editor {
+                    color: white !important;
+                }
+                .dark .ql-toolbar {
+                    background-color: #374151 !important;
+                    border-color: #4B5563 !important;
+                }
+                .dark .ql-toolbar button {
+                    color: white !important;
+                }
+                .dark .ql-toolbar button:hover {
+                    color: #60A5FA !important;
+                }
+                .dark .ql-toolbar .ql-active {
+                    color: #60A5FA !important;
+                }
+                .dark .ql-toolbar .ql-stroke {
+                    stroke: white !important;
+                }
+                .dark .ql-toolbar .ql-fill {
+                    fill: white !important;
+                }
+            `;
+            document.head.appendChild(style);
         });
 
         function closeModal(modalName) {
@@ -377,5 +412,45 @@
                 close: true
             }).showToast();
         @endif
+
+        // Función para verificar si el grupo es de primaria
+        function esGrupoPrimaria(grupoId) {
+            const grupo = @json($grupos);
+            const grupoSeleccionado = grupo.find(g => g.id == grupoId);
+            return grupoSeleccionado && grupoSeleccionado.nombre.toLowerCase().includes('primaria');
+        }
+
+        // Función para mostrar/ocultar el campo de hora
+        function toggleHoraEntrega(grupoId) {
+            const horaContainer = document.getElementById('hora_entrega_container');
+            const editHoraContainer = document.getElementById('edit_hora_entrega_container');
+            
+            if (esGrupoPrimaria(grupoId)) {
+                horaContainer.style.display = 'none';
+                editHoraContainer.style.display = 'none';
+            } else {
+                horaContainer.style.display = 'block';
+                editHoraContainer.style.display = 'block';
+            }
+        }
+
+        // Modificar las funciones existentes de filtrar materias
+        const originalFiltrarMaterias = window.filtrarMaterias;
+        window.filtrarMaterias = function(grupoId) {
+            originalFiltrarMaterias(grupoId);
+            toggleHoraEntrega(grupoId);
+        }
+
+        const originalFiltrarMateriasEditar = window.filtrarMateriasEditar;
+        window.filtrarMateriasEditar = function(grupoId) {
+            originalFiltrarMateriasEditar(grupoId);
+            toggleHoraEntrega(grupoId);
+        }
+
+        // Inicializar el estado del campo de hora
+        const grupoSelect = document.getElementById('grupo');
+        if (grupoSelect) {
+            toggleHoraEntrega(grupoSelect.value);
+        }
     </script>
 </x-layouts.app>
