@@ -36,7 +36,8 @@
                                         @php
                                             $inicioSemana = now()->startOfWeek();
                                             $finSemana = now()->endOfWeek();
-                                            $tareasSemana = \App\Models\tarea::where('materia', $horario->materia->id)
+                                            $tareasSemana = DB::table('tareas')
+                                                ->where('materia', $horario->materia->id)
                                                 ->where('grupo', $grupo->id)
                                                 ->whereBetween('fecha_entrega', [$inicioSemana, $finSemana])
                                                 ->count();
