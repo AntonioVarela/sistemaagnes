@@ -106,7 +106,13 @@
                                 @foreach($anuncios as $anuncio)
                                 <div class="bg-indigo-50 rounded-lg p-4 border border-indigo-100 hover:border-indigo-200 transition-colors">
                                     <div class="flex justify-between items-start">
-                                        <h3 class="text-lg font-semibold text-indigo-900">{{ $anuncio->titulo }}</h3>
+                                        <div>
+                                            <h3 class="text-lg font-semibold text-indigo-900">{{ $anuncio->titulo }}</h3>
+                                            <p class="text-sm text-indigo-600 mt-1">
+                                                <span class="font-medium">Materia:</span> 
+                                                {{ $anuncio->materia->nombre ?? 'No especificada' }}
+                                            </p>
+                                        </div>
                                         <span class="text-xs text-indigo-600 bg-indigo-100 px-2 py-1 rounded-full">
                                             {{ $anuncio->created_at->format('d M Y') }}
                                         </span>
@@ -121,7 +127,7 @@
                                             {{ $anuncio->created_at->format('h:i A') }}
                                         </div>
                                         @if($anuncio->archivo)
-                                            <a href="/storage/{{ $anuncio->archivo }}" 
+                                            <a href="{{ asset('storage/' . $anuncio->archivo) }}" 
                                                class="inline-flex items-center px-3 py-1 text-sm text-indigo-600 bg-indigo-100 rounded-full hover:bg-indigo-200 transition-colors" 
                                                target="_blank">
                                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -280,7 +286,7 @@
                     }
                     
                     if (info.event.extendedProps.archivo) {
-                        $('#modalResources').html(`<a href="/storage/${info.event.extendedProps.archivo}" class="text-indigo-600 hover:text-indigo-800" target="_blank">Ver archivo adjunto</a>`);
+                        $('#modalResources').html(`<a href="{{ asset('storage/') }}/${info.event.extendedProps.archivo}" class="text-indigo-600 hover:text-indigo-800" target="_blank">Ver archivo adjunto</a>`);
                     } else {
                         $('#modalResources').text('No hay recursos disponibles');
                     }
