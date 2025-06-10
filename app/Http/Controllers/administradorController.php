@@ -347,12 +347,32 @@ class administradorController extends Controller
     }
     public function destroyHorario($id)
     {
-        $horario = horario::findOrFail($id);
-        $horario->delete();
-        session()->flash('toast', [
-            'type' => 'success',
-            'message' => '¡Horario eliminado exitosamente!'
-        ]);
+        try {
+            $horario = horario::findOrFail($id);
+            
+            // Verificar si el usuario tiene permiso para eliminar el horario
+            if (Auth::user()->rol !== 'administrador') {
+                session()->flash('toast', [
+                    'type' => 'error',
+                    'message' => 'No tienes permiso para eliminar horarios'
+                ]);
+                return redirect()->route('horarios.index');
+            }
+
+            // Eliminar el horario
+            $horario->delete();
+
+            session()->flash('toast', [
+                'type' => 'success',
+                'message' => '¡Horario eliminado exitosamente!'
+            ]);
+        } catch (\Exception $e) {
+            session()->flash('toast', [
+                'type' => 'error',
+                'message' => 'Error al eliminar el horario: ' . $e->getMessage()
+            ]);
+        }
+
         return redirect()->route('horarios.index');
     }
     public function updateHorario(Request $request, $id)

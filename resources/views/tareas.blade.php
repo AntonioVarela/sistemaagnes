@@ -86,7 +86,7 @@
             </div>
             <flux:separator class="dark:border-gray-700" />
 
-            <form action="{{ route('tareas.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+            <form action="{{ route('tareas.store') }}" method="POST" enctype="multipart/form-data" class="space-y-4" id="form-nueva-tarea">
                 @csrf
                 <div class="grid gap-4">
                     <div class="dark:text-white">
@@ -96,7 +96,7 @@
                         </div>
                     </div>
 
-                    <textarea name="descripcion" class="hidden" id="descripcion" required ></textarea>
+                    <textarea name="descripcion" class="hidden" id="descripcion" required></textarea>
                     <div class="grid grid-cols-2 gap-4">
                         <flux:input name="fecha_entrega" id="fecha_entrega" label="Fecha de Entrega *" type="date" required 
                             x-bind:min="new Date().toISOString().split('T')[0]" class="dark:text-white" />
@@ -126,7 +126,7 @@
 
                 <flux:footer class="flex justify-end gap-3">
                     <flux:button type="button" variant="filled" onclick="closeModal('edit-profile')" class="dark:text-white">Cancelar</flux:button>
-                    <flux:button type="submit" variant="primary">Guardar tarea</flux:button>
+                    <flux:button type="submit" variant="primary" id="btn-guardar-tarea">Guardar tarea</flux:button>
                 </flux:footer>
             </form>
         </flux:container>
@@ -187,21 +187,7 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script>
-        
-        $(document).ready(function() {
-            $('#myTable').DataTable({
-                language: {
-                    url: 'https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json',
-                },
-                pageLength: 10,
-                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
-                dom: '<"flex justify-between items-center mb-4"lf>rt<"flex justify-between items-center mt-4"ip>',
-                order: [[1, 'asc']],
-                columnDefs: [
-                    { orderable: false, targets: -1 }
-                ]
-            });
-
+        document.addEventListener('DOMContentLoaded', function() {
             // Configuración del editor Quill para nueva tarea
             var quillNueva = new Quill('#editor-nueva', {
                 theme: 'snow',
@@ -219,11 +205,6 @@
                 }
             });
 
-            quillNueva.on('text-change', function(delta, oldDelta, source) {
-                var html = quillNueva.root.innerHTML;
-                document.getElementById('descripcion').value = html;
-            });
-            
             // Configuración del editor Quill para editar tarea
             var quillEditar = new Quill('#editor-editar', {
                 theme: 'snow',
@@ -241,40 +222,141 @@
                 }
             });
 
-            quillEditar.on('text-change', function(delta, oldDelta, source) {
-                var html = quillEditar.root.innerHTML;
-                document.getElementById('edit_descripcion').value = html;
+            // Eventos para actualizar el contenido del textarea
+            quillNueva.on('text-change', function() {
+                document.getElementById('descripcion').value = quillNueva.root.innerHTML;
             });
 
-            // Agregar estilos para modo oscuro en los editores Quill
-            const style = document.createElement('style');
-            style.textContent = `
-                .dark .ql-editor {
-                    color: white !important;
-                }
-                .dark .ql-toolbar {
-                    background-color: #374151 !important;
-                    border-color: #4B5563 !important;
-                }
-                .dark .ql-toolbar button {
-                    color: white !important;
-                }
-                .dark .ql-toolbar button:hover {
-                    color: #60A5FA !important;
-                }
-                .dark .ql-toolbar .ql-active {
-                    color: #60A5FA !important;
-                }
-                .dark .ql-toolbar .ql-stroke {
-                    stroke: white !important;
-                }
-                .dark .ql-toolbar .ql-fill {
-                    fill: white !important;
-                }
-            `;
-            document.head.appendChild(style);
+            quillEditar.on('text-change', function() {
+                document.getElementById('edit_descripcion').value = quillEditar.root.innerHTML;
+            });
+
+            // Manejo del formulario de nueva tarea
+            const formNuevaTarea = document.getElementById('form-nueva-tarea');
+            if (formNuevaTarea) {
+                formNuevaTarea.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    // Validar que el editor tenga contenido
+                    if (quillNueva.root.innerHTML === '<p><br></p>') {
+                        Toastify({
+                            text: "Por favor, ingresa una descripción para la tarea",
+                            duration: 3000,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "#ef4444",
+                            stopOnFocus: true,
+                            close: true
+                        }).showToast();
+                        return false;
+                    }
+
+                    // Validar campos requeridos
+                    const fechaEntrega = document.getElementById('fecha_entrega');
+                    const grupo = document.getElementById('grupo');
+                    const materia = document.getElementById('materia');
+
+                    if (!fechaEntrega.value) {
+                        Toastify({
+                            text: "Por favor, selecciona una fecha de entrega",
+                            duration: 3000,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "#ef4444",
+                            stopOnFocus: true,
+                            close: true
+                        }).showToast();
+                        return false;
+                    }
+
+                    if (grupo && !grupo.value) {
+                        Toastify({
+                            text: "Por favor, selecciona un grupo",
+                            duration: 3000,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "#ef4444",
+                            stopOnFocus: true,
+                            close: true
+                        }).showToast();
+                        return false;
+                    }
+
+                    if (materia && !materia.value) {
+                        Toastify({
+                            text: "Por favor, selecciona una materia",
+                            duration: 3000,
+                            gravity: "top",
+                            position: "right",
+                            backgroundColor: "#ef4444",
+                            stopOnFocus: true,
+                            close: true
+                        }).showToast();
+                        return false;
+                    }
+
+                    // Si todo está bien, enviar el formulario
+                    this.submit();
+                });
+            }
+
+            // Configuración de DataTable
+            if ($.fn.DataTable) {
+                $('#myTable').DataTable({
+                    language: {
+                        url: 'https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json',
+                    },
+                    pageLength: 10,
+                    lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
+                    dom: '<"flex justify-between items-center mb-4"lf>rt<"flex justify-between items-center mt-4"ip>',
+                    order: [[1, 'asc']],
+                    columnDefs: [
+                        { orderable: false, targets: -1 }
+                    ]
+                });
+            }
+
+            // Configuración de formularios de eliminación
+            const formsEliminar = document.querySelectorAll('.form-eliminar');
+            formsEliminar.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: '¿Estás seguro?',
+                        text: "¡Esta acción no se puede deshacer!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Sí, eliminar',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
+
+            // Mostrar toast si existe mensaje
+            @if(session('toast'))
+                Toastify({
+                    text: "{{ session('toast.message') }}",
+                    duration: 3500,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: 
+                        @if(session('toast.type') == 'success') "#22c55e"
+                        @elseif(session('toast.type') == 'error') "#ef4444"
+                        @elseif(session('toast.type') == 'warning') "#f59e42"
+                        @else "#3b82f6" @endif,
+                    stopOnFocus: true,
+                    close: true
+                }).showToast();
+            @endif
         });
 
+        // Funciones globales
         function closeModal(modalName) {
             const modal = document.querySelector(`[data-modal="${modalName}"]`);
             if (modal) {
@@ -284,17 +366,19 @@
 
         function filtrarMaterias(grupoId) {
             const materiaSelect = document.getElementById('materia');
+            if (!materiaSelect) return;
+
             const opciones = materiaSelect.getElementsByTagName('option');
             
             // Ocultar todas las opciones primero
             for (let opcion of opciones) {
-                if (opcion.value === '') continue; // Saltar la opción por defecto si existe
+                if (opcion.value === '') continue;
                 opcion.style.display = 'none';
             }
             
             // Mostrar solo las materias del grupo seleccionado
             for (let opcion of opciones) {
-                if (opcion.value === '') continue; // Saltar la opción por defecto si existe
+                if (opcion.value === '') continue;
                 const grupos = JSON.parse(opcion.getAttribute('data-grupos'));
                 if (grupos.includes(parseInt(grupoId))) {
                     opcion.style.display = '';
@@ -312,17 +396,19 @@
 
         function filtrarMateriasEditar(grupoId) {
             const materiaSelect = document.getElementById('edit_materia');
+            if (!materiaSelect) return;
+
             const opciones = materiaSelect.getElementsByTagName('option');
             
             // Ocultar todas las opciones primero
             for (let opcion of opciones) {
-                if (opcion.value === '') continue; // Saltar la opción por defecto si existe
+                if (opcion.value === '') continue;
                 opcion.style.display = 'none';
             }
             
             // Mostrar solo las materias del grupo seleccionado
             for (let opcion of opciones) {
-                if (opcion.value === '') continue; // Saltar la opción por defecto si existe
+                if (opcion.value === '') continue;
                 const grupos = JSON.parse(opcion.getAttribute('data-grupos'));
                 if (grupos.includes(parseInt(grupoId))) {
                     opcion.style.display = '';
@@ -340,6 +426,8 @@
 
         function prepareEditModal(id, descripcion, fecha_entrega, hora_entrega, grupo_id, materia_id) {
             const form = document.getElementById('edit-task-form');
+            if (!form) return;
+
             form.action = `/tareas/${id}/update`;
             
             // Establecer el contenido del editor Quill
@@ -359,98 +447,6 @@
                     document.getElementById('edit_materia').value = materia_id;
                 }
             }
-        }
-
-        // Filtrar materias al cargar la página
-        document.addEventListener('DOMContentLoaded', function() {
-            const grupoSelect = document.getElementById('grupo');
-            if (grupoSelect) {
-                filtrarMaterias(grupoSelect.value);
-            }
-            
-            const editGrupoSelect = document.getElementById('edit_grupo');
-            if (editGrupoSelect) {
-                filtrarMateriasEditar(editGrupoSelect.value);
-            }
-        });
-
-        document.addEventListener('DOMContentLoaded', function () {
-            const forms = document.querySelectorAll('.form-eliminar');
-            forms.forEach(form => {
-                form.addEventListener('submit', function (e) {
-                    e.preventDefault();
-                    Swal.fire({
-                        title: '¿Estás seguro?',
-                        text: "¡Esta acción no se puede deshacer!",
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#3085d6',
-                        cancelButtonColor: '#d33',
-                        confirmButtonText: 'Sí, eliminar',
-                        cancelButtonText: 'Cancelar'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            form.submit();
-                        }
-                    });
-                });
-            });
-        });
-
-        @if(session('toast'))
-            Toastify({
-                text: "{{ session('toast.message') }}",
-                duration: 3500,
-                gravity: "top",
-                position: "right",
-                backgroundColor: 
-                    @if(session('toast.type') == 'success') "#22c55e"
-                    @elseif(session('toast.type') == 'error') "#ef4444"
-                    @elseif(session('toast.type') == 'warning') "#f59e42"
-                    @else "#3b82f6" @endif,
-                stopOnFocus: true,
-                close: true
-            }).showToast();
-        @endif
-
-        // Función para verificar si el grupo es de primaria
-        function esGrupoPrimaria(grupoId) {
-            const grupo = @json($grupos);
-            const grupoSeleccionado = grupo.find(g => g.id == grupoId);
-            return grupoSeleccionado && grupoSeleccionado.nombre.toLowerCase().includes('primaria');
-        }
-
-        // Función para mostrar/ocultar el campo de hora
-        function toggleHoraEntrega(grupoId) {
-            const horaContainer = document.getElementById('hora_entrega_container');
-            const editHoraContainer = document.getElementById('edit_hora_entrega_container');
-            
-            if (esGrupoPrimaria(grupoId)) {
-                horaContainer.style.display = 'none';
-                editHoraContainer.style.display = 'none';
-            } else {
-                horaContainer.style.display = 'block';
-                editHoraContainer.style.display = 'block';
-            }
-        }
-
-        // Modificar las funciones existentes de filtrar materias
-        const originalFiltrarMaterias = window.filtrarMaterias;
-        window.filtrarMaterias = function(grupoId) {
-            originalFiltrarMaterias(grupoId);
-            toggleHoraEntrega(grupoId);
-        }
-
-        const originalFiltrarMateriasEditar = window.filtrarMateriasEditar;
-        window.filtrarMateriasEditar = function(grupoId) {
-            originalFiltrarMateriasEditar(grupoId);
-            toggleHoraEntrega(grupoId);
-        }
-
-        // Inicializar el estado del campo de hora
-        const grupoSelect = document.getElementById('grupo');
-        if (grupoSelect) {
-            toggleHoraEntrega(grupoSelect.value);
         }
     </script>
 </x-layouts.app>

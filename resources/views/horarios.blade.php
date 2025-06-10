@@ -70,6 +70,7 @@
                             </flux:modal.trigger>
                             <form action="{{ route('horarios.destroy', $horario->id) }}" method="POST" class="form-eliminar inline">
                                 @csrf
+                                @method('DELETE')
                                 <button type="submit" class="text-red-600 hover:text-red-900 transition-colors">
                                     <flux:icon name="trash" />
                                 </button>
@@ -293,14 +294,15 @@
                 form.addEventListener('submit', function (e) {
                     e.preventDefault();
                     Swal.fire({
-                        title: '¿Estás seguro?',
-                        text: "¡Esta acción no se puede deshacer!",
+                        title: '¿Estás seguro de eliminar este horario?',
+                        text: "Esta acción eliminará el horario de {{ $horario->materia->nombre }} para {{ $horario->grupo->nombre }} {{ $horario->grupo->seccion }}",
                         icon: 'warning',
                         showCancelButton: true,
-                        confirmButtonColor: '#3085d6',
-                        cancelButtonColor: '#d33',
+                        confirmButtonColor: '#ef4444',
+                        cancelButtonColor: '#6b7280',
                         confirmButtonText: 'Sí, eliminar',
-                        cancelButtonText: 'Cancelar'
+                        cancelButtonText: 'Cancelar',
+                        reverseButtons: true
                     }).then((result) => {
                         if (result.isConfirmed) {
                             form.submit();
