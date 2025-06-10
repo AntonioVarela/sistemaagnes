@@ -152,18 +152,24 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         $(document).ready(function() {
-            $('#myTable').DataTable({
-                language: {
-                    url: 'https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json',
-                },
-                pageLength: 10,
-                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
-                dom: '<"flex justify-between items-center mb-4"lf>rt<"flex justify-between items-center mt-4"ip>',
-                order: [[2, 'desc']],
-                columnDefs: [
-                    { orderable: false, targets: -1 }
-                ]
-            });
+            // Inicialización de DataTable
+            if ($.fn.DataTable) {
+                // Verificar si la tabla ya está inicializada
+                if (!$.fn.DataTable.isDataTable('#myTable')) {
+                    $('#myTable').DataTable({
+                        language: {
+                            url: 'https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json',
+                        },
+                        pageLength: 10,
+                        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
+                        dom: '<"flex justify-between items-center mb-4"lf>rt<"flex justify-between items-center mt-4"ip>',
+                        order: [[2, 'desc']], // Ordenar por fecha descendente
+                        columnDefs: [
+                            { orderable: false, targets: -1 } // Deshabilitar ordenamiento en la columna de acciones
+                        ]
+                    });
+                }
+            }
 
             // Filtrar materias al cargar la página
             const grupoSelect = document.getElementById('grupo');

@@ -242,65 +242,7 @@
     <link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Configuración del editor Quill para nueva tarea
-            var quillNueva = new Quill('#editor-nueva', {
-                theme: 'snow',
-                modules: {
-                    toolbar: [
-                        ['bold', 'italic', 'underline', 'strike'],
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                        [{ 'direction': 'rtl' }],
-                        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                        [{ 'color': [] }, { 'background': [] }],
-                        [{ 'font': [] }],
-                        [{ 'align': [] }],
-                        ['clean']
-                    ]
-                }
-            });
-
-            // Configuración del editor Quill para editar tarea
-            var quillEditar = new Quill('#editor-editar', {
-                theme: 'snow',
-                modules: {
-                    toolbar: [
-                        ['bold', 'italic', 'underline', 'strike'],
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                        [{ 'direction': 'rtl' }],
-                        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                        [{ 'color': [] }, { 'background': [] }],
-                        [{ 'font': [] }],
-                        [{ 'align': [] }],
-                        ['clean']
-                    ]
-                }
-            });
-
-            // Eventos para actualizar el contenido del textarea
-            quillNueva.on('text-change', function() {
-                document.getElementById('descripcion').value = quillNueva.root.innerHTML;
-            });
-
-            quillEditar.on('text-change', function() {
-                document.getElementById('edit_descripcion').value = quillEditar.root.innerHTML;
-            });
-
-            // Configuración de DataTable
-            if ($.fn.DataTable) {
-                $('#myTable').DataTable({
-                    language: {
-                        url: 'https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json',
-                    },
-                    pageLength: 10,
-                    lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
-                    dom: '<"flex justify-between items-center mb-4"lf>rt<"flex justify-between items-center mt-4"ip>',
-                    order: [[1, 'asc']],
-                    columnDefs: [
-                        { orderable: false, targets: -1 }
-                    ]
-                });
-            }
-
+           
             // Configuración de formularios de eliminación
             const formsEliminar = document.querySelectorAll('.form-eliminar');
             formsEliminar.forEach(form => {

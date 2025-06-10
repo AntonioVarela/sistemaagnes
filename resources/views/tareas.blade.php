@@ -11,7 +11,6 @@
                 </flux:button>
             </flux:modal.trigger>
         </div>
-
         <div class="overflow-hidden rounded-lg">
             <table id="myTable" class="w-full">
                 <thead class="bg-gray-50 dark:bg-gray-700">
@@ -25,7 +24,7 @@
                 </thead>
                 <tbody class=" divide-y divide-gray-200 dark:divide-gray-700">
                     @foreach ($tareas as $tarea)
-                        <tr class="hover:bg-gray-50  transition-colors">
+                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="flex items-center">
                                     <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900">
@@ -90,9 +89,11 @@
                 @csrf
                 <div class="grid gap-4">
                     <div class="dark:text-white">
-                        <flux:header
-                        <div id="editor-nueva" class="h-64 dark:bg-gray-700 dark:text-white">
-                            
+                        <flux:heading size="lg" class="dark:text-white">Descripción</flux:heading>
+                        <div class="quill-container">
+                            <div id="editor-nueva" style="height: 156px;" class="dark:text-white">
+                                
+                            </div>
                         </div>
                     </div>
 
@@ -144,8 +145,9 @@
                 @csrf
                 <div class="grid gap-4">
                     <div class="dark:text-white">
-                        <div id="editor-editar" class="h-64 dark:bg-gray-700 dark:text-white">
-                            
+                        <div class="quill-container">
+                            <div id="editor-editar" style="height: 156px;" class="dark:text-white">
+                            </div>
                         </div>
                     </div>
                     <textarea name="descripcion" id="edit_descripcion" class="hidden" required></textarea>
@@ -183,53 +185,61 @@
             </form>
         </flux:container>
     </flux:modal>
+    
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        
+        function iniciarComponentes() {
             // Configuración del editor Quill para nueva tarea
-            var quillNueva = new Quill('#editor-nueva', {
-                theme: 'snow',
-                modules: {
-                    toolbar: [
-                        ['bold', 'italic', 'underline', 'strike'],
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                        [{ 'direction': 'rtl' }],
-                        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                        [{ 'color': [] }, { 'background': [] }],
-                        [{ 'font': [] }],
-                        [{ 'align': [] }],
-                        ['clean']
-                    ]
-                }
-            });
+            const editorNueva = document.getElementById('editor-nueva');
+            if (editorNueva && !document.querySelector('#editor-nueva .ql-editor')) {
+                var quillNueva = new Quill('#editor-nueva', {
+                    theme: 'snow',
+                    modules: {
+                        toolbar: [
+                            ['bold', 'italic', 'underline', 'strike'],
+                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                            [{ 'direction': 'rtl' }],
+                            [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                            [{ 'color': [] }, { 'background': [] }],
+                            [{ 'font': [] }],
+                            [{ 'align': [] }],
+                            ['clean']
+                        ]
+                    }
+                });
+
+                // Eventos para actualizar el contenido del textarea
+                quillNueva.on('text-change', function() {
+                    document.getElementById('descripcion').value = quillNueva.root.innerHTML;
+                });
+            }
 
             // Configuración del editor Quill para editar tarea
-            var quillEditar = new Quill('#editor-editar', {
-                theme: 'snow',
-                modules: {
-                    toolbar: [
-                        ['bold', 'italic', 'underline', 'strike'],
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                        [{ 'direction': 'rtl' }],
-                        [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
-                        [{ 'color': [] }, { 'background': [] }],
-                        [{ 'font': [] }],
-                        [{ 'align': [] }],
-                        ['clean']
-                    ]
-                }
-            });
+            const editorEditar = document.getElementById('editor-editar');
+            if (editorEditar && !document.querySelector('#editor-editar .ql-editor')) {
+                var quillEditar = new Quill('#editor-editar', {
+                    theme: 'snow',
+                    modules: {
+                        toolbar: [
+                            ['bold', 'italic', 'underline', 'strike'],
+                            [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                            [{ 'direction': 'rtl' }],
+                            [{ 'header': [1, 2, 3, 4, 5, 6, false] }],
+                            [{ 'color': [] }, { 'background': [] }],
+                            [{ 'font': [] }],
+                            [{ 'align': [] }],
+                            ['clean']
+                        ]
+                    }
+                });
 
-            // Eventos para actualizar el contenido del textarea
-            quillNueva.on('text-change', function() {
-                document.getElementById('descripcion').value = quillNueva.root.innerHTML;
-            });
-
-            quillEditar.on('text-change', function() {
-                document.getElementById('edit_descripcion').value = quillEditar.root.innerHTML;
-            });
+                quillEditar.on('text-change', function() {
+                    document.getElementById('edit_descripcion').value = quillEditar.root.innerHTML;
+                });
+            }
 
             // Manejo del formulario de nueva tarea
             const formNuevaTarea = document.getElementById('form-nueva-tarea');
@@ -299,21 +309,23 @@
                     this.submit();
                 });
             }
-
             // Configuración de DataTable
             if ($.fn.DataTable) {
-                $('#myTable').DataTable({
-                    language: {
-                        url: 'https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json',
-                    },
-                    pageLength: 10,
-                    lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
-                    dom: '<"flex justify-between items-center mb-4"lf>rt<"flex justify-between items-center mt-4"ip>',
-                    order: [[1, 'asc']],
-                    columnDefs: [
-                        { orderable: false, targets: -1 }
-                    ]
-                });
+                // Verificar si la tabla ya está inicializada
+                if (!$.fn.DataTable.isDataTable('#myTable')) {
+                    $('#myTable').DataTable({
+                        language: {
+                            url: 'https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json',
+                        },
+                        pageLength: 10,
+                        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
+                        dom: '<"flex justify-between items-center mb-4"lf>rt<"flex justify-between items-center mt-4"ip>',
+                        order: [[1, 'asc']],
+                        columnDefs: [
+                            { orderable: false, targets: -1 }
+                        ]
+                    });
+                }
             }
 
             // Configuración de formularios de eliminación
@@ -354,7 +366,7 @@
                     close: true
                 }).showToast();
             @endif
-        });
+        }
 
         // Funciones globales
         function closeModal(modalName) {
@@ -447,6 +459,11 @@
                     document.getElementById('edit_materia').value = materia_id;
                 }
             }
+        
         }
+
+        document.addEventListener('DOMContentLoaded', iniciarComponentes);
+        document.addEventListener('livewire:navigated', iniciarComponentes);
+       
     </script>
 </x-layouts.app>
