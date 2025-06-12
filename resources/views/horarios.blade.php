@@ -56,9 +56,9 @@
                     <div class="flex items-start justify-between mb-4">
                         <div>
                             <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
-                                {{ $horario->materia->nombre }}
+                                {{ $horario->materia->nombre ?? 'Materia no asignada' }}
                             </h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-200 ">{{ $horario->grupo->nombre }} {{ $horario->grupo->seccion }}</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-200 ">{{ $horario->grupo->nombre ?? 'Grupo no asignado' }} {{ $horario->grupo->seccion ?? '' }}</p>
                         </div>
                         <div class="flex items-center gap-2">
                             <flux:modal.trigger name="edit-task">
@@ -250,7 +250,7 @@
                     e.preventDefault();
                     Swal.fire({
                         title: '¿Estás seguro de eliminar este horario?',
-                        text: "Esta acción eliminará el horario de {{ $horario->materia->nombre }} para {{ $horario->grupo->nombre }} {{ $horario->grupo->seccion }}",
+                        text: "Esta acción eliminará el horario de {{ $horario->materia->nombre ?? 'la materia' }} para {{ $horario->grupo->nombre ?? 'el grupo' }} {{ $horario->grupo->seccion ?? '' }}",
                         icon: 'warning',
                         showCancelButton: true,
                         confirmButtonColor: '#ef4444',

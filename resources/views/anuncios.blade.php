@@ -33,6 +33,18 @@
                                     <div class="text-sm text-gray-900 dark:text-white">
                                         {{ Str::limit($anuncio->contenido, 2000) }}
                                     </div>
+                                    @if($anuncio->archivo)
+                                        <div class="mt-2">
+                                            <a href="{{ asset('storage/' . $anuncio->archivo) }}" 
+                                               class="inline-flex items-center px-3 py-1 text-sm text-indigo-600 bg-indigo-100 rounded-full hover:bg-indigo-200 transition-colors" 
+                                               target="_blank">
+                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                                                </svg>
+                                                Ver archivo
+                                            </a>
+                                        </div>
+                                    @endif
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm text-gray-900 dark:text-white">
@@ -150,9 +162,11 @@
     </flux:modal>
 
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script>
-        $(document).ready(function() {
-            // Inicialización de DataTable
+        function iniciarComponentes() {
+            // Configuración de DataTable
             if ($.fn.DataTable) {
                 // Verificar si la tabla ya está inicializada
                 if (!$.fn.DataTable.isDataTable('#myTable')) {
@@ -176,92 +190,11 @@
             if (grupoSelect) {
                 filtrarMaterias(grupoSelect.value);
             }
-        });
 
-        function closeModal(modalName) {
-            const modal = document.querySelector(`[data-modal="${modalName}"]`);
-            if (modal) {
-                modal.close();
-            }
-        }
-
-        function filtrarMaterias(grupoId) {
-            const materiaSelect = document.getElementById('materia');
-            const opciones = materiaSelect.getElementsByTagName('option');
-            
-            // Ocultar todas las opciones primero
-            for (let opcion of opciones) {
-                if (opcion.value === '') continue; // Saltar la opción por defecto si existe
-                opcion.style.display = 'none';
-            }
-            
-            // Mostrar solo las materias del grupo seleccionado
-            for (let opcion of opciones) {
-                if (opcion.value === '') continue; // Saltar la opción por defecto si existe
-                const grupos = JSON.parse(opcion.getAttribute('data-grupos'));
-                if (grupos.includes(parseInt(grupoId))) {
-                    opcion.style.display = '';
-                }
-            }
-            
-            // Seleccionar la primera materia visible
-            for (let opcion of opciones) {
-                if (opcion.style.display !== 'none') {
-                    materiaSelect.value = opcion.value;
-                    break;
-                }
-            }
-        }
-
-        function filtrarMateriasEditar(grupoId) {
-            const materiaSelect = document.getElementById('edit_materia');
-            const opciones = materiaSelect.getElementsByTagName('option');
-            
-            // Ocultar todas las opciones primero
-            for (let opcion of opciones) {
-                if (opcion.value === '') continue; // Saltar la opción por defecto si existe
-                opcion.style.display = 'none';
-            }
-            
-            // Mostrar solo las materias del grupo seleccionado
-            for (let opcion of opciones) {
-                if (opcion.value === '') continue; // Saltar la opción por defecto si existe
-                const grupos = JSON.parse(opcion.getAttribute('data-grupos'));
-                if (grupos.includes(parseInt(grupoId))) {
-                    opcion.style.display = '';
-                }
-            }
-            
-            // Seleccionar la primera materia visible
-            for (let opcion of opciones) {
-                if (opcion.style.display !== 'none') {
-                    materiaSelect.value = opcion.value;
-                    break;
-                }
-            }
-        }
-
-        function prepareEditModal(id, titulo, contenido, grupo_id, materia_id) {
-            const form = document.getElementById('edit-announcement-form');
-            form.action = `/anuncios/${id}/update`;
-            
-            document.getElementById('edit_titulo').value = titulo;
-            document.getElementById('edit_contenido').value = contenido;
-            
-            // Establecer grupo y materia
-            if (grupo_id) {
-                document.getElementById('edit_grupo').value = grupo_id;
-                filtrarMateriasEditar(grupo_id);
-                if (materia_id) {
-                    document.getElementById('edit_materia').value = materia_id;
-                }
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', function () {
-            const forms = document.querySelectorAll('.form-eliminar');
-            forms.forEach(form => {
-                form.addEventListener('submit', function (e) {
+            // Configuración de formularios de eliminación
+            const formsEliminar = document.querySelectorAll('.form-eliminar');
+            formsEliminar.forEach(form => {
+                form.addEventListener('submit', function(e) {
                     e.preventDefault();
                     Swal.fire({
                         title: '¿Estás seguro?',
@@ -279,6 +212,113 @@
                     });
                 });
             });
-        });
+
+            // Mostrar toast si existe mensaje
+            @if(session('toast'))
+                Toastify({
+                    text: "{{ session('toast.message') }}",
+                    duration: 3500,
+                    gravity: "top",
+                    position: "right",
+                    backgroundColor: 
+                        @if(session('toast.type') == 'success') "#22c55e"
+                        @elseif(session('toast.type') == 'error') "#ef4444"
+                        @elseif(session('toast.type') == 'warning') "#f59e42"
+                        @else "#3b82f6" @endif,
+                    stopOnFocus: true,
+                    close: true
+                }).showToast();
+            @endif
+        }
+
+        // Funciones globales
+        function closeModal(modalName) {
+            const modal = document.querySelector(`[data-modal="${modalName}"]`);
+            if (modal) {
+                modal.close();
+            }
+        }
+
+        function filtrarMaterias(grupoId) {
+            const materiaSelect = document.getElementById('materia');
+            if (!materiaSelect) return;
+
+            const opciones = materiaSelect.getElementsByTagName('option');
+            
+            // Ocultar todas las opciones primero
+            for (let opcion of opciones) {
+                if (opcion.value === '') continue;
+                opcion.style.display = 'none';
+            }
+            
+            // Mostrar solo las materias del grupo seleccionado
+            for (let opcion of opciones) {
+                if (opcion.value === '') continue;
+                const grupos = JSON.parse(opcion.getAttribute('data-grupos'));
+                if (grupos.includes(parseInt(grupoId))) {
+                    opcion.style.display = '';
+                }
+            }
+            
+            // Seleccionar la primera materia visible
+            for (let opcion of opciones) {
+                if (opcion.style.display !== 'none') {
+                    materiaSelect.value = opcion.value;
+                    break;
+                }
+            }
+        }
+
+        function filtrarMateriasEditar(grupoId) {
+            const materiaSelect = document.getElementById('edit_materia');
+            if (!materiaSelect) return;
+
+            const opciones = materiaSelect.getElementsByTagName('option');
+            
+            // Ocultar todas las opciones primero
+            for (let opcion of opciones) {
+                if (opcion.value === '') continue;
+                opcion.style.display = 'none';
+            }
+            
+            // Mostrar solo las materias del grupo seleccionado
+            for (let opcion of opciones) {
+                if (opcion.value === '') continue;
+                const grupos = JSON.parse(opcion.getAttribute('data-grupos'));
+                if (grupos.includes(parseInt(grupoId))) {
+                    opcion.style.display = '';
+                }
+            }
+            
+            // Seleccionar la primera materia visible
+            for (let opcion of opciones) {
+                if (opcion.style.display !== 'none') {
+                    materiaSelect.value = opcion.value;
+                    break;
+                }
+            }
+        }
+
+        function prepareEditModal(id, titulo, contenido, grupo_id, materia_id) {
+            const form = document.getElementById('edit-announcement-form');
+            if (!form) return;
+
+            form.action = `/anuncios/${id}/update`;
+            
+            document.getElementById('edit_titulo').value = titulo;
+            document.getElementById('edit_contenido').value = contenido;
+            
+            // Establecer grupo y materia
+            if (grupo_id) {
+                document.getElementById('edit_grupo').value = grupo_id;
+                filtrarMateriasEditar(grupo_id);
+                if (materia_id) {
+                    document.getElementById('edit_materia').value = materia_id;
+                }
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', iniciarComponentes);
+        document.addEventListener('livewire:navigated', iniciarComponentes);
     </script>
 </x-layouts.app>
