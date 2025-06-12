@@ -28,6 +28,9 @@
                             <tr class="hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $anuncio->titulo }}</div>
+                                    <div class="text-xs text-gray-500 dark:text-gray-400">
+                                        Creado por: {{ $anuncio->user->name ?? 'Usuario no disponible' }}
+                                    </div>
                                 </td>
                                 <td class="px-6 py-4">
                                     <div class="text-sm text-gray-900 dark:text-white">
@@ -53,20 +56,24 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex items-center gap-2">
-                                        <flux:modal.trigger name="edit-announcement">
-                                            <flux:button icon='pencil' variant="filled" 
-                                                onclick="prepareEditModal({{ $anuncio->id }}, '{{ $anuncio->titulo }}', '{{ $anuncio->contenido }}', '{{ $anuncio->grupo_id }}', '{{ $anuncio->materia_id }}')" 
-                                                class="text-indigo-600 hover:text-indigo-900">
-                                                Editar
-                                            </flux:button>
-                                        </flux:modal.trigger>
-                                        <form action="{{ route('anuncios.destroy', $anuncio->id) }}" method="POST" class="form-eliminar inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:text-red-900 transition-colors">
-                                                <flux:icon name="trash" />
-                                            </button>
-                                        </form>
+                                        @if(auth()->user()->id === $anuncio->user_id)
+                                            <flux:modal.trigger name="edit-announcement">
+                                                <flux:button icon='pencil' variant="filled" 
+                                                    onclick="prepareEditModal({{ $anuncio->id }}, '{{ $anuncio->titulo }}', '{{ $anuncio->contenido }}', '{{ $anuncio->grupo_id }}', '{{ $anuncio->materia_id }}')" 
+                                                    class="text-indigo-600 hover:text-indigo-900">
+                                                    Editar
+                                                </flux:button>
+                                            </flux:modal.trigger>
+                                            <form action="{{ route('anuncios.destroy', $anuncio->id) }}" method="POST" class="form-eliminar inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="text-red-600 hover:text-red-900 transition-colors">
+                                                    <flux:icon name="trash" />
+                                                </button>
+                                            </form>
+                                        @else
+                                            <span class="text-gray-500 dark:text-gray-400">Solo el creador puede editar</span>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>

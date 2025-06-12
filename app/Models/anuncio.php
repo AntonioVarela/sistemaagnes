@@ -20,4 +20,9 @@ class anuncio extends Model
     {
         return $this->belongsTo(Materia::class);
     }
+
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'usuario_id');
+    }
 }

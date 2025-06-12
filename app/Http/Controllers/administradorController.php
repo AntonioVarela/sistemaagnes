@@ -395,16 +395,26 @@ class administradorController extends Controller
     //Anuncios
     public function showAnuncios()
     {
-        if(Auth::user()->rol == 'administrador' || Auth::user()->rol == 'Coordinador'){
+        if(Auth::user()->rol == 'administrador'){
             $horario = horario::all();
             $grupos = grupo::all(); 
-        } else{
+            $anuncios = anuncio::all();
+        }
+        if(Auth::user()->rol == 'Maestro'){
             $horario = horario::where('maestro_id', Auth::user()->id)->get();
             $grupos = grupo::whereIn('id', $horario->pluck('grupo_id'))->get();
+            $anuncios = anuncio::with('user')->where('usuario_id', Auth::user()->id)->get();
+        }
+        if(Auth::user()->rol == 'Coordinador Primaria'){
+            $grupos = grupo::where('seccion', 'Primaria')->get();
+            $anuncios = anuncio::with('user')->whereIn('grupo_id', $grupos->pluck('id'))->get();
+        }
+        if(Auth::user()->rol == 'Coordinador Secundaria'){
+            $grupos = grupo::where('seccion', 'Secundaria')->get();
+            $anuncios = anuncio::with('user')->whereIn('grupo_id', $grupos->pluck('id'))->get();
         }
         $materias = materia::whereIn('id', $horario->pluck('materia_id'))->get();
-        $anuncios = anuncio::all();
-        return view("anuncios", compact(['anuncios','horario','grupos','materias'])); // Cambiado a 'anuncios'
+        return view("anuncios", compact(['anuncios','horario','grupos','materias']));
     }
     public function storeAnuncio(Request $request)
     {
