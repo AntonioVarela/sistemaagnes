@@ -38,7 +38,7 @@
                                     </div>
                                     @if($anuncio->archivo)
                                         <div class="mt-2">
-                                            <a href="{{ asset('storage/' . $anuncio->archivo) }}" 
+                                            <a href="{{ Storage::disk('s3')->url($anuncio->archivo) }}" 
                                                class="inline-flex items-center px-3 py-1 text-sm text-indigo-600 bg-indigo-100 rounded-full hover:bg-indigo-200 transition-colors" 
                                                target="_blank">
                                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -56,7 +56,7 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex items-center gap-2">
-                                        @if(auth()->user()->id === $anuncio->user_id)
+                                        @if(auth()->user()->id === $anuncio->user_id || auth()->user()->rol === 'administrador')
                                             <flux:modal.trigger name="edit-announcement">
                                                 <flux:button icon='pencil' variant="filled" 
                                                     onclick="prepareEditModal({{ $anuncio->id }}, '{{ $anuncio->titulo }}', '{{ $anuncio->contenido }}', '{{ $anuncio->grupo_id }}', '{{ $anuncio->materia_id }}')" 
