@@ -108,7 +108,6 @@ class administradorController extends Controller
         ]);
         return redirect()->route('tareas.index');
     }
-
     public function store(Request $request)
     {
         $horario = horario::where('maestro_id', Auth::user()->id)->get();
