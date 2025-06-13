@@ -417,7 +417,7 @@ class administradorController extends Controller
         if ($request->hasFile('archivo')) {
             $archivo = $request->file('archivo');
             $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
-            $rutaArchivo = $archivo->storeAs('archivos', $nombreArchivo, 's3');
+            $rutaArchivo = $archivo->storeAs('archivos', $nombreArchivo, 'public');
             $anuncio->archivo = $rutaArchivo;
         }
         if(count($horario) == 1){
@@ -445,9 +445,9 @@ class administradorController extends Controller
     public function destroyAnuncio($id)
     {
         $anuncio = anuncio::findOrFail($id);
-        // Eliminar el archivo del bucket si existe
+        // Eliminar el archivo si existe
         if ($anuncio->archivo) {
-            Storage::disk('s3')->delete($anuncio->archivo);
+            Storage::disk('public')->delete($anuncio->archivo);
         }
         $anuncio->delete();
         session()->flash('toast', [
@@ -464,11 +464,11 @@ class administradorController extends Controller
         if ($request->hasFile('archivo')) {
             // Eliminar el archivo anterior si existe
             if ($anuncio->archivo) {
-                Storage::disk('s3')->delete($anuncio->archivo);
+                Storage::disk('public')->delete($anuncio->archivo);
             }
             $archivo = $request->file('archivo');
             $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
-            $rutaArchivo = $archivo->storeAs('archivos', $nombreArchivo, 's3');
+            $rutaArchivo = $archivo->storeAs('archivos', $nombreArchivo, 'public');
             $anuncio->archivo = $rutaArchivo;
         }
         $horario = horario::where('maestro_id', Auth::user()->id)->get();
@@ -495,7 +495,7 @@ class administradorController extends Controller
         if ($request->hasFile('archivo')) {
             $archivo = $request->file('archivo');
             $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
-            $rutaArchivo = $archivo->storeAs('archivos', $nombreArchivo, 's3');
+            $rutaArchivo = $archivo->storeAs('archivos', $nombreArchivo, 'public');
             $tarea->archivo = $rutaArchivo;
         }
         $tarea->fecha_entrega = request('fecha_entrega');
@@ -527,11 +527,11 @@ class administradorController extends Controller
         if ($request->hasFile('archivo')) {
             // Eliminar el archivo anterior si existe
             if ($tarea->archivo) {
-                Storage::disk('s3')->delete($tarea->archivo);
+                Storage::disk('public')->delete($tarea->archivo);
             }
             $archivo = $request->file('archivo');
             $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
-            $rutaArchivo = $archivo->storeAs('archivos', $nombreArchivo, 's3');
+            $rutaArchivo = $archivo->storeAs('archivos', $nombreArchivo, 'public');
             $tarea->archivo = $rutaArchivo;
         }
         $tarea->fecha_entrega = $request->fecha_entrega;
@@ -553,9 +553,9 @@ class administradorController extends Controller
     public function destroyTarea($id)
     {
         $tarea = tarea::findOrFail($id);
-        // Eliminar el archivo del bucket si existe
+        // Eliminar el archivo si existe
         if ($tarea->archivo) {
-            Storage::disk('s3')->delete($tarea->archivo);
+            Storage::disk('public')->delete($tarea->archivo);
         }
         $tarea->delete();
         session()->flash('toast', [

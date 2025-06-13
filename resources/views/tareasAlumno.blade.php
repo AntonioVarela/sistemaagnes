@@ -107,7 +107,7 @@
                                 <div class="bg-indigo-50 rounded-lg p-4 border border-indigo-100 hover:border-indigo-200 transition-colors">
                                     <div class="flex justify-between items-start">
                                         <div>
-                                            <h3 class="text-lg font-semibold text-indigo-900">{{ $anuncio->titulo }}</h3>
+                                        <h3 class="text-lg font-semibold text-indigo-900">{{ $anuncio->titulo }}</h3>
                                             <p class="text-sm text-indigo-600 mt-1">
                                                 <span class="font-medium">Materia:</span> 
                                                 {{ $anuncio->materia->nombre ?? 'No especificada' }}
@@ -236,19 +236,19 @@
                 });
             } else {
                 eventos = tareas.map(function(element) {
-                    return {
-                        title: element.titulo,
-                        start: element.fecha_entrega,
-                        color: '#4F46E5',
-                        allDay: false,
-                        extendedProps: {
-                            description: element.descripcion,
-                            fecha_entrega: element.fecha_entrega,
-                            hora_entrega: element.hora_entrega,
-                            archivo: element.archivo
-                        }
-                    };
-                });
+                return {
+                    title: element.titulo,
+                    start: element.fecha_entrega,
+                    color: '#4F46E5',
+                    allDay: false,
+                    extendedProps: {
+                        description: element.descripcion,
+                        fecha_entrega: element.fecha_entrega,
+                        hora_entrega: element.hora_entrega,
+                        archivo: element.archivo
+                    }
+                };
+            });
             }
 
             var calendarEl = document.getElementById('calendar');

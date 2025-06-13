@@ -54,7 +54,7 @@
                                 <div class="text-sm text-gray-900 dark:text-white line-clamp-2">{!! $tarea->descripcion !!}</div>
                                 @if($tarea->archivo)
                                     <div class="mt-2">
-                                        <a href="{{ Storage::disk('s3')->url($tarea->archivo) }}" 
+                                        <a href="{{ asset('storage/' . $tarea->archivo) }}" 
                                            class="inline-flex items-center px-3 py-1 text-sm text-indigo-600 bg-indigo-100 rounded-full hover:bg-indigo-200 transition-colors" 
                                            target="_blank">
                                             <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
