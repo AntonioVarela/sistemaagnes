@@ -50,50 +50,68 @@
             </div>
         </form>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
             @foreach ($horarios as $horario)
-                <div class="bg-white dark:bg-gray-700 rounded-xl shadow-sm p-6 hover:shadow-md transition-shadow">
-                    <div class="flex items-start justify-between mb-4">
-                        <div>
-                            <h3 class="text-lg font-semibold text-gray-900 dark:text-white">
+                <div class="bg-white dark:bg-gray-700 rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow relative">
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-sm font-semibold text-gray-900 dark:text-white truncate">
                                 {{ $horario->materia->nombre ?? 'Materia no asignada' }}
                             </h3>
-                            <p class="text-sm text-gray-500 dark:text-gray-200 ">{{ $horario->grupo->nombre ?? 'Grupo no asignado' }} {{ $horario->grupo->seccion ?? '' }}</p>
+                            <p class="text-xs text-gray-500 dark:text-gray-200 truncate">{{ $horario->grupo->nombre ?? 'Grupo no asignado' }} {{ $horario->grupo->seccion ?? '' }}</p>
                         </div>
-                        <div class="flex items-center gap-2">
-                            <flux:modal.trigger name="edit-task">
-                                <flux:button icon='pencil' variant="filled" 
-                                    onclick="prepareEditModal({{ $horario->id }}, '{{ $horario->materia_id }}', '{{ $horario->grupo_id }}', '{{ $horario->maestro_id }}', '{{ $horario->dias }}', '{{ $horario->hora_inicio }}', '{{ $horario->hora_fin }}')" 
-                                    class="text-indigo-600 hover:text-indigo-900">
-                                    Editar
-                                </flux:button>
-                            </flux:modal.trigger>
-                            <form action="{{ route('horarios.destroy', $horario->id) }}" method="POST" class="form-eliminar inline">
-                                @csrf
-                                @method('DELETE')
-                                <button type="submit" class="text-red-600 hover:text-red-900 transition-colors">
-                                    <flux:icon name="trash" />
-                                </button>
-                            </form>
+                        <div class="relative ml-2">
+                            <button type="button" 
+                                onclick="toggleDropdown({{ $horario->id }})"
+                                class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                                    <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path>
+                                </svg>
+                            </button>
+                            
+                            <!-- Dropdown menu -->
+                            <div id="dropdown-{{ $horario->id }}" class="hidden absolute right-0 mt-2 w-32 bg-white dark:bg-gray-800 rounded-md shadow-lg z-10 border border-gray-200 dark:border-gray-700">
+                                <div class="py-1">
+                                    <flux:modal.trigger name="edit-task">
+                                        <button type="button" 
+                                            onclick="prepareEditModal({{ $horario->id }}, '{{ $horario->materia_id }}', '{{ $horario->grupo_id }}', '{{ $horario->maestro_id }}', '{{ $horario->dias }}', '{{ $horario->hora_inicio }}', '{{ $horario->hora_fin }}')"
+                                            class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                                            <flux:icon name="pencil" class="w-3 h-3" />
+                                            Editar
+                                        </button>
+                                    </flux:modal.trigger>
+                                    <form action="{{ route('horarios.destroy', $horario->id) }}" method="POST" class="form-eliminar">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" 
+                                            class="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                                            <flux:icon name="trash" class="w-3 h-3" />
+                                            Eliminar
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="space-y-3">
-                        <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-200">
-                            <flux:icon name="user" class="w-4 h-4" />
-                            @foreach ($usuarios as $usuario)    
-                                @if ($usuario->id == $horario->maestro_id)
-                                    <span>{{ $usuario->name }}</span>
-                                @endif
-                            @endforeach
+                    <div class="space-y-2">
+                        <div class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-200">
+                            <flux:icon name="user" class="w-3 h-3 flex-shrink-0" />
+                            <span class="truncate">
+                                @foreach ($usuarios as $usuario)    
+                                    @if ($usuario->id == $horario->maestro_id)
+                                        {{ $usuario->name }}
+                                    @endif
+                                @endforeach
+                            </span>
                         </div>
-                        <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-200">
-                            <flux:icon name="clock" class="w-4 h-4" />
+                        <div class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-200">
+                            <flux:icon name="clock" class="w-3 h-3 flex-shrink-0" />
                             <span>{{ $horario->hora_inicio }} - {{ $horario->hora_fin }}</span>
                         </div>
-                        <div class="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-200">
-                            <flux:icon name="calendar" class="w-4 h-4" />
-                            <span>{{ str_replace(',', ', ', $horario->dias) }}</span>
+                        <div class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-200">
+                            <flux:icon name="calendar" class="w-3 h-3 flex-shrink-0" />
+                            <span class="truncate">{{ str_replace(',', ', ', $horario->dias) }}</span>
                         </div>
                     </div>
                 </div>
@@ -290,6 +308,28 @@
                 modal.close();
             }
         }
+
+        function toggleDropdown(id) {
+            // Cerrar todos los dropdowns abiertos
+            document.querySelectorAll('[id^="dropdown-"]').forEach(dropdown => {
+                if (dropdown.id !== `dropdown-${id}`) {
+                    dropdown.classList.add('hidden');
+                }
+            });
+            
+            // Toggle del dropdown actual
+            const dropdown = document.getElementById(`dropdown-${id}`);
+            dropdown.classList.toggle('hidden');
+        }
+
+        // Cerrar dropdowns al hacer clic fuera
+        document.addEventListener('click', function(event) {
+            if (!event.target.closest('[onclick*="toggleDropdown"]') && !event.target.closest('[id^="dropdown-"]')) {
+                document.querySelectorAll('[id^="dropdown-"]').forEach(dropdown => {
+                    dropdown.classList.add('hidden');
+                });
+            }
+        });
 
         function prepareEditModal(id, materia_id, grupo_id, maestro_id, dias, hora_inicio, hora_fin) {
             const form = document.getElementById('edit-task-form');

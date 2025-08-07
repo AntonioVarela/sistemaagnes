@@ -28,3 +28,5 @@
 
 @vite(['resources/css/app.css', 'resources/js/app.js'])
 @fluxAppearance
+
+<script src="{{ asset('js/global.js') }}"></script>

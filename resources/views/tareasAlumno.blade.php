@@ -127,14 +127,16 @@
                                             {{ $anuncio->created_at->format('h:i A') }}
                                         </div>
                                         @if($anuncio->archivo)
-                                            <a href="{{ asset('storage/' . $anuncio->archivo) }}" 
-                                               class="inline-flex items-center px-3 py-1 text-sm text-indigo-600 bg-indigo-100 rounded-full hover:bg-indigo-200 transition-colors" 
-                                               target="_blank">
-                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
-                                                </svg>
-                                                Ver archivo
-                                            </a>
+                                            <div class="mt-2">
+                                                @php
+                                                    $url = Storage::disk('s3')->url($anuncio->archivo);
+                                                @endphp
+                                                <a href="{{ $url }}" 
+                                                   class="text-indigo-600 hover:text-indigo-800 font-medium" 
+                                                   target="_blank">
+                                                    Ver archivo adjunto
+                                                </a>
+                                            </div>
                                         @endif
                                     </div>
                                 </div>
@@ -286,7 +288,7 @@
                     }
                     
                     if (info.event.extendedProps.archivo) {
-                        $('#modalResources').html(`<a href="{{ asset('storage/') }}/${info.event.extendedProps.archivo}" class="text-indigo-600 hover:text-indigo-800" target="_blank">Ver archivo adjunto</a>`);
+                        $('#modalResources').html(`<a href="https://tu-bucket.s3.amazonaws.com/${info.event.extendedProps.archivo}" class="text-indigo-600 hover:text-indigo-800" target="_blank">Ver archivo adjunto</a>`);
                     } else {
                         $('#modalResources').text('No hay recursos disponibles');
                     }

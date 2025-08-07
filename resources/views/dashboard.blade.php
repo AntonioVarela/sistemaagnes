@@ -74,11 +74,16 @@
 
                         <div class="mt-4 sm:mt-6 flex flex-col justify-end gap-2 sm:gap-3">
                             <flux:button icon='eye' variant="filled" name="view-students" 
-                                :href="route('tareas.alumnos', $grupo->id)"
+                                :href="route('tareas.index', ['grupo' => $grupo->id])"
                                 class="bg-blue-600 hover:bg-blue-700 text-sm sm:text-base w-full sm:w-auto">
                                 Ver Tareas
                             </flux:button>
                             
+                            <flux:button icon='users' variant="filled" name="view-alumnos" 
+                                :href="route('tareas.alumnos', $grupo->id)"
+                                class="bg-green-600 hover:bg-green-700 text-sm sm:text-base w-full sm:w-auto">
+                                Ver Actividades de Alumnos
+                            </flux:button>
                         </div>
                     </div>
                 </div>

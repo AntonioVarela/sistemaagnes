@@ -17,9 +17,10 @@
                 <table id="myTable" class="w-full">
                     <thead class="bg-gray-50 dark:bg-gray-800">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Título</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Contenido</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Fecha</th>
+                                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Título</th>
+                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Contenido</th>
+                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Fecha</th>
+                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Expira</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Acciones</th>
                         </tr>
                     </thead>
@@ -52,21 +53,39 @@
                                         </div>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900 dark:text-white">
-                                        {{ $anuncio->created_at->format('d/m/Y H:i') }}
-                                    </div>
-                                </td>
+                                                                 <td class="px-6 py-4 whitespace-nowrap">
+                                     <div class="text-sm text-gray-900 dark:text-white">
+                                         {{ $anuncio->created_at->format('d/m/Y H:i') }}
+                                     </div>
+                                 </td>
+                                 <td class="px-6 py-4 whitespace-nowrap">
+                                     <div class="text-sm text-gray-900 dark:text-white">
+                                         @if($anuncio->fecha_expiracion)
+                                             <span class="px-2 py-1 text-xs font-semibold rounded-full 
+                                                 @if($anuncio->fecha_expiracion->isPast()) 
+                                                     bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
+                                                 @elseif($anuncio->fecha_expiracion->isToday()) 
+                                                     bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
+                                                 @else 
+                                                     bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                                                 @endif">
+                                                 {{ $anuncio->fecha_expiracion->format('d/m/Y') }}
+                                             </span>
+                                         @else
+                                             <span class="text-gray-500 dark:text-gray-400">Sin expiración</span>
+                                         @endif
+                                     </div>
+                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex items-center gap-2">
                                         @if(auth()->user()->id === $anuncio->user_id || auth()->user()->rol === 'administrador')
-                                            <flux:modal.trigger name="edit-announcement">
-                                                <flux:button icon='pencil' variant="filled" 
-                                                    onclick="prepareEditModal({{ $anuncio->id }}, '{{ $anuncio->titulo }}', '{{ $anuncio->contenido }}', '{{ $anuncio->grupo_id }}', '{{ $anuncio->materia_id }}')" 
-                                                    class="text-indigo-600 hover:text-indigo-900">
-                                                    Editar
-                                                </flux:button>
-                                            </flux:modal.trigger>
+                                                                                         <flux:modal.trigger name="edit-announcement">
+                                                 <flux:button icon='pencil' variant="filled" 
+                                                     onclick="prepareEditModal({{ $anuncio->id }}, '{{ $anuncio->titulo }}', '{{ $anuncio->contenido }}', '{{ $anuncio->grupo_id }}', '{{ $anuncio->materia_id }}', '{{ $anuncio->fecha_expiracion ? $anuncio->fecha_expiracion->format('Y-m-d') : 'null' }}')" 
+                                                     class="text-indigo-600 hover:text-indigo-900">
+                                                     Editar
+                                                 </flux:button>
+                                             </flux:modal.trigger>
                                             <form action="{{ route('anuncios.destroy', $anuncio->id) }}" method="POST" class="form-eliminar inline">
                                                 @csrf
                                                 @method('DELETE')
@@ -102,7 +121,8 @@
                         placeholder="Ingresa el título del anuncio" required />
                     <flux:textarea name="contenido" id="contenido" label="Contenido"
                         placeholder="Ingresa el contenido del anuncio" required />
-                    <flux:input name="archivo" id="archivo" label="Archivo" type="file" />
+                                         <flux:input name="archivo" id="archivo" label="Archivo" type="file" />
+                     <flux:input name="fecha_expiracion" id="fecha_expiracion" label="Fecha de expiración (opcional)" type="date" />
                     @if(count($horario) > 1)
                         <div class="grid grid-cols-2 gap-4">
                             <flux:select name="grupo_id" id="grupo" label="Grupo" onchange="filtrarMaterias(this.value)">
@@ -144,7 +164,8 @@
                         placeholder="Ingresa el título del anuncio" required />
                     <flux:textarea name="contenido" id="edit_contenido" label="Contenido"
                         placeholder="Ingresa el contenido del anuncio" required />
-                    <flux:input name="archivo" id="edit_archivo" label="Archivo" type="file" />
+                                         <flux:input name="archivo" id="edit_archivo" label="Archivo" type="file" />
+                     <flux:input name="fecha_expiracion" id="edit_fecha_expiracion" label="Fecha de expiración (opcional)" type="date" />
                     @if(count($horario) > 1)
                         <div class="grid grid-cols-2 gap-4">
                             <flux:select name="grupo_id" id="edit_grupo" label="Grupo" onchange="filtrarMateriasEditar(this.value)">
@@ -176,23 +197,20 @@
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script>
         function iniciarComponentes() {
-            // Configuración de DataTable
-            if ($.fn.DataTable) {
-                // Verificar si la tabla ya está inicializada
-                if (!$.fn.DataTable.isDataTable('#myTable')) {
-                    $('#myTable').DataTable({
-                        language: {
-                            url: 'https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json',
-                        },
-                        pageLength: 10,
-                        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
-                        dom: '<"flex justify-between items-center mb-4"lf>rt<"flex justify-between items-center mt-4"ip>',
-                        order: [[2, 'desc']], // Ordenar por fecha descendente
-                        columnDefs: [
-                            { orderable: false, targets: -1 } // Deshabilitar ordenamiento en la columna de acciones
-                        ]
-                    });
-                }
+            // Inicializar DataTable con configuración específica
+            if ($.fn.DataTable && !$.fn.DataTable.isDataTable('#myTable')) {
+                $('#myTable').DataTable({
+                    language: {
+                        url: 'https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json',
+                    },
+                    pageLength: 10,
+                    lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
+                    dom: '<"flex justify-between items-center mb-4"lf>rt<"flex justify-between items-center mt-4"ip>',
+                    order: [[2, 'desc']], // Ordenar por fecha descendente
+                    columnDefs: [
+                        { orderable: false, targets: -1 } // Deshabilitar ordenamiento en la columna de acciones
+                    ]
+                });
             }
 
             // Filtrar materias al cargar la página
@@ -201,44 +219,8 @@
                 filtrarMaterias(grupoSelect.value);
             }
 
-            // Configuración de formularios de eliminación
-            const formsEliminar = document.querySelectorAll('.form-eliminar');
-            formsEliminar.forEach(form => {
-                form.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    Swal.fire({
-                        title: '¿Estás seguro?',
-                        text: "¡Esta acción no se puede deshacer!",
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#3085d6',
-                        cancelButtonColor: '#d33',
-                        confirmButtonText: 'Sí, eliminar',
-                        cancelButtonText: 'Cancelar'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            form.submit();
-                        }
-                    });
-                });
-            });
-
-            // Mostrar toast si existe mensaje
-            @if(session('toast'))
-                Toastify({
-                    text: "{{ session('toast.message') }}",
-                    duration: 3500,
-                    gravity: "top",
-                    position: "right",
-                    backgroundColor: 
-                        @if(session('toast.type') == 'success') "#22c55e"
-                        @elseif(session('toast.type') == 'error') "#ef4444"
-                        @elseif(session('toast.type') == 'warning') "#f59e42"
-                        @else "#3b82f6" @endif,
-                    stopOnFocus: true,
-                    close: true
-                }).showToast();
-            @endif
+            // Inicializar formularios de eliminación
+            initDeleteForms();
         }
 
         // Funciones globales
@@ -309,7 +291,7 @@
             }
         }
 
-        function prepareEditModal(id, titulo, contenido, grupo_id, materia_id) {
+        function prepareEditModal(id, titulo, contenido, grupo_id, materia_id, fecha_expiracion) {
             const form = document.getElementById('edit-announcement-form');
             if (!form) return;
 
@@ -317,6 +299,11 @@
             
             document.getElementById('edit_titulo').value = titulo;
             document.getElementById('edit_contenido').value = contenido;
+            if (fecha_expiracion && fecha_expiracion !== 'null') {
+                document.getElementById('edit_fecha_expiracion').value = fecha_expiracion;
+            } else {
+                document.getElementById('edit_fecha_expiracion').value = '';
+            }
             
             // Establecer grupo y materia
             if (grupo_id) {

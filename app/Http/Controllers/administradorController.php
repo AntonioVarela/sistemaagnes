@@ -9,8 +9,11 @@ use App\Models\User;
 use App\Models\tarea;
 use App\Models\horario;
 use App\Models\anuncio;
+use App\Http\Requests\AnuncioRequest;
+use App\Http\Requests\TareaRequest;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Log;
 
 class administradorController extends Controller
 {
@@ -78,7 +81,7 @@ class administradorController extends Controller
         return view('tareas',compact('grupos','materias','tareas','horario','seccion')); // Cambiado a 'tareas'
     }
 
-    public function updateTareas(Request $request, $id)
+    public function updateTareas(TareaRequest $request, $id)
     {
         $tarea = tarea::findOrFail($id);
         $tarea->descripcion = $request->descripcion;
@@ -86,10 +89,23 @@ class administradorController extends Controller
         $tarea->hora_entrega = $request->hora_entrega;
         
         if ($request->hasFile('archivo')) {
-            $archivo = $request->file('archivo');
-            $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
-            $rutaArchivo = $archivo->storeAs('archivos', $nombreArchivo, 'public');
-            $tarea->archivo = $rutaArchivo;
+            try {
+                // Eliminar el archivo anterior si existe
+                if ($tarea->archivo) {
+                    Storage::disk('s3')->delete($tarea->archivo);
+                }
+                $archivo = $request->file('archivo');
+                $nombreArchivo = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '', $archivo->getClientOriginalName());
+                $rutaArchivo = $archivo->storeAs('archivos', $nombreArchivo, 's3');
+                $tarea->archivo = $rutaArchivo;
+            } catch (\Exception $e) {
+                Log::error('Error al actualizar archivo de tarea: ' . $e->getMessage());
+                session()->flash('toast', [
+                    'type' => 'error',
+                    'message' => 'Error al subir el archivo. Por favor, inténtalo de nuevo.'
+                ]);
+                return redirect()->route('tareas.index');
+            }
         }
 
         if ($request->has('grupo')) {
@@ -108,7 +124,7 @@ class administradorController extends Controller
         ]);
         return redirect()->route('tareas.index');
     }
-    public function store(Request $request)
+    public function store(TareaRequest $request)
     {
         $horario = horario::where('maestro_id', Auth::user()->id)->get();
         $tarea = new tarea();
@@ -131,10 +147,19 @@ class administradorController extends Controller
         
 
         if ($request->hasFile('archivo')) {
-            $archivo = $request->file('archivo');
-            $nombreArchivo = time() . '_' . $archivo->getClientOriginalName(); // Generar un nombre único
-            $rutaArchivo = $archivo->storeAs('archivos', $nombreArchivo, 'public'); // Guardar en el sistema de archivos
-            $tarea->archivo = $rutaArchivo; // Guardar la ruta en la base de datos
+            try {
+                $archivo = $request->file('archivo');
+                $nombreArchivo = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '', $archivo->getClientOriginalName());
+                $rutaArchivo = $archivo->storeAs('archivos', $nombreArchivo, 's3');
+                $tarea->archivo = $rutaArchivo;
+            } catch (\Exception $e) {
+                Log::error('Error al subir archivo de tarea: ' . $e->getMessage());
+                session()->flash('toast', [
+                    'type' => 'error',
+                    'message' => 'Error al subir el archivo. Por favor, inténtalo de nuevo.'
+                ]);
+                return redirect()->route('tareas.index');
+            }
         }
         $tarea->save();
         session()->flash('toast', [
@@ -142,7 +167,21 @@ class administradorController extends Controller
             'message' => '¡Tarea creada exitosamente!'
         ]);
         return redirect()->route('tareas.index');
-        // Logic to store a new task
+    }
+
+    public function destroyTarea($id)
+    {
+        $tarea = tarea::findOrFail($id);
+        // Eliminar el archivo si existe
+        if ($tarea->archivo) {
+            Storage::disk('s3')->delete($tarea->archivo);
+        }
+        $tarea->delete();
+        session()->flash('toast', [
+            'type' => 'success',
+            'message' => '¡Tarea eliminada exitosamente!'
+        ]);
+        return redirect()->route('tareas.index');
     }
 
     //Alumnos
@@ -152,7 +191,7 @@ class administradorController extends Controller
         $materias = materia::all();
         $usuarios = User::all();
         $tareas = tarea::where('grupo', $id)->get(); // Cambiado a 'tareas'
-        $anuncios = anuncio::where('grupo_id', $id)->get();
+        $anuncios = anuncio::where('grupo_id', $id)->activos()->get();
         return view("tareasAlumno", compact(['grupo','materias','usuarios', 'tareas', 'anuncios'])); // Cambiado a 'tareasAlumno'
  
     }
@@ -388,36 +427,46 @@ class administradorController extends Controller
         if(Auth::user()->rol == 'administrador'){
             $horario = horario::all();
             $grupos = grupo::all(); 
-            $anuncios = anuncio::all();
+            $anuncios = anuncio::activos()->get();
         }
         if(Auth::user()->rol == 'Maestro'){
             $horario = horario::where('maestro_id', Auth::user()->id)->get();
             $grupos = grupo::whereIn('id', $horario->pluck('grupo_id'))->get();
-            $anuncios = anuncio::with('user')->where('usuario_id', Auth::user()->id)->get();
+            $anuncios = anuncio::with('user')->where('usuario_id', Auth::user()->id)->activos()->get();
         }
         if(Auth::user()->rol == 'Coordinador Primaria'){
             $grupos = grupo::where('seccion', 'Primaria')->get();
-            $anuncios = anuncio::with('user')->whereIn('grupo_id', $grupos->pluck('id'))->get();
+            $anuncios = anuncio::with('user')->whereIn('grupo_id', $grupos->pluck('id'))->activos()->get();
         }
         if(Auth::user()->rol == 'Coordinador Secundaria'){
             $grupos = grupo::where('seccion', 'Secundaria')->get();
-            $anuncios = anuncio::with('user')->whereIn('grupo_id', $grupos->pluck('id'))->get();
+            $anuncios = anuncio::with('user')->whereIn('grupo_id', $grupos->pluck('id'))->activos()->get();
         }
         $materias = materia::whereIn('id', $horario->pluck('materia_id'))->get();
         return view("anuncios", compact(['anuncios','horario','grupos','materias']));
     }
-    public function storeAnuncio(Request $request)
+    public function storeAnuncio(AnuncioRequest $request)
     {
         $horario = horario::where('maestro_id', Auth::user()->id)->get();
         $anuncio = new anuncio();
         $anuncio->titulo = $request->titulo;
         $anuncio->contenido = $request->contenido;
         $anuncio->usuario_id = Auth::user()->id;
+        $anuncio->fecha_expiracion = $request->fecha_expiracion ? $request->fecha_expiracion : null;
         if ($request->hasFile('archivo')) {
-            $archivo = $request->file('archivo');
-            $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
-            $rutaArchivo = $archivo->storeAs('archivos', $nombreArchivo, 's3');
-            $anuncio->archivo = $rutaArchivo;
+            try {
+                $archivo = $request->file('archivo');
+                $nombreArchivo = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '', $archivo->getClientOriginalName());
+                $rutaArchivo = $archivo->storeAs('archivos', $nombreArchivo, 's3');
+                $anuncio->archivo = $rutaArchivo;
+            } catch (\Exception $e) {
+                Log::error('Error al subir archivo de anuncio: ' . $e->getMessage());
+                session()->flash('toast', [
+                    'type' => 'error',
+                    'message' => 'Error al subir el archivo. Por favor, inténtalo de nuevo.'
+                ]);
+                return redirect()->route('anuncios.index');
+            }
         }
         if(count($horario) == 1){
             $materia = materia::find($horario[0]->materia_id);
@@ -465,7 +514,7 @@ class administradorController extends Controller
         ]);
         return redirect()->route('anuncios.index');
     }
-    public function updateAnuncio(Request $request, $id)
+    public function updateAnuncio(AnuncioRequest $request, $id)
     {
         $anuncio = anuncio::findOrFail($id);
         
@@ -480,15 +529,25 @@ class administradorController extends Controller
 
         $anuncio->titulo = $request->titulo;
         $anuncio->contenido = $request->contenido;
+        $anuncio->fecha_expiracion = $request->fecha_expiracion ? $request->fecha_expiracion : null;
         if ($request->hasFile('archivo')) {
-            // Eliminar el archivo anterior si existe
-            if ($anuncio->archivo) {
-                Storage::disk('s3')->delete($anuncio->archivo);
+            try {
+                // Eliminar el archivo anterior si existe
+                if ($anuncio->archivo) {
+                    Storage::disk('s3')->delete($anuncio->archivo);
+                }
+                $archivo = $request->file('archivo');
+                $nombreArchivo = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '', $archivo->getClientOriginalName());
+                $rutaArchivo = $archivo->storeAs('archivos', $nombreArchivo, 's3');
+                $anuncio->archivo = $rutaArchivo;
+            } catch (\Exception $e) {
+                Log::error('Error al actualizar archivo de anuncio: ' . $e->getMessage());
+                session()->flash('toast', [
+                    'type' => 'error',
+                    'message' => 'Error al subir el archivo. Por favor, inténtalo de nuevo.'
+                ]);
+                return redirect()->route('anuncios.index');
             }
-            $archivo = $request->file('archivo');
-            $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
-            $rutaArchivo = $archivo->storeAs('archivos', $nombreArchivo, 's3');
-            $anuncio->archivo = $rutaArchivo;
         }
         $horario = horario::where('maestro_id', Auth::user()->id)->get();
         if(count($horario) > 1){
@@ -506,81 +565,5 @@ class administradorController extends Controller
         return redirect()->route('anuncios.index');
     }
     
-    public function storeTarea(Request $request)
-    {
-        $horario = horario::where('maestro_id', Auth::user()->id)->get();
-        $tarea = new tarea();
-        $tarea->descripcion = request('descripcion');
-        if ($request->hasFile('archivo')) {
-            $archivo = $request->file('archivo');
-            $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
-            $rutaArchivo = $archivo->storeAs('archivos', $nombreArchivo, 's3');
-            $tarea->archivo = $rutaArchivo;
-        }
-        $tarea->fecha_entrega = request('fecha_entrega');
-        $tarea->hora_entrega = request('hora_entrega');
-        if(count($horario) == 1){
-            $materia = materia::find($horario[0]->materia_id);
-            $tarea->titulo = "Tarea de " . $materia->nombre;
-            $tarea->grupo = $horario[0]->grupo_id;
-            $tarea->materia = $horario[0]->materia_id;
-        }
-        else{
-            $materia = materia::find($request->materia);
-            $tarea->titulo = "Tarea de " . $materia->nombre;
-            $tarea->grupo = request('grupo');
-            $tarea->materia = request('materia');
-        }
-        $tarea->save();
-        session()->flash('toast', [
-            'type' => 'success',
-            'message' => '¡Tarea creada exitosamente!'
-        ]);
-        return redirect()->route('tareas.index');
-    }
 
-    public function updateTarea(Request $request, $id)
-    {
-        $tarea = tarea::findOrFail($id);
-        $tarea->descripcion = $request->descripcion;
-        if ($request->hasFile('archivo')) {
-            // Eliminar el archivo anterior si existe
-            if ($tarea->archivo) {
-                Storage::disk('s3')->delete($tarea->archivo);
-            }
-            $archivo = $request->file('archivo');
-            $nombreArchivo = time() . '_' . $archivo->getClientOriginalName();
-            $rutaArchivo = $archivo->storeAs('archivos', $nombreArchivo, 's3');
-            $tarea->archivo = $rutaArchivo;
-        }
-        $tarea->fecha_entrega = $request->fecha_entrega;
-        $tarea->hora_entrega = $request->hora_entrega;
-        if(count($horario) > 1){
-            $materia = materia::find($request->materia);
-            $tarea->titulo = "Tarea de " . $materia->nombre;
-            $tarea->grupo = $request->grupo;
-            $tarea->materia = $request->materia;
-        }
-        $tarea->save();
-        session()->flash('toast', [
-            'type' => 'success',
-            'message' => '¡Tarea actualizada exitosamente!'
-        ]);
-        return redirect()->route('tareas.index');
-    }
-
-    public function destroyTarea($id)
-    {
-        $tarea = tarea::findOrFail($id);
-        // Eliminar el archivo si existe
-        if ($tarea->archivo) {
-            Storage::disk('s3')->delete($tarea->archivo);
-        }
-        $tarea->delete();
-        session()->flash('toast', [
-            'type' => 'success',
-            'message' => '¡Tarea eliminada exitosamente!'
-        ]);
-        return redirect()->route('tareas.index');
-    }
 }
