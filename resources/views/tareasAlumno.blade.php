@@ -78,14 +78,50 @@
                 min-height: 300px !important;
             }
         }
+
+        /* Estilos para el logo */
+        @media (max-width: 768px) {
+            .header-logo {
+                height: 2rem !important;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .header-logo {
+                height: 1.5rem !important;
+            }
+        }
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
+    <!-- Barra de Alerta para Circular -->
+    <div class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-4 py-3 shadow-lg">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center">
+                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                </svg>
+                <span class="font-medium">¡Nueva circular disponible!</span>
+            </div>
+            <button onclick="descargarCircular()" class="bg-white text-indigo-600 hover:bg-gray-100 px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center">
+                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                </svg>
+                Descargar Circular
+            </button>
+        </div>
+    </div>
+
     <div class="min-h-screen">
         <!-- Header -->
         <header class="bg-white shadow-sm">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                <h1 class="text-3xl font-bold text-gray-900">Panel de Actividades de {{ $grupo->nombre }} {{ $grupo->seccion }}</h1>
+                <div class="flex justify-between items-center">
+                    <h1 class="text-3xl font-bold text-gray-900">Panel de Actividades de {{ $grupo->nombre }} {{ $grupo->seccion }}</h1>
+                    <div class="flex items-center">
+                        <img src="/logo.png" alt="Logo" class="header-logo h-12 w-auto opacity-60 hover:opacity-80 transition-opacity duration-200" />
+                    </div>
+                </div>
             </div>
         </header>
 
@@ -311,6 +347,17 @@
             });
             
         });
+        
+        // Función para descargar la circular
+        function descargarCircular() {
+            // Aquí puedes agregar la lógica para descargar la circular
+            // Por ejemplo, abrir un enlace o mostrar un modal con opciones
+            alert('Función de descarga de circular - Aquí puedes implementar la lógica específica para descargar el archivo de la circular de la semana.');
+            
+            // Ejemplo de implementación:
+            // window.open('/download/circular-semana', '_blank');
+            // O mostrar un modal con opciones de descarga
+        }
         
     </script>
 </body>
