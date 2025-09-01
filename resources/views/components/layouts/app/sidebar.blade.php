@@ -19,6 +19,9 @@
                     <flux:navlist.item icon="device-tablet" :href="route('anuncios.index')" :current="request()->routeIs('anuncios.index')" wire:navigate>
                         <span>{{ __('Anuncios') }}</span>
                     </flux:navlist.item>
+                    <flux:navlist.item icon="document-text" :href="route('circulares.index')" :current="request()->routeIs('circulares.index')" wire:navigate>
+                        <span>{{ __('Circulares') }}</span>
+                    </flux:navlist.item>
                     @if (Auth::user()->rol != "Coordinador")
                     <flux:navlist.item icon="book-open" :href="route('tareas.index')" :current="request()->routeIs('tareas.index')" wire:navigate>
                         <span>{{ __('Tareas') }}</span>

@@ -7,19 +7,21 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 
-class anuncio extends Model
+class Circular extends Model
 {
     use SoftDeletes;
+    protected $table = 'circulares';
 
     protected $fillable = [
         'titulo',
-        'contenido',
+        'descripcion',
         'archivo',
-        'fecha_expiracion',
+        'nombre_archivo_original',
+        'tipo_archivo',
         'usuario_id',
         'grupo_id',
-        'materia_id',
-        'seccion'
+        'seccion',
+        'fecha_expiracion'
     ];
 
     protected $casts = [
@@ -31,18 +33,13 @@ class anuncio extends Model
         return $this->belongsTo(Grupo::class);
     }
 
-    public function materia()
-    {
-        return $this->belongsTo(Materia::class);
-    }
-
     public function user()
     {
         return $this->belongsTo(User::class, 'usuario_id');
     }
 
-    // Scope para obtener solo anuncios activos (no expirados)
-    public function scopeActivos($query)
+    // Scope para obtener solo circulares activas (no expiradas)
+    public function scopeActivas($query)
     {
         return $query->where(function($q) {
             $q->whereNull('fecha_expiracion')
@@ -50,14 +47,14 @@ class anuncio extends Model
         });
     }
 
-    // Scope para obtener anuncios expirados
-    public function scopeExpirados($query)
+    // Scope para obtener circulares expiradas
+    public function scopeExpiradas($query)
     {
         return $query->where('fecha_expiracion', '<', Carbon::today());
     }
 
-    // Método para verificar si el anuncio está activo
-    public function estaActivo()
+    // Método para verificar si la circular está activa
+    public function estaActiva()
     {
         return $this->fecha_expiracion === null || $this->fecha_expiracion >= Carbon::today();
     }
@@ -66,5 +63,20 @@ class anuncio extends Model
     public function getUrlArchivoAttribute()
     {
         return Storage::disk('s3')->url($this->archivo);
+    }
+
+    // Método para formatear el tamaño del archivo
+    public function getTamanioFormateadoAttribute()
+    {
+        if (!$this->archivo) return null;
+        
+        $bytes = Storage::disk('s3')->size($this->archivo);
+        $units = ['B', 'KB', 'MB', 'GB'];
+        
+        for ($i = 0; $bytes > 1024 && $i < count($units) - 1; $i++) {
+            $bytes /= 1024;
+        }
+        
+        return round($bytes, 2) . ' ' . $units[$i];
     }
 }

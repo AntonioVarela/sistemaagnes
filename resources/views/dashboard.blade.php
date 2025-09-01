@@ -7,6 +7,8 @@
             <div class="flex space-x-4">
                 <flux:button icon='plus' variant="filled" name="new-group" :href="route('grupos.index')"
                     class="bg-green-600 hover:bg-green-700 text-sm sm:text-base">Nuevo Grupo</flux:button>
+                <flux:button icon='document-text' variant="filled" name="circulares" :href="route('circulares.index')"
+                    class="bg-blue-600 hover:bg-blue-700 text-sm sm:text-base">Circulares</flux:button>
             </div>
         </div>
     </x-slot>

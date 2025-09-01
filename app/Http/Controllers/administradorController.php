@@ -11,6 +11,8 @@ use App\Models\horario;
 use App\Models\anuncio;
 use App\Http\Requests\AnuncioRequest;
 use App\Http\Requests\TareaRequest;
+use App\Http\Requests\CircularRequest;
+use App\Models\Circular;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
@@ -76,7 +78,22 @@ class administradorController extends Controller
         $seccion = grupo::select('seccion')->whereIn('id', $horario->pluck('grupo_id'))->groupBy('seccion')->get();
         
         $materias = materia::whereIn('id', $horario->pluck('materia_id'))->get();
-        $tareas = tarea::whereIn('materia', $horario->pluck('materia_id'))->whereIn('grupo', $horario->pluck('grupo_id'))->get();
+        
+        // Aplicar filtros
+        $query = tarea::whereIn('materia', $horario->pluck('materia_id'))
+                      ->whereIn('grupo', $horario->pluck('grupo_id'));
+        
+        // Filtro por grupo
+        if (request('grupo_filter')) {
+            $query->where('grupo', request('grupo_filter'));
+        }
+        
+        // Filtro por materia
+        if (request('materia_filter')) {
+            $query->where('materia', request('materia_filter'));
+        }
+        
+        $tareas = $query->get();
 
         return view('tareas',compact('grupos','materias','tareas','horario','seccion')); // Cambiado a 'tareas'
     }
@@ -192,7 +209,8 @@ class administradorController extends Controller
         $usuarios = User::all();
         $tareas = tarea::where('grupo', $id)->get(); // Cambiado a 'tareas'
         $anuncios = anuncio::where('grupo_id', $id)->activos()->get();
-        return view("tareasAlumno", compact(['grupo','materias','usuarios', 'tareas', 'anuncios'])); // Cambiado a 'tareasAlumno'
+        $circulares = Circular::where('grupo_id', $id)->activas()->orderBy('created_at', 'desc')->take(3)->get();
+        return view("tareasAlumno", compact(['grupo','materias','usuarios', 'tareas', 'anuncios', 'circulares'])); // Cambiado a 'tareasAlumno'
  
     }
 
@@ -565,5 +583,160 @@ class administradorController extends Controller
         return redirect()->route('anuncios.index');
     }
     
+    // ==================== MÉTODOS PARA CIRCULARES ====================
+    
+    public function indexCirculares()
+    {
+        if(Auth::user()->rol == 'administrador'){
+            $circulares = Circular::with(['user', 'grupo'])->orderBy('created_at', 'desc')->get();
+            $grupos = grupo::all();
+        } else if(Auth::user()->rol == 'Coordinador Primaria'){
+            $circulares = Circular::with(['user', 'grupo'])
+                ->where('seccion', 'Primaria')
+                ->orderBy('created_at', 'desc')
+                ->get();
+            $grupos = grupo::where('seccion', 'Primaria')->get();
+        } else if(Auth::user()->rol == 'Coordinador Secundaria'){
+            $circulares = Circular::with(['user', 'grupo'])
+                ->where('seccion', 'Secundaria')
+                ->orderBy('created_at', 'desc')
+                ->get();
+            $grupos = grupo::where('seccion', 'Secundaria')->get();
+        } else {
+            // Maestros solo ven circulares de sus grupos
+            $horario = horario::where('maestro_id', Auth::user()->id)->get();
+            $grupos = grupo::whereIn('id', $horario->pluck('grupo_id'))->get();
+            $circulares = Circular::with(['user', 'grupo'])
+                ->whereIn('grupo_id', $horario->pluck('grupo_id'))
+                ->orderBy('created_at', 'desc')
+                ->get();
+        }
 
+        return view('circulares', compact('circulares', 'grupos'));
+    }
+
+    public function storeCircular(CircularRequest $request)
+    {
+        try {
+            $archivo = $request->file('archivo');
+            $nombreArchivo = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '', $archivo->getClientOriginalName());
+            $rutaArchivo = $archivo->storeAs('circulares', $nombreArchivo, 's3');
+
+            $circular = new Circular();
+            $circular->titulo = $request->titulo;
+            $circular->descripcion = $request->descripcion;
+            $circular->archivo = $rutaArchivo;
+            $circular->nombre_archivo_original = $archivo->getClientOriginalName();
+            $circular->tipo_archivo = $archivo->getClientMimeType();
+            $circular->usuario_id = Auth::user()->id;
+            $circular->grupo_id = $request->grupo_id;
+            $circular->seccion = $request->seccion;
+            $circular->fecha_expiracion = $request->fecha_expiracion ? $request->fecha_expiracion : null;
+            $circular->save();
+
+            session()->flash('toast', [
+                'type' => 'success',
+                'message' => '¡Circular subida exitosamente!'
+            ]);
+            return redirect()->route('circulares.index');
+        } catch (\Exception $e) {
+            Log::error('Error al subir circular: ' . $e->getMessage());
+            session()->flash('toast', [
+                'type' => 'error',
+                'message' => 'Error al subir la circular. Por favor, inténtalo de nuevo.'
+            ]);
+            return redirect()->route('circulares.index');
+        }
+    }
+
+    public function updateCircular(CircularRequest $request, $id)
+    {
+        $circular = Circular::findOrFail($id);
+        
+        // Verificar si el usuario es el creador o administrador
+        if (Auth::user()->id !== $circular->usuario_id && Auth::user()->rol !== 'administrador') {
+            session()->flash('toast', [
+                'type' => 'error',
+                'message' => 'No tienes permiso para editar esta circular'
+            ]);
+            return redirect()->route('circulares.index');
+        }
+
+        $circular->titulo = $request->titulo;
+        $circular->descripcion = $request->descripcion;
+        $circular->grupo_id = $request->grupo_id;
+        $circular->seccion = $request->seccion;
+        $circular->fecha_expiracion = $request->fecha_expiracion ? $request->fecha_expiracion : null;
+
+        if ($request->hasFile('archivo')) {
+            try {
+                // Eliminar el archivo anterior si existe
+                if ($circular->archivo) {
+                    Storage::disk('s3')->delete($circular->archivo);
+                }
+                $archivo = $request->file('archivo');
+                $nombreArchivo = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '', $archivo->getClientOriginalName());
+                $rutaArchivo = $archivo->storeAs('circulares', $nombreArchivo, 's3');
+                $circular->archivo = $rutaArchivo;
+                $circular->nombre_archivo_original = $archivo->getClientOriginalName();
+                $circular->tipo_archivo = $archivo->getClientMimeType();
+            } catch (\Exception $e) {
+                Log::error('Error al actualizar archivo de circular: ' . $e->getMessage());
+                session()->flash('toast', [
+                    'type' => 'error',
+                    'message' => 'Error al subir el archivo. Por favor, inténtalo de nuevo.'
+                ]);
+                return redirect()->route('circulares.index');
+            }
+        }
+
+        $circular->save();
+        session()->flash('toast', [
+            'type' => 'success',
+            'message' => '¡Circular actualizada exitosamente!'
+        ]);
+        return redirect()->route('circulares.index');
+    }
+
+    public function destroyCircular($id)
+    {
+        $circular = Circular::findOrFail($id);
+        
+        // Verificar si el usuario es el creador o administrador
+        if (Auth::user()->id !== $circular->usuario_id && Auth::user()->rol !== 'administrador') {
+            session()->flash('toast', [
+                'type' => 'error',
+                'message' => 'No tienes permiso para eliminar esta circular'
+            ]);
+            return redirect()->route('circulares.index');
+        }
+
+        // Eliminar el archivo si existe
+        if ($circular->archivo) {
+            Storage::disk('s3')->delete($circular->archivo);
+        }
+        $circular->delete();
+        session()->flash('toast', [
+            'type' => 'success',
+            'message' => '¡Circular eliminada exitosamente!'
+        ]);
+        return redirect()->route('circulares.index');
+    }
+
+    public function downloadCircular($id)
+    {
+        $circular = Circular::findOrFail($id);
+        
+        try {
+            $url = Storage::disk('s3')->url($circular->archivo);
+            return redirect($url);
+        } catch (\Exception $e) {
+            Log::error('Error al descargar circular: ' . $e->getMessage());
+            session()->flash('toast', [
+                'type' => 'error',
+                'message' => 'Error al descargar la circular.'
+            ]);
+            return redirect()->back();
+        }
+    }
 }

@@ -4,9 +4,7 @@ use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 use App\Http\Controllers\administradorController;
 
-Route::get('/', function () {
-    return view('welcome');
-})->name('home');
+Route::get('/', [App\Http\Controllers\WelcomeController::class, 'index'])->name('home');
 
 
 
@@ -48,6 +46,12 @@ Route::get('/anuncios',[administradorController::class,'showAnuncios'])->name('a
 Route::post('/anunciosguardar', [administradorController::class,'storeAnuncio'])->name('anuncios.store');
 Route::delete('/anuncios/{id}', [administradorController::class,'destroyAnuncio'])->name('anuncios.destroy');
 Route::post('/anuncios/{id}/update', [administradorController::class,'updateAnuncio'])->name('anuncios.update');
+
+Route::get('/circulares',[administradorController::class,'indexCirculares'])->name('circulares.index');
+Route::post('/circulares', [administradorController::class,'storeCircular'])->name('circulares.store');
+Route::put('/circulares/{id}', [administradorController::class,'updateCircular'])->name('circulares.update');
+Route::delete('/circulares/{id}', [administradorController::class,'destroyCircular'])->name('circulares.destroy');
+Route::get('/circulares/{id}/download', [administradorController::class,'downloadCircular'])->name('circulares.download');
 
 });
 

@@ -94,23 +94,6 @@
     </style>
 </head>
 <body class="bg-gray-50 text-gray-800">
-    <!-- Barra de Alerta para Circular -->
-    <div class="bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-4 py-3 shadow-lg">
-        <div class="max-w-7xl mx-auto flex items-center justify-between">
-            <div class="flex items-center">
-                <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"></path>
-                </svg>
-                <span class="font-medium">¡Nueva circular disponible!</span>
-            </div>
-            <button onclick="descargarCircular()" class="bg-white text-indigo-600 hover:bg-gray-100 px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center">
-                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                </svg>
-                Descargar Circular
-            </button>
-        </div>
-    </div>
 
     <div class="min-h-screen">
         <!-- Header -->
@@ -119,7 +102,9 @@
                 <div class="flex justify-between items-center">
                     <h1 class="text-3xl font-bold text-gray-900">Panel de Actividades de {{ $grupo->nombre }} {{ $grupo->seccion }}</h1>
                     <div class="flex items-center">
-                        <img src="/logo.png" alt="Logo" class="header-logo h-12 w-auto opacity-60 hover:opacity-80 transition-opacity duration-200" />
+                        <a href="{{ route('home') }}" class="hover:opacity-80 transition-opacity duration-200">
+                            <img src="/logo.png" alt="Logo" class="header-logo h-12 w-auto opacity-60" />
+                        </a>
                     </div>
                 </div>
             </div>
@@ -128,8 +113,9 @@
         <!-- Main Content -->
         <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                <!-- Sección de anuncios -->
-                <div class="lg:col-span-1">
+                <!-- Sección de anuncios y circulares -->
+                <div class="lg:col-span-1 space-y-6">
+                    <!-- Anuncios -->
                     <div class="bg-white rounded-xl shadow-sm p-6">
                         <h2 class="text-xl font-semibold text-gray-900 mb-6 flex items-center">
                             <svg class="w-6 h-6 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -164,10 +150,7 @@
                                         </div>
                                         @if($anuncio->archivo)
                                             <div class="mt-2">
-                                                @php
-                                                    $url = Storage::disk('s3')->url($anuncio->archivo);
-                                                @endphp
-                                                <a href="{{ $url }}" 
+                                                <a href="{{ $anuncio->url_archivo }}" 
                                                    class="text-indigo-600 hover:text-indigo-800 font-medium" 
                                                    target="_blank">
                                                     Ver archivo adjunto
@@ -184,6 +167,60 @@
                                     </svg>
                                     <h3 class="text-lg font-medium text-gray-900 mb-1">No hay anuncios disponibles</h3>
                                     <p class="text-sm text-gray-500">Los anuncios importantes aparecerán aquí cuando estén disponibles.</p>
+                                </div>
+                            @endif
+                        </div>
+                    </div>
+
+                    <!-- Circulares -->
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <h2 class="text-xl font-semibold text-gray-900 mb-6 flex items-center">
+                            <svg class="w-6 h-6 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                            </svg>
+                            Circulares Semanales
+                        </h2>
+                        <div class="space-y-4">
+                            @if(count($circulares) > 0)
+                                @foreach($circulares as $circular)
+                                <div class="bg-blue-50 rounded-lg p-4 border border-blue-100 hover:border-blue-200 transition-colors">
+                                    <div class="flex justify-between items-start">
+                                        <div>
+                                            <h3 class="text-lg font-semibold text-blue-900">{{ $circular->titulo }}</h3>
+                                            @if($circular->descripcion)
+                                                <p class="text-sm text-blue-700 mt-1">{{ Str::limit($circular->descripcion, 100) }}</p>
+                                            @endif
+                                        </div>
+                                        <span class="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full">
+                                            {{ $circular->created_at->format('d M Y') }}
+                                        </span>
+                                    </div>
+                                    
+                                    <div class="mt-4 flex items-center justify-between">
+                                        <div class="flex items-center text-xs text-blue-600">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                                            </svg>
+                                            {{ $circular->user->name ?? 'Usuario no disponible' }}
+                                        </div>
+                                        <a href="{{ $circular->url_archivo }}" 
+                                           class="text-blue-600 hover:text-blue-800 font-medium flex items-center"
+                                           target="_blank">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                            </svg>
+                                            Ver archivo
+                                        </a>
+                                    </div>
+                                </div>
+                                @endforeach
+                            @else
+                                <div class="bg-gray-50 rounded-lg p-8 text-center">
+                                    <svg class="w-12 h-12 mx-auto text-gray-400 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    <h3 class="text-lg font-medium text-gray-900 mb-1">No hay circulares disponibles</h3>
+                                    <p class="text-sm text-gray-500">Las circulares semanales aparecerán aquí cuando estén disponibles.</p>
                                 </div>
                             @endif
                         </div>
@@ -250,6 +287,7 @@
         $(document).ready(function () {
             var tareas = @json($tareas);
             var grupo = @json($grupo); 
+            var s3BaseUrl = '{{ config("filesystems.disks.s3.url") }}';
             var eventos;
             
             if(grupo.seccion == 'Primaria') {
@@ -324,7 +362,9 @@
                     }
                     
                     if (info.event.extendedProps.archivo) {
-                        $('#modalResources').html(`<a href="https://tu-bucket.s3.amazonaws.com/${info.event.extendedProps.archivo}" class="text-indigo-600 hover:text-indigo-800" target="_blank">Ver archivo adjunto</a>`);
+                        // Generar la URL de S3 usando la configuración del servidor
+                        const s3Url = s3BaseUrl + '/' + info.event.extendedProps.archivo;
+                        $('#modalResources').html(`<a href="${s3Url}" class="text-indigo-600 hover:text-indigo-800" target="_blank">Ver archivo adjunto</a>`);
                     } else {
                         $('#modalResources').text('No hay recursos disponibles');
                     }
@@ -348,16 +388,7 @@
             
         });
         
-        // Función para descargar la circular
-        function descargarCircular() {
-            // Aquí puedes agregar la lógica para descargar la circular
-            // Por ejemplo, abrir un enlace o mostrar un modal con opciones
-            alert('Función de descarga de circular - Aquí puedes implementar la lógica específica para descargar el archivo de la circular de la semana.');
-            
-            // Ejemplo de implementación:
-            // window.open('/download/circular-semana', '_blank');
-            // O mostrar un modal con opciones de descarga
-        }
+        // La función descargarCircular() ya no es necesaria ya que ahora usamos enlaces directos
         
     </script>
 </body>

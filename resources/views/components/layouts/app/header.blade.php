@@ -97,24 +97,46 @@
             </a>
 
             <flux:navlist variant="outline">
-                <flux:navlist.group :heading="__('Platform')">
-                    <flux:navlist.item icon="layout-grid" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
-                    {{ __('Dashboard') }}
+                <flux:navlist.group heading="Control escolar">
+                    <flux:navlist.item icon="home" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
+                        {{ __('Dashboard') }}
                     </flux:navlist.item>
+                    <flux:navlist.item icon="device-tablet" :href="route('anuncios.index')" :current="request()->routeIs('anuncios.index')" wire:navigate>
+                        {{ __('Anuncios') }}
+                    </flux:navlist.item>
+                    <flux:navlist.item icon="document-text" :href="route('circulares.index')" :current="request()->routeIs('circulares.index')" wire:navigate>
+                        {{ __('Circulares') }}
+                    </flux:navlist.item>
+                    @if (Auth::user()->rol != "Coordinador")
+                    <flux:navlist.item icon="book-open" :href="route('tareas.index')" :current="request()->routeIs('tareas.index')" wire:navigate>
+                        {{ __('Tareas') }}
+                    </flux:navlist.item>
+                    
+                    @if (Auth::user()->rol == "administrador")
+                        <flux:navlist.item icon="calendar-days" :href="route('horarios.index')" :current="request()->routeIs('horarios.index')" wire:navigate>
+                            {{ __('Horarios') }}
+                        </flux:navlist.item>
+                    @endif
+                    @endif
                 </flux:navlist.group>
             </flux:navlist>
 
+            @if (Auth::user()->rol == "administrador")
             <flux:spacer />
-
             <flux:navlist variant="outline">
-                <flux:navlist.item icon="folder-git-2" href="https://github.com/laravel/livewire-starter-kit" target="_blank">
-                {{ __('Repository') }}
-                </flux:navlist.item>
-
-                <flux:navlist.item icon="book-open-text" href="https://laravel.com/docs/starter-kits#livewire" target="_blank">
-                {{ __('Documentation') }}
-                </flux:navlist.item>
+                <flux:navlist.group heading="Administración">
+                    <flux:navlist.item icon="user" :href="route('usuarios.index')">
+                        {{ __('Usuarios') }}
+                    </flux:navlist.item>
+                    <flux:navlist.item icon="user-group" :href="route('grupos.index')">
+                        {{ __('Grupos') }}
+                    </flux:navlist.item>
+                    <flux:navlist.item icon="book-open-text" :href="route('materias.index')">
+                        {{ __('Materias') }}
+                    </flux:navlist.item>
+                </flux:navlist.group>
             </flux:navlist>
+            @endif
         </flux:sidebar>
 
         {{ $slot }}

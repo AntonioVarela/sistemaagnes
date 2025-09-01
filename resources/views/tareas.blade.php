@@ -11,6 +11,45 @@
                 </flux:button>
             </flux:modal.trigger>
         </div>
+
+        <!-- Filtros -->
+        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-700">
+            <div class="flex flex-wrap gap-4 items-center">
+                <div class="flex items-center gap-2">
+                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Filtrar por grupo:</label>
+                    <flux:select name="grupo_filter" class="w-full" onchange="window.location.href=this.value">
+                        <option value="{{ route('tareas.index') }}">Todos los grupos</option>
+                        @foreach($grupos as $grupo)
+                            <option value="{{ route('tareas.index') }}?grupo_filter={{ $grupo->id }}" 
+                                    {{ request('grupo_filter') == $grupo->id ? 'selected' : '' }}>
+                                {{ $grupo->nombre }} - {{ $grupo->seccion }}
+                            </option>
+                        @endforeach
+                    </flux:select>
+                </div>
+                <div class="flex items-center gap-2">
+                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Filtrar por materia:</label>
+                    <flux:select name="materia_filter" class="w-full" onchange="window.location.href=this.value">
+                        <option value="{{ route('tareas.index') }}">Todas las materias</option>
+                        @foreach($materias as $materia)
+                            <option value="{{ route('tareas.index') }}?materia_filter={{ $materia->id }}" 
+                                    {{ request('materia_filter') == $materia->id ? 'selected' : '' }}>
+                                {{ $materia->nombre }}
+                            </option>
+                        @endforeach
+                    </flux:select>
+                </div>
+                @if(request('grupo_filter') || request('materia_filter'))
+                    <a href="{{ route('tareas.index') }}" 
+                       class="inline-flex items-center px-3 py-2 text-sm text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                        Limpiar filtros
+                    </a>
+                @endif
+            </div>
+        </div>
         <div class="overflow-hidden rounded-lg">
             <table id="myTable" class="w-full">
                 <thead class="bg-gray-50 dark:bg-gray-700">
