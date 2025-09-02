@@ -28,6 +28,7 @@ class AnuncioRequest extends FormRequest
             'fecha_expiracion' => 'nullable|date|after_or_equal:today',
             'grupo_id' => 'nullable|exists:grupos,id',
             'materia_id' => 'nullable|exists:materias,id',
+            'es_global' => 'nullable|boolean',
         ];
     }
 

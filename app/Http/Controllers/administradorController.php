@@ -208,7 +208,7 @@ class administradorController extends Controller
         $materias = materia::all();
         $usuarios = User::all();
         $tareas = tarea::where('grupo', $id)->get(); // Cambiado a 'tareas'
-        $anuncios = anuncio::where('grupo_id', $id)->activos()->get();
+        $anuncios = anuncio::porGrupo($id)->activos()->get();
         $circulares = Circular::where('grupo_id', $id)->activas()->orderBy('created_at', 'desc')->take(3)->get();
         return view("tareasAlumno", compact(['grupo','materias','usuarios', 'tareas', 'anuncios', 'circulares'])); // Cambiado a 'tareasAlumno'
  
@@ -486,19 +486,28 @@ class administradorController extends Controller
                 return redirect()->route('anuncios.index');
             }
         }
-        if(count($horario) == 1){
-            $materia = materia::find($horario[0]->materia_id);
-            $grupo = grupo::find($horario[0]->grupo_id);
-            $anuncio->grupo_id = $horario[0]->grupo_id;
-            $anuncio->materia_id = $horario[0]->materia_id;
-            $anuncio->seccion = $grupo->seccion;
-        }
-        else{
-            $materia = materia::find($request->materia_id);
-            $grupo = grupo::find($request->grupo_id);
-            $anuncio->grupo_id = $request->grupo_id;
-            $anuncio->materia_id = $request->materia_id;
-            $anuncio->seccion = $grupo->seccion;
+        // Si es un anuncio global, no se asigna grupo ni materia específica
+        if ($request->es_global) {
+            $anuncio->es_global = true;
+            $anuncio->grupo_id = null;
+            $anuncio->materia_id = null;
+            $anuncio->seccion = null;
+        } else {
+            $anuncio->es_global = false;
+            if(count($horario) == 1){
+                $materia = materia::find($horario[0]->materia_id);
+                $grupo = grupo::find($horario[0]->grupo_id);
+                $anuncio->grupo_id = $horario[0]->grupo_id;
+                $anuncio->materia_id = $horario[0]->materia_id;
+                $anuncio->seccion = $grupo->seccion;
+            }
+            else{
+                $materia = materia::find($request->materia_id);
+                $grupo = grupo::find($request->grupo_id);
+                $anuncio->grupo_id = $request->grupo_id;
+                $anuncio->materia_id = $request->materia_id;
+                $anuncio->seccion = $grupo->seccion;
+            }
         }
         $anuncio->save();
         session()->flash('toast', [
@@ -567,13 +576,22 @@ class administradorController extends Controller
                 return redirect()->route('anuncios.index');
             }
         }
-        $horario = horario::where('maestro_id', Auth::user()->id)->get();
-        if(count($horario) > 1){
-            $materia = materia::find($request->materia_id);
-            $grupo = grupo::find($request->grupo_id);
-            $anuncio->grupo_id = $request->grupo_id;
-            $anuncio->materia_id = $request->materia_id;
-            $anuncio->seccion = $grupo->seccion;
+        // Si es un anuncio global, no se asigna grupo ni materia específica
+        if ($request->es_global) {
+            $anuncio->es_global = true;
+            $anuncio->grupo_id = null;
+            $anuncio->materia_id = null;
+            $anuncio->seccion = null;
+        } else {
+            $anuncio->es_global = false;
+            $horario = horario::where('maestro_id', Auth::user()->id)->get();
+            if(count($horario) > 1){
+                $materia = materia::find($request->materia_id);
+                $grupo = grupo::find($request->grupo_id);
+                $anuncio->grupo_id = $request->grupo_id;
+                $anuncio->materia_id = $request->materia_id;
+                $anuncio->seccion = $grupo->seccion;
+            }
         }
         $anuncio->save();
         session()->flash('toast', [

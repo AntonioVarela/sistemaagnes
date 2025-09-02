@@ -17,10 +17,11 @@
                 <table id="myTable" class="w-full">
                     <thead class="bg-gray-50 dark:bg-gray-800">
                         <tr>
-                                                         <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Título</th>
-                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Contenido</th>
-                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Fecha</th>
-                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Expira</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Título</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Contenido</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Alcance</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Fecha</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Expira</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Acciones</th>
                         </tr>
                     </thead>
@@ -39,10 +40,7 @@
                                     </div>
                                     @if($anuncio->archivo)
                                         <div class="mt-2">
-                                            @php
-                                                $url = Storage::disk('s3')->url($anuncio->archivo);
-                                            @endphp
-                                            <a href="{{ $url }}" 
+                                            <a href="{{ $anuncio->url_archivo }}" 
                                                class="inline-flex items-center px-3 py-1 text-sm text-indigo-600 bg-indigo-100 rounded-full hover:bg-indigo-200 transition-colors" 
                                                target="_blank">
                                                 <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -50,6 +48,18 @@
                                                 </svg>
                                                 Ver archivo
                                             </a>
+                                        </div>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    @if($anuncio->es_global)
+                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
+                                            🌍 Global
+                                        </span>
+                                    @else
+                                        <div class="text-sm text-gray-900 dark:text-white">
+                                            <div class="font-medium">{{ $anuncio->grupo->nombre ?? 'N/A' }}</div>
+                                            <div class="text-xs text-gray-500">{{ $anuncio->materia->nombre ?? 'N/A' }}</div>
                                         </div>
                                     @endif
                                 </td>
@@ -81,7 +91,7 @@
                                         @if(auth()->user()->id === $anuncio->user_id || auth()->user()->rol === 'administrador')
                                                                                          <flux:modal.trigger name="edit-announcement">
                                                  <flux:button icon='pencil' variant="filled" 
-                                                     onclick="prepareEditModal({{ $anuncio->id }}, '{{ $anuncio->titulo }}', '{{ $anuncio->contenido }}', '{{ $anuncio->grupo_id }}', '{{ $anuncio->materia_id }}', '{{ $anuncio->fecha_expiracion ? $anuncio->fecha_expiracion->format('Y-m-d') : 'null' }}')" 
+                                                     onclick="prepareEditModal({{ $anuncio->id }}, '{{ $anuncio->titulo }}', '{{ $anuncio->contenido }}', '{{ $anuncio->grupo_id }}', '{{ $anuncio->materia_id }}', '{{ $anuncio->fecha_expiracion ? $anuncio->fecha_expiracion->format('Y-m-d') : 'null' }}', {{ $anuncio->es_global ? 'true' : 'false' }})" 
                                                      class="text-indigo-600 hover:text-indigo-900">
                                                      Editar
                                                  </flux:button>
@@ -122,9 +132,18 @@
                     <flux:textarea name="contenido" id="contenido" label="Contenido"
                         placeholder="Ingresa el contenido del anuncio" required />
                                          <flux:input name="archivo" id="archivo" label="Archivo" type="file" />
-                     <flux:input name="fecha_expiracion" id="fecha_expiracion" label="Fecha de expiración (opcional)" type="date" />
+                    <flux:input name="fecha_expiracion" id="fecha_expiracion" label="Fecha de expiración (opcional)" type="date" />
+                    
+                    <!-- Checkbox para anuncio global -->
+                    <div class="flex items-center space-x-3">
+                        <input type="checkbox" name="es_global" id="es_global" value="1" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                        <label for="es_global" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Anuncio Global (visible para todos los usuarios)
+                        </label>
+                    </div>
+                    
                     @if(count($horario) > 1)
-                        <div class="grid grid-cols-2 gap-4">
+                        <div id="grupo-materia-new" class="grupo-materia-container grid grid-cols-2 gap-4">
                             <flux:select name="grupo_id" id="grupo" label="Grupo" onchange="filtrarMaterias(this.value)">
                                 <option value="">Selecciona un grupo</option>
                                 @foreach ($grupos as $grupo)
@@ -166,8 +185,17 @@
                         placeholder="Ingresa el contenido del anuncio" required />
                                          <flux:input name="archivo" id="edit_archivo" label="Archivo" type="file" />
                      <flux:input name="fecha_expiracion" id="edit_fecha_expiracion" label="Fecha de expiración (opcional)" type="date" />
+                     
+                     <!-- Checkbox para anuncio global -->
+                     <div class="flex items-center space-x-3">
+                         <input type="checkbox" name="es_global" id="edit_es_global" value="1" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                         <label for="edit_es_global" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                             Anuncio Global (visible para todos los usuarios)
+                         </label>
+                     </div>
+                     
                     @if(count($horario) > 1)
-                        <div class="grid grid-cols-2 gap-4">
+                        <div id="grupo-materia-edit" class="grupo-materia-container grid grid-cols-2 gap-4">
                             <flux:select name="grupo_id" id="edit_grupo" label="Grupo" onchange="filtrarMateriasEditar(this.value)">
                                 <option value="">Selecciona un grupo</option>
                                 @foreach ($grupos as $grupo)
@@ -291,7 +319,7 @@
             }
         }
 
-        function prepareEditModal(id, titulo, contenido, grupo_id, materia_id, fecha_expiracion) {
+        function prepareEditModal(id, titulo, contenido, grupo_id, materia_id, fecha_expiracion, es_global) {
             const form = document.getElementById('edit-announcement-form');
             if (!form) return;
 
@@ -305,6 +333,9 @@
                 document.getElementById('edit_fecha_expiracion').value = '';
             }
             
+            // Establecer el checkbox de anuncio global
+            document.getElementById('edit_es_global').checked = es_global;
+            
             // Establecer grupo y materia
             if (grupo_id) {
                 document.getElementById('edit_grupo').value = grupo_id;
@@ -314,6 +345,81 @@
                 }
             }
         }
+
+        // Función para mostrar/ocultar campos según el tipo de anuncio
+        function toggleAnuncioGlobal(isGlobal, containerId) {
+            console.log('toggleAnuncioGlobal called:', isGlobal, containerId);
+            const grupoMateriaContainer = document.querySelector(containerId);
+            console.log('Container found:', grupoMateriaContainer);
+            if (grupoMateriaContainer) {
+                grupoMateriaContainer.style.display = isGlobal ? 'none' : 'grid';
+                console.log('Display changed to:', grupoMateriaContainer.style.display);
+            }
+        }
+
+        // Agregar event listeners para los checkboxes
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('DOMContentLoaded event fired');
+            const esGlobalCheckbox = document.getElementById('es_global');
+            const editEsGlobalCheckbox = document.getElementById('edit_es_global');
+            
+            console.log('Checkboxes found:', { esGlobalCheckbox, editEsGlobalCheckbox });
+            
+            if (esGlobalCheckbox) {
+                console.log('Adding event listener to es_global checkbox');
+                esGlobalCheckbox.addEventListener('change', function() {
+                    console.log('es_global checkbox changed:', this.checked);
+                    toggleAnuncioGlobal(this.checked, '#grupo-materia-new');
+                });
+            }
+            
+            if (editEsGlobalCheckbox) {
+                console.log('Adding event listener to edit_es_global checkbox');
+                editEsGlobalCheckbox.addEventListener('change', function() {
+                    console.log('edit_es_global checkbox changed:', this.checked);
+                    toggleAnuncioGlobal(this.checked, '#grupo-materia-edit');
+                });
+            }
+        });
+
+        // Función para inicializar checkboxes cuando se abren los modales
+        function initializeCheckboxes() {
+            const esGlobalCheckbox = document.getElementById('es_global');
+            const editEsGlobalCheckbox = document.getElementById('edit_es_global');
+            
+            if (esGlobalCheckbox && !esGlobalCheckbox.hasAttribute('data-initialized')) {
+                console.log('Initializing es_global checkbox');
+                esGlobalCheckbox.setAttribute('data-initialized', 'true');
+                esGlobalCheckbox.addEventListener('change', function() {
+                    console.log('es_global checkbox changed:', this.checked);
+                    toggleAnuncioGlobal(this.checked, '#grupo-materia-new');
+                });
+            }
+            
+            if (editEsGlobalCheckbox && !editEsGlobalCheckbox.hasAttribute('data-initialized')) {
+                console.log('Initializing edit_es_global checkbox');
+                editEsGlobalCheckbox.setAttribute('data-initialized', 'true');
+                editEsGlobalCheckbox.addEventListener('change', function() {
+                    console.log('edit_es_global checkbox changed:', this.checked);
+                    toggleAnuncioGlobal(this.checked, '#grupo-materia-edit');
+                });
+            }
+        }
+
+        // Observar cambios en el DOM para detectar cuando se abren los modales
+        const observer = new MutationObserver(function(mutations) {
+            mutations.forEach(function(mutation) {
+                if (mutation.type === 'childList') {
+                    initializeCheckboxes();
+                }
+            });
+        });
+
+        // Observar cambios en el body
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
 
         document.addEventListener('DOMContentLoaded', iniciarComponentes);
         document.addEventListener('livewire:navigated', iniciarComponentes);

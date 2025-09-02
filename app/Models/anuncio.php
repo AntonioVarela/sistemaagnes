@@ -19,7 +19,8 @@ class anuncio extends Model
         'usuario_id',
         'grupo_id',
         'materia_id',
-        'seccion'
+        'seccion',
+        'es_global'
     ];
 
     protected $casts = [
@@ -54,6 +55,21 @@ class anuncio extends Model
     public function scopeExpirados($query)
     {
         return $query->where('fecha_expiracion', '<', Carbon::today());
+    }
+
+    // Scope para obtener anuncios globales
+    public function scopeGlobales($query)
+    {
+        return $query->where('es_global', true);
+    }
+
+    // Scope para obtener anuncios por grupo
+    public function scopePorGrupo($query, $grupoId)
+    {
+        return $query->where(function($q) use ($grupoId) {
+            $q->where('es_global', true)
+              ->orWhere('grupo_id', $grupoId);
+        });
     }
 
     // Método para verificar si el anuncio está activo
