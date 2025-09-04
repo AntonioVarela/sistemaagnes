@@ -21,7 +21,8 @@ class Circular extends Model
         'usuario_id',
         'grupo_id',
         'seccion',
-        'fecha_expiracion'
+        'fecha_expiracion',
+        'es_global'
     ];
 
     protected $casts = [
@@ -51,6 +52,21 @@ class Circular extends Model
     public function scopeExpiradas($query)
     {
         return $query->where('fecha_expiracion', '<', Carbon::today());
+    }
+
+    // Scope para obtener circulares globales
+    public function scopeGlobales($query)
+    {
+        return $query->where('es_global', true);
+    }
+
+    // Scope para obtener circulares por grupo específico o globales
+    public function scopePorGrupo($query, $grupoId)
+    {
+        return $query->where(function($q) use ($grupoId) {
+            $q->where('grupo_id', $grupoId)
+              ->orWhere('es_global', true);
+        });
     }
 
     // Método para verificar si la circular está activa

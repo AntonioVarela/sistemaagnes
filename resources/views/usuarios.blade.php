@@ -20,6 +20,7 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Nombre</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Email</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Rol</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Estado</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Acciones</th>
                         </tr>
                     </thead>
@@ -44,21 +45,35 @@
                                         {{ $usuario->rol }}
                                     </span>
                                 </td>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
+                                        @if($usuario->id === Auth::id())
+                                            <flux:icon name="user" class="w-3 h-3 mr-1" />
+                                            Tú
+                                        @else
+                                            Activo
+                                        @endif
+                                    </span>
+                                </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                     <div class="flex items-center gap-2">
-                                        <flux:modal.trigger name="edit-task">
+                                        <flux:modal.trigger name="edit-usuario">
                                             <flux:button icon='pencil' variant="filled" 
                                                 onclick="prepareEditModal({{ $usuario->id }}, '{{ $usuario->name }}', '{{ $usuario->email }}', '{{ $usuario->rol }}')" 
                                                 class="text-indigo-600 hover:text-indigo-900">
                                                 Editar
                                             </flux:button>
                                         </flux:modal.trigger>
-                                        <form action="{{ route('usuarios.destroy', $usuario->id) }}" method="POST" class="form-eliminar inline">
-                                            @csrf
-                                            <button type="submit" class="text-red-600 hover:text-red-900 transition-colors">
+                                        @if($usuario->id !== Auth::id())
+                                            <button onclick="confirmarEliminacion({{ $usuario->id }}, '{{ $usuario->name }}')" 
+                                                    class="text-red-600 hover:text-red-900 transition-colors">
                                                 <flux:icon name="trash" />
                                             </button>
-                                        </form>
+                                        @else
+                                            <span class="text-gray-400 cursor-not-allowed" title="No puedes eliminar tu propia cuenta">
+                                                <flux:icon name="lock" />
+                                            </span>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>
@@ -104,15 +119,16 @@
     </flux:modal>
 
     <!-- Modal de edición -->
-    <flux:modal name="edit-task" class="md:w-[500px] p-6">
+    <flux:modal name="edit-usuario" class="md:w-[500px] p-6">
         <flux:container class="space-y-6">
             <div class="flex items-center justify-between">
                 <flux:heading size="lg">Editar Usuario</flux:heading>
             </div>
             <flux:separator />
 
-            <form id="edit-task-form" method="POST" class="space-y-4">
+            <form id="edit-usuario-form" method="POST" class="space-y-4">
                 @csrf
+                @method('PUT')
                 <div class="grid gap-4">
                     <flux:input name="name" id="edit_name" label="Nombre" type="text"
                         placeholder="Ingresa el nombre" required />
@@ -129,7 +145,7 @@
                 </div>
 
                 <flux:footer class="flex justify-end gap-3">
-                    <flux:button type="button" variant="filled" onclick="closeModal('edit-task')">Cancelar</flux:button>
+                    <flux:button type="button" variant="filled" onclick="closeModal('edit-usuario')">Cancelar</flux:button>
                     <flux:button type="submit" variant="primary">Actualizar usuario</flux:button>
                 </flux:footer>
             </form>
@@ -163,36 +179,72 @@
         }
 
         function prepareEditModal(id, name, email, rol) {
-            const form = document.getElementById('edit-task-form');
-            form.action = `/usuarios/${id}/update`;
+            const form = document.getElementById('edit-usuario-form');
+            form.action = `/usuarios/${id}`;
             
             document.getElementById('edit_name').value = name;
             document.getElementById('edit_email').value = email;
             document.getElementById('edit_rol').value = rol;
         }
 
-        document.addEventListener('DOMContentLoaded', function () {
-            const forms = document.querySelectorAll('.form-eliminar');
-            forms.forEach(form => {
-                form.addEventListener('submit', function (e) {
-                    e.preventDefault();
-                    Swal.fire({
-                        title: '¿Estás seguro?',
-                        text: "¡Esta acción no se puede deshacer!",
-                        icon: 'warning',
-                        showCancelButton: true,
-                        confirmButtonColor: '#3085d6',
-                        cancelButtonColor: '#d33',
-                        confirmButtonText: 'Sí, eliminar',
-                        cancelButtonText: 'Cancelar'
-                    }).then((result) => {
-                        if (result.isConfirmed) {
-                            form.submit();
-                        }
-                    });
-                });
+        function confirmarEliminacion(id, nombre) {
+            Swal.fire({
+                title: '¿Eliminar usuario?',
+                html: `
+                    <div class="text-left">
+                        <p class="mb-3">¿Estás seguro de que quieres eliminar al usuario <strong>${nombre}</strong>?</p>
+                        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-3">
+                            <div class="flex">
+                                <div class="flex-shrink-0">
+                                    <svg class="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd" />
+                                    </svg>
+                                </div>
+                                <div class="ml-3">
+                                    <p class="text-sm text-yellow-700">
+                                        <strong>Advertencia:</strong> Esta acción no se puede deshacer y se verificará que el usuario no tenga:
+                                    </p>
+                                    <ul class="mt-2 text-sm text-yellow-700 list-disc list-inside">
+                                        <li>Horarios asignados</li>
+                                        <li>Grupos como titular</li>
+                                        <li>Anuncios o circulares publicados</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#d33',
+                cancelButtonColor: '#6b7280',
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar',
+                width: '500px'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Crear y enviar el formulario de eliminación
+                    const form = document.createElement('form');
+                    form.method = 'POST';
+                    form.action = `/usuarios/${id}`;
+                    
+                    const csrfToken = document.createElement('input');
+                    csrfToken.type = 'hidden';
+                    csrfToken.name = '_token';
+                    csrfToken.value = '{{ csrf_token() }}';
+                    
+                    const methodField = document.createElement('input');
+                    methodField.type = 'hidden';
+                    methodField.name = '_method';
+                    methodField.value = 'DELETE';
+                    
+                    form.appendChild(csrfToken);
+                    form.appendChild(methodField);
+                    document.body.appendChild(form);
+                    form.submit();
+                }
             });
-        });
+        }
 
         @if(session('toast'))
             Toastify({

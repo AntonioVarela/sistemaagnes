@@ -3,6 +3,9 @@
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 use App\Http\Controllers\administradorController;
+use App\Http\Controllers\CursosController;
+use App\Http\Controllers\TareasPdfController;
+
 
 Route::get('/', [App\Http\Controllers\WelcomeController::class, 'index'])->name('home');
 
@@ -33,9 +36,9 @@ Route::post('/tareas/{id}/destroy', [administradorController::class,'destroyTare
 Route::get('/dashboard', [administradorController::class,'indexDashboard'])->name('dashboard')->middleware(['auth', 'verified']);
 
     Route::get('/usuarios',[administradorController::class,'showUsuarios'])->name('usuarios.index');
-Route::post('/usuariosguardar', [administradorController::class,'storeUsuario'])->name('usuarios.store');
+Route::post('/usuarios', [administradorController::class,'storeUsuario'])->name('usuarios.store');
 Route::delete('/usuarios/{id}', [administradorController::class,'destroyUsuario'])->name('usuarios.destroy');
-Route::post('/usuarios/{id}/update', [administradorController::class,'updateUsuario'])->name('usuarios.update');
+Route::put('/usuarios/{id}', [administradorController::class,'updateUsuario'])->name('usuarios.update');
 
 Route::get('/horarios',[administradorController::class,'showHorarios'])->name('horarios.index');
 Route::post('/horariosguardar', [administradorController::class,'storeHorario'])->name('horarios.store');
@@ -52,6 +55,15 @@ Route::post('/circulares', [administradorController::class,'storeCircular'])->na
 Route::put('/circulares/{id}', [administradorController::class,'updateCircular'])->name('circulares.update');
 Route::delete('/circulares/{id}', [administradorController::class,'destroyCircular'])->name('circulares.destroy');
 Route::get('/circulares/{id}/download', [administradorController::class,'downloadCircular'])->name('circulares.download');
+
+// Rutas para cursos
+Route::resource('cursos', CursosController::class)->middleware('auth');
+Route::post('/cursos/{curso}/toggle-status', [CursosController::class, 'toggleStatus'])->name('cursos.toggle-status')->middleware('auth');
+Route::get('/api/cursos-activos', [CursosController::class, 'getCursosActivos'])->name('cursos.activos')->middleware('auth');
+
+// Rutas para descarga de PDF de tareas
+Route::get('/tareas/{grupoId}/pdf', [TareasPdfController::class, 'downloadTareasPdf'])->name('tareas.pdf.download')->middleware('auth');
+Route::get('/tareas/{grupoId}/pdf-preview', [TareasPdfController::class, 'previewTareasPdf'])->name('tareas.pdf.preview')->middleware('auth');
 
 });
 

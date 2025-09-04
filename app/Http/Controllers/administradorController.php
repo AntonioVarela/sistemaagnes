@@ -209,7 +209,7 @@ class administradorController extends Controller
         $usuarios = User::all();
         $tareas = tarea::where('grupo', $id)->get(); // Cambiado a 'tareas'
         $anuncios = anuncio::porGrupo($id)->activos()->get();
-        $circulares = Circular::where('grupo_id', $id)->activas()->orderBy('created_at', 'desc')->take(3)->get();
+        $circulares = Circular::porGrupo($id)->activas()->orderBy('created_at', 'desc')->take(3)->get();
         return view("tareasAlumno", compact(['grupo','materias','usuarios', 'tareas', 'anuncios', 'circulares'])); // Cambiado a 'tareasAlumno'
  
     }
@@ -310,40 +310,141 @@ class administradorController extends Controller
     }
     public function storeUsuario(Request $request)
     {
-        $usuario = new User();
-        $usuario->name = $request->name;
-        $usuario->email = $request->email;
-        $usuario->password = bcrypt($request->password);
-        $usuario->rol = $request->rol;
-        $usuario->save();
-        session()->flash('toast', [
-            'type' => 'success',
-            'message' => '¡Usuario creado exitosamente!'
-        ]);
+        try {
+            // Validar que el email no esté duplicado
+            $emailExists = User::where('email', $request->email)->exists();
+            if ($emailExists) {
+                session()->flash('toast', [
+                    'type' => 'error',
+                    'message' => 'El email ya está en uso'
+                ]);
+                return redirect()->route('usuarios.index');
+            }
+            
+            $usuario = new User();
+            $usuario->name = $request->name;
+            $usuario->email = $request->email;
+            $usuario->password = bcrypt($request->password);
+            $usuario->rol = $request->rol;
+            $usuario->save();
+            
+            session()->flash('toast', [
+                'type' => 'success',
+                'message' => '¡Usuario creado exitosamente!'
+            ]);
+            
+        } catch (\Exception $e) {
+            session()->flash('toast', [
+                'type' => 'error',
+                'message' => 'Error al crear el usuario: ' . $e->getMessage()
+            ]);
+        }
+        
         return redirect()->route('usuarios.index');
     }
     public function destroyUsuario($id)
     {
-        $usuario = User::findOrFail($id);
-        $usuario->delete();
-        session()->flash('toast', [
-            'type' => 'success',
-            'message' => '¡Usuario eliminado exitosamente!'
-        ]);
+        try {
+            // Verificar que no se esté eliminando a sí mismo
+            if (Auth::id() == $id) {
+                session()->flash('toast', [
+                    'type' => 'error',
+                    'message' => 'No puedes eliminar tu propia cuenta'
+                ]);
+                return redirect()->route('usuarios.index');
+            }
+
+            $usuario = User::findOrFail($id);
+            
+            // Verificar si el usuario tiene horarios asignados
+            $horariosAsignados = horario::where('maestro_id', $id)->count();
+            if ($horariosAsignados > 0) {
+                session()->flash('toast', [
+                    'type' => 'error',
+                    'message' => 'No se puede eliminar el usuario porque tiene horarios asignados'
+                ]);
+                return redirect()->route('usuarios.index');
+            }
+
+            // Verificar si el usuario es titular de algún grupo
+            $gruposTitular = grupo::where('titular', $id)->count();
+            if ($gruposTitular > 0) {
+                session()->flash('toast', [
+                    'type' => 'error',
+                    'message' => 'No se puede eliminar el usuario porque es titular de un grupo'
+                ]);
+                return redirect()->route('usuarios.index');
+            }
+
+            // Verificar si el usuario tiene anuncios o circulares
+            $anunciosUsuario = anuncio::where('user_id', $id)->count();
+            $circularesUsuario = Circular::where('usuario_id', $id)->count();
+            
+            if ($anunciosUsuario > 0 || $circularesUsuario > 0) {
+                session()->flash('toast', [
+                    'type' => 'error',
+                    'message' => 'No se puede eliminar el usuario porque tiene contenido publicado'
+                ]);
+                return redirect()->route('usuarios.index');
+            }
+
+            $usuario->delete();
+            
+            session()->flash('toast', [
+                'type' => 'success',
+                'message' => '¡Usuario eliminado exitosamente!'
+            ]);
+            
+        } catch (\Exception $e) {
+            session()->flash('toast', [
+                'type' => 'error',
+                'message' => 'Error al eliminar el usuario: ' . $e->getMessage()
+            ]);
+        }
+        
         return redirect()->route('usuarios.index');
     }
     public function updateUsuario(Request $request, $id)
     {
-        $usuario = User::findOrFail($id);
-        $usuario->name = $request->name;
-        $usuario->email = $request->email;
-        $usuario->password = bcrypt($request->password);
-        $usuario->rol = $request->rol;
-        $usuario->save();
-        session()->flash('toast', [
-            'type' => 'success',
-            'message' => '¡Usuario actualizado exitosamente!'
-        ]);
+        try {
+            $usuario = User::findOrFail($id);
+            
+            // Validar que el email no esté duplicado (excluyendo el usuario actual)
+            $emailExists = User::where('email', $request->email)
+                ->where('id', '!=', $id)
+                ->exists();
+                
+            if ($emailExists) {
+                session()->flash('toast', [
+                    'type' => 'error',
+                    'message' => 'El email ya está en uso por otro usuario'
+                ]);
+                return redirect()->route('usuarios.index');
+            }
+            
+            $usuario->name = $request->name;
+            $usuario->email = $request->email;
+            $usuario->rol = $request->rol;
+            
+            // Solo actualizar la contraseña si se proporciona una nueva
+            if (!empty($request->password)) {
+                $usuario->password = bcrypt($request->password);
+            }
+            
+            $usuario->save();
+            
+            session()->flash('toast', [
+                'type' => 'success',
+                'message' => '¡Usuario actualizado exitosamente!'
+            ]);
+            
+        } catch (\Exception $e) {
+            session()->flash('toast', [
+                'type' => 'error',
+                'message' => 'Error al actualizar el usuario: ' . $e->getMessage()
+            ]);
+        }
+        
         return redirect()->route('usuarios.index');
     }
     //Horarios
@@ -647,8 +748,18 @@ class administradorController extends Controller
             $circular->nombre_archivo_original = $archivo->getClientOriginalName();
             $circular->tipo_archivo = $archivo->getClientMimeType();
             $circular->usuario_id = Auth::user()->id;
-            $circular->grupo_id = $request->grupo_id;
-            $circular->seccion = $request->seccion;
+            
+            // Si es global, no asignar grupo ni sección específicos
+            if ($request->es_global) {
+                $circular->es_global = true;
+                $circular->grupo_id = null;
+                $circular->seccion = null;
+            } else {
+                $circular->es_global = false;
+                $circular->grupo_id = $request->grupo_id;
+                $circular->seccion = $request->seccion;
+            }
+            
             $circular->fecha_expiracion = $request->fecha_expiracion ? $request->fecha_expiracion : null;
             $circular->save();
 
@@ -682,8 +793,18 @@ class administradorController extends Controller
 
         $circular->titulo = $request->titulo;
         $circular->descripcion = $request->descripcion;
-        $circular->grupo_id = $request->grupo_id;
-        $circular->seccion = $request->seccion;
+        
+        // Si es global, no asignar grupo ni sección específicos
+        if ($request->es_global) {
+            $circular->es_global = true;
+            $circular->grupo_id = null;
+            $circular->seccion = null;
+        } else {
+            $circular->es_global = false;
+            $circular->grupo_id = $request->grupo_id;
+            $circular->seccion = $request->seccion;
+        }
+        
         $circular->fecha_expiracion = $request->fecha_expiracion ? $request->fecha_expiracion : null;
 
         if ($request->hasFile('archivo')) {

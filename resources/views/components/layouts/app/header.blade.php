@@ -15,6 +15,9 @@
                 <flux:navbar.item icon="layout-grid" :href="route('dashboard')" :current="request()->routeIs('dashboard')" wire:navigate>
                     {{ __('Dashboard') }}
                 </flux:navbar.item>
+                <flux:navbar.item icon="academic-cap" :href="route('cursos.index')" :current="request()->routeIs('cursos.*')" wire:navigate>
+                    {{ __('Cursos') }}
+                </flux:navbar.item>
             </flux:navbar>
 
             <flux:spacer />
@@ -106,6 +109,9 @@
                     </flux:navlist.item>
                     <flux:navlist.item icon="document-text" :href="route('circulares.index')" :current="request()->routeIs('circulares.index')" wire:navigate>
                         {{ __('Circulares') }}
+                    </flux:navlist.item>
+                    <flux:navlist.item icon="academic-cap" :href="route('cursos.index')" :current="request()->routeIs('cursos.*')" wire:navigate>
+                        {{ __('Cursos') }}
                     </flux:navlist.item>
                     @if (Auth::user()->rol != "Coordinador")
                     <flux:navlist.item icon="book-open" :href="route('tareas.index')" :current="request()->routeIs('tareas.index')" wire:navigate>

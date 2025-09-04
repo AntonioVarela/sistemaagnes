@@ -25,9 +25,10 @@ class CircularRequest extends FormRequest
             'titulo' => 'required|string|max:255',
             'descripcion' => 'nullable|string|max:1000',
             'archivo' => 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240', // 10MB máximo
-            'grupo_id' => 'required|exists:grupos,id',
-            'seccion' => 'required|in:Primaria,Secundaria',
-            'fecha_expiracion' => 'nullable|date|after:today'
+            'grupo_id' => 'nullable|exists:grupos,id',
+            'seccion' => 'nullable|in:Primaria,Secundaria',
+            'fecha_expiracion' => 'nullable|date|after:today',
+            'es_global' => 'nullable|boolean'
         ];
     }
 
