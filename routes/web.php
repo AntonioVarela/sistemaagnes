@@ -61,11 +61,11 @@ Route::resource('cursos', CursosController::class)->middleware('auth');
 Route::post('/cursos/{curso}/toggle-status', [CursosController::class, 'toggleStatus'])->name('cursos.toggle-status')->middleware('auth');
 Route::get('/api/cursos-activos', [CursosController::class, 'getCursosActivos'])->name('cursos.activos')->middleware('auth');
 
-// Rutas para descarga de PDF de tareas
-Route::get('/tareas/{grupoId}/pdf', [TareasPdfController::class, 'downloadTareasPdf'])->name('tareas.pdf.download')->middleware('auth');
-Route::get('/tareas/{grupoId}/pdf-preview', [TareasPdfController::class, 'previewTareasPdf'])->name('tareas.pdf.preview')->middleware('auth');
 
 });
+// Rutas para descarga de PDF de tareas
+Route::get('/tareas/{grupoId}/pdf', [TareasPdfController::class, 'downloadTareasPdf'])->name('tareas.pdf.download');
+Route::get('/tareas/{grupoId}/pdf-preview', [TareasPdfController::class, 'previewTareasPdf'])->name('tareas.pdf.preview');
 
 Route::get('/actividades/{id}', [administradorController::class,'showAlumnos'])->name('tareas.alumnos');//Cambiar a volt
 
