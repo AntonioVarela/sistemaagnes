@@ -349,7 +349,7 @@
                                         <div class="w-full flex-shrink-0">
                                             <div class="relative group cursor-pointer">
                                                 @if($curso->imagen)
-                                                    <img src="{{ $curso->url_imagen }}" alt="{{ $curso->titulo }}" class="w-full h-48 object-cover rounded-lg">
+                                                    <img src="{{ $curso->url_imagen }}" alt="{{ $curso->titulo }}" class="w-full h-48 object-cover rounded-lg cursor-pointer" onclick="openFullscreenImage('{{ $curso->url_imagen }}', '{{ $curso->titulo }}')">
                                                 @else
                                                     <div class="w-full h-48 bg-gradient-to-br from-{{ $loop->index % 2 == 0 ? 'blue' : 'emerald' }}-500 to-{{ $loop->index % 2 == 0 ? 'purple' : 'teal' }}-600 rounded-lg flex items-center justify-center">
                                                         <svg class="w-16 h-16 text-white opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -363,11 +363,6 @@
                                                     <p class="text-sm opacity-90">{{ $curso->descripcion }}</p>
                                                 </div>
                                                 <div class="absolute top-3 right-3">
-                                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-emerald-500 text-white">
-                                                        {{ ucfirst($curso->nivel) }}
-                                                    </span>
-                                                </div>
-                                                <div class="absolute top-3 left-3">
                                                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-500 text-white">
                                                         {{ ucfirst($curso->categoria) }}
                                                     </span>
@@ -474,6 +469,18 @@
                     <p id="modalResources" class="text-sm text-gray-500">No hay recursos disponibles</p>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Modal para vista en pantalla completa de imágenes -->
+    <div id="imageModal" class="fixed inset-0 hidden bg-black bg-opacity-90 backdrop-blur-sm flex items-center justify-center z-50">
+        <div class="relative w-full h-full flex items-center justify-center p-4">
+            <button id="closeImageModal" class="absolute top-4 right-4 text-white hover:text-gray-300 focus:outline-none z-10">
+                <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                </svg>
+            </button>
+            <img id="fullscreenImage" src="" alt="Imagen en pantalla completa" class="max-w-full max-h-full object-contain">
         </div>
     </div>
 
@@ -654,6 +661,44 @@
         }
         
         // La función descargarCircular() ya no es necesaria ya que ahora usamos enlaces directos
+        
+        // Función para abrir imagen en pantalla completa
+        function openFullscreenImage(imageSrc, imageAlt) {
+            const modal = document.getElementById('imageModal');
+            const image = document.getElementById('fullscreenImage');
+            
+            image.src = imageSrc;
+            image.alt = imageAlt;
+            modal.classList.remove('hidden');
+            
+            // Prevenir scroll del body
+            document.body.style.overflow = 'hidden';
+        }
+        
+        // Cerrar modal de imagen
+        document.getElementById('closeImageModal').addEventListener('click', function() {
+            document.getElementById('imageModal').classList.add('hidden');
+            document.body.style.overflow = 'auto';
+        });
+        
+        // Cerrar modal de imagen al hacer clic fuera
+        document.getElementById('imageModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
+        });
+        
+        // Cerrar modal de imagen con tecla Escape
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                const imageModal = document.getElementById('imageModal');
+                if (!imageModal.classList.contains('hidden')) {
+                    imageModal.classList.add('hidden');
+                    document.body.style.overflow = 'auto';
+                }
+            }
+        });
         
     </script>
 </body>
