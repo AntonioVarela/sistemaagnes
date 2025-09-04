@@ -28,10 +28,7 @@ class TareasPdfController extends Controller
      */
     public function downloadTareasPdf($grupoId)
     {
-        // Verificar que el usuario esté autenticado
-        if (!Auth::check()) {
-            abort(401, 'Usuario no autenticado');
-        }
+        // No se requiere autenticación para descargar PDFs
 
         // Obtener el grupo
         $grupo = grupo::findOrFail($grupoId);
@@ -74,7 +71,7 @@ class TareasPdfController extends Controller
             'grupo' => $grupo,
             'tareas' => $tareasData,
             'fechaGeneracion' => now()->format('d/m/Y H:i:s'),
-            'usuario' => Auth::user(),
+            'usuario' => Auth::user() ?? (object)['name' => 'Usuario Público'],
             'inicioSemana' => now()->startOfWeek()->format('d/m/Y'),
             'finSemana' => now()->endOfWeek()->format('d/m/Y')
         ]);
@@ -96,10 +93,7 @@ class TareasPdfController extends Controller
      */
     public function previewTareasPdf($grupoId)
     {
-        // Verificar que el usuario esté autenticado
-        if (!Auth::check()) {
-            abort(401, 'Usuario no autenticado');
-        }
+        // No se requiere autenticación para ver PDFs
 
         // Obtener el grupo
         $grupo = grupo::findOrFail($grupoId);
@@ -134,7 +128,7 @@ class TareasPdfController extends Controller
             'grupo' => $grupo,
             'tareas' => $tareasData,
             'fechaGeneracion' => now()->format('d/m/Y H:i:s'),
-            'usuario' => Auth::user(),
+            'usuario' => Auth::user() ?? (object)['name' => 'Usuario Público'],
             'inicioSemana' => now()->startOfWeek()->format('d/m/Y'),
             'finSemana' => now()->endOfWeek()->format('d/m/Y')
         ]);
