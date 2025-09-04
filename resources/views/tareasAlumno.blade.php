@@ -112,6 +112,20 @@
             transition: transform 0.3s ease-in-out;
         }
         
+        /* Estilos para imágenes clickeables */
+        #cursosCarousel .group[data-image] {
+            transition: all 0.3s ease-in-out;
+        }
+        
+        #cursosCarousel .group[data-image]:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        
+        #cursosCarousel .group[data-image]:active {
+            transform: translateY(0);
+        }
+        
         /* Responsive para el carrusel */
         @media (max-width: 768px) {
             #cursosCarousel .w-full {
@@ -347,9 +361,9 @@
                                     @if($cursosActivos->count() > 0)
                                         @foreach($cursosActivos as $curso)
                                         <div class="w-full flex-shrink-0">
-                                            <div class="relative group cursor-pointer">
+                                            <div class="relative group cursor-pointer" data-image="{{ $curso->imagen ? $curso->url_imagen : '' }}" data-title="{{ $curso->titulo }}">
                                                 @if($curso->imagen)
-                                                    <img src="{{ $curso->url_imagen }}" alt="{{ $curso->titulo }}" class="w-full h-48 object-cover rounded-lg cursor-pointer" onclick="openFullscreenImage('{{ $curso->url_imagen }}', '{{ $curso->titulo }}')">
+                                                    <img src="{{ $curso->url_imagen }}" alt="{{ $curso->titulo }}" class="w-full h-48 object-cover rounded-lg cursor-pointer">
                                                 @else
                                                     <div class="w-full h-48 bg-gradient-to-br from-{{ $loop->index % 2 == 0 ? 'blue' : 'emerald' }}-500 to-{{ $loop->index % 2 == 0 ? 'purple' : 'teal' }}-600 rounded-lg flex items-center justify-center">
                                                         <svg class="w-16 h-16 text-white opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -367,6 +381,15 @@
                                                         {{ ucfirst($curso->categoria) }}
                                                     </span>
                                                 </div>
+                                                @if($curso->imagen)
+                                                <div class="absolute top-3 left-3">
+                                                    <div class="bg-white/20 backdrop-blur-sm rounded-full p-1.5">
+                                                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
+                                                        </svg>
+                                                    </div>
+                                                </div>
+                                                @endif
                                             </div>
                                         </div>
                                         @endforeach
@@ -598,6 +621,20 @@
             const prevBtn = document.getElementById('prevBtn');
             const nextBtn = document.getElementById('nextBtn');
             const indicators = document.querySelectorAll('.carousel-indicator');
+            
+            // Agregar event listeners para las imágenes de cursos
+            const cursoContainers = document.querySelectorAll('[data-image]');
+            cursoContainers.forEach(container => {
+                if (container.dataset.image) {
+                    container.addEventListener('click', function() {
+                        const imageSrc = this.dataset.image;
+                        const imageTitle = this.dataset.title;
+                        if (imageSrc) {
+                            openFullscreenImage(imageSrc, imageTitle);
+                        }
+                    });
+                }
+            });
             
             let currentSlide = 0;
             const totalSlides = indicators.length;
