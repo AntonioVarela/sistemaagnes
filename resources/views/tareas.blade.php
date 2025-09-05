@@ -14,10 +14,10 @@
 
         <!-- Filtros -->
         <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-700">
-            <div class="flex flex-wrap gap-4 items-center">
-                <div class="flex items-center gap-2">
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Filtrar por grupo:</label>
-                    <flux:select name="grupo_filter" class="w-full" onchange="window.location.href=this.value">
+            <div class="flex flex-col sm:flex-row flex-wrap gap-4 items-start sm:items-center">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
+                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">Filtrar por grupo:</label>
+                    <flux:select name="grupo_filter" class="w-full sm:w-48" onchange="window.location.href=this.value">
                         <option value="{{ route('tareas.index') }}">Todos los grupos</option>
                         @foreach($grupos as $grupo)
                             <option value="{{ route('tareas.index') }}?grupo_filter={{ $grupo->id }}" 
@@ -27,9 +27,9 @@
                         @endforeach
                     </flux:select>
                 </div>
-                <div class="flex items-center gap-2">
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Filtrar por materia:</label>
-                    <flux:select name="materia_filter" class="w-full" onchange="window.location.href=this.value">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
+                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">Filtrar por materia:</label>
+                    <flux:select name="materia_filter" class="w-full sm:w-48" onchange="window.location.href=this.value">
                         <option value="{{ route('tareas.index') }}">Todas las materias</option>
                         @foreach($materias as $materia)
                             <option value="{{ route('tareas.index') }}?materia_filter={{ $materia->id }}" 
@@ -41,7 +41,7 @@
                 </div>
                 @if(request('grupo_filter') || request('materia_filter'))
                     <a href="{{ route('tareas.index') }}" 
-                       class="inline-flex items-center px-3 py-2 text-sm text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors">
+                       class="inline-flex items-center px-3 py-2 text-sm text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors w-full sm:w-auto justify-center">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
@@ -50,37 +50,53 @@
                 @endif
             </div>
         </div>
-        <div class="overflow-hidden rounded-lg">
-            <table id="myTable" class="w-full">
+        <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+            <table id="myTable" class="w-full min-w-full">
                 <thead class="bg-gray-50 dark:bg-gray-700">
                     <tr>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tarea</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Fecha entrega</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Grupo</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Descripción</th>
-                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Acciones</th>
+                        <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tarea</th>
+                        <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell">Fecha entrega</th>
+                        <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden md:table-cell">Grupo</th>
+                        <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden lg:table-cell">Descripción</th>
+                        <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Acciones</th>
                     </tr>
                 </thead>
                 <tbody class=" divide-y divide-gray-200 dark:divide-gray-700">
                     @foreach ($tareas as $tarea)
                         <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="px-3 sm:px-6 py-4">
                                 <div class="flex items-center">
-                                    <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900">
-                                        <svg class="h-6 w-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <div class="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900">
+                                        <svg class="h-4 w-4 sm:h-6 sm:w-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
                                         </svg>
                                     </div>
-                                    <div class="ml-4">
+                                    <div class="ml-2 sm:ml-4">
                                         <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $tarea->titulo }}</div>
+                                        <!-- Información adicional para móviles -->
+                                        <div class="sm:hidden text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                            <div>{{ $tarea->fecha_entrega }}</div>
+                                            @if($tarea->hora_entrega)
+                                                <div>{{ $tarea->hora_entrega }}</div>
+                                            @endif
+                                            @foreach ($grupos as $grupo)
+                                                @if ($tarea->grupo == $grupo->id)
+                                                    <div class="mt-1">
+                                                        <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
+                                                            {{ $grupo->nombre }} {{ $grupo->seccion }}
+                                                        </span>
+                                                    </div>
+                                                @endif
+                                            @endforeach
+                                        </div>
                                     </div>
                                 </div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="px-3 sm:px-6 py-4 whitespace-nowrap hidden sm:table-cell">
                                 <div class="text-sm text-gray-900 dark:text-white">{{ $tarea->fecha_entrega }}</div>
                                 <div class="text-sm text-gray-500 dark:text-gray-400">{{ $tarea->hora_entrega }}</div>
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap">
+                            <td class="px-3 sm:px-6 py-4 whitespace-nowrap hidden md:table-cell">
                                 @foreach ($grupos as $grupo)
                                     @if ($tarea->grupo == $grupo->id)
                                         <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
@@ -89,7 +105,7 @@
                                     @endif
                                 @endforeach
                             </td>
-                            <td class="px-6 py-4">
+                            <td class="px-3 sm:px-6 py-4 hidden lg:table-cell">
                                 <div class="text-sm text-gray-900 dark:text-white line-clamp-2">{!! $tarea->descripcion !!}</div>
                                 @if($tarea->archivo)
                                     <div class="mt-2">
@@ -107,19 +123,19 @@
                                     </div>
                                 @endif
                             </td>
-                            <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                <div class="flex items-center gap-2">
+                            <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <div class="flex items-center gap-1 sm:gap-2">
                                     <flux:modal.trigger name="edit-task">
-                                        <flux:button icon='pencil' variant="filled" 
+                                        <flux:button icon='pencil' variant="filled" size="sm"
                                             onclick="prepareEditModal({{ $tarea->id }}, `{{ addslashes($tarea->descripcion) }}`, '{{ $tarea->fecha_entrega }}', '{{ $tarea->hora_entrega }}', '{{ $tarea->grupo }}', '{{ $tarea->materia }}')" 
                                             class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300">
-                                            Editar
+                                            <span class="hidden sm:inline">Editar</span>
                                         </flux:button>
                                     </flux:modal.trigger>
                                     <form action="{{ route('tareas.destroy', $tarea->id) }}" method="POST" class="form-eliminar inline">
                                         @csrf
-                                        <button type="submit" class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors">
-                                            <flux:icon name="trash" />
+                                        <button type="submit" class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors p-1">
+                                            <flux:icon name="trash" class="w-4 h-4" />
                                         </button>
                                     </form>
                                 </div>
@@ -243,6 +259,100 @@
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    
+    <style>
+        /* Estilos para mejorar la compatibilidad entre Flux UI y DataTables */
+        .dataTables_wrapper {
+            position: relative;
+            z-index: 1;
+        }
+        
+        .dataTables_filter,
+        .dataTables_length {
+            margin-bottom: 1rem;
+        }
+        
+        .dataTables_filter input {
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            padding: 0.5rem 0.75rem;
+            font-size: 0.875rem;
+        }
+        
+        .dataTables_length select {
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .dataTables_paginate {
+            margin-top: 1rem;
+        }
+        
+        .dataTables_paginate .paginate_button {
+            border: 1px solid #d1d5db;
+            border-radius: 0.375rem;
+            padding: 0.5rem 0.75rem;
+            margin: 0 0.125rem;
+            color: #374151;
+            background: white;
+        }
+        
+        .dataTables_paginate .paginate_button:hover {
+            background: #f3f4f6;
+            border-color: #9ca3af;
+        }
+        
+        .dataTables_paginate .paginate_button.current {
+            background: #3b82f6;
+            color: white;
+            border-color: #3b82f6;
+        }
+        
+        /* Asegurar que el sidebar tenga mayor z-index */
+        [data-flux-sidebar] {
+            z-index: 50 !important;
+        }
+        
+        /* Mejorar la responsividad de la tabla */
+        @media (max-width: 640px) {
+            .dataTables_wrapper .dataTables_length,
+            .dataTables_wrapper .dataTables_filter {
+                text-align: left;
+                margin-bottom: 0.5rem;
+            }
+            
+            .dataTables_wrapper .dataTables_paginate {
+                text-align: center;
+            }
+            
+            .dataTables_wrapper .dataTables_info {
+                text-align: center;
+                margin-top: 0.5rem;
+            }
+        }
+        
+        /* Estilos para el modo oscuro */
+        .dark .dataTables_filter input,
+        .dark .dataTables_length select {
+            background-color: #374151;
+            border-color: #4b5563;
+            color: #f9fafb;
+        }
+        
+        .dark .dataTables_paginate .paginate_button {
+            background: #374151;
+            border-color: #4b5563;
+            color: #f9fafb;
+        }
+        
+        .dark .dataTables_paginate .paginate_button:hover {
+            background: #4b5563;
+            border-color: #6b7280;
+        }
+    </style>
+    
     <script>
         
         function iniciarComponentes() {
@@ -371,13 +481,23 @@
                         language: {
                             url: 'https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json',
                         },
+                        responsive: true,
                         pageLength: 10,
                         lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
-                        dom: '<"flex justify-between items-center mb-4"lf>rt<"flex justify-between items-center mt-4"ip>',
+                        dom: '<"flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4"lf>rt<"flex flex-col sm:flex-row justify-between items-start sm:items-center mt-4 gap-4"ip>',
                         order: [[1, 'asc']],
                         columnDefs: [
-                            { orderable: false, targets: -1 }
-                        ]
+                            { orderable: false, targets: -1 },
+                            { responsivePriority: 1, targets: 0 },
+                            { responsivePriority: 2, targets: -1 },
+                            { responsivePriority: 3, targets: 1 },
+                            { responsivePriority: 4, targets: 2 },
+                            { responsivePriority: 5, targets: 3 }
+                        ],
+                        scrollX: true,
+                        autoWidth: false,
+                        processing: true,
+                        stateSave: false
                     });
                 }
             }

@@ -71,7 +71,7 @@
                                             </button>
                                         @else
                                             <span class="text-gray-400 cursor-not-allowed" title="No puedes eliminar tu propia cuenta">
-                                                <flux:icon name="lock" />
+                                                <flux:icon name="lock-closed" />
                                             </span>
                                         @endif
                                     </div>
