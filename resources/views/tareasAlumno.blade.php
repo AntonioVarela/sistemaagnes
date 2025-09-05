@@ -508,6 +508,44 @@
     </div>
 
     <script>
+        // Función auxiliar para formatear fechas de manera segura
+        function formatearFecha(fechaString, horaString = null) {
+            if (!fechaString) return 'Fecha no disponible';
+            
+            try {
+                // Limpiar la fecha si viene con formato extraño
+                let fechaLimpia = fechaString.toString().trim();
+                
+                // Si la fecha no tiene formato ISO, intentar parsearla
+                if (!fechaLimpia.includes('T') && !fechaLimpia.includes('Z')) {
+                    fechaLimpia += 'T00:00:00';
+                }
+                
+                const fecha = new Date(fechaLimpia);
+                
+                if (isNaN(fecha.getTime())) {
+                    // Si no se puede parsear, devolver la fecha original
+                    return fechaString + (horaString ? ' a las ' + horaString : '');
+                }
+                
+                let fechaFormateada = fecha.toLocaleDateString('es-ES', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                
+                if (horaString && horaString !== 'null' && horaString !== '') {
+                    fechaFormateada += ' a las ' + horaString;
+                }
+                
+                return fechaFormateada;
+            } catch (error) {
+                console.error('Error al formatear fecha:', error);
+                return fechaString + (horaString ? ' a las ' + horaString : '');
+            }
+        }
+
         $(document).ready(function () {
             var tareas = @json($tareas);
             var grupo = @json($grupo); 
@@ -517,38 +555,47 @@
             if(grupo.seccion == 'Primaria') {
                 eventos = tareas.map(function(element) {
                     // Restar un día a la fecha para primaria
-                    let date = new Date(element.fecha_entrega);
-                    date.setDate(date.getDate() - 1);
-                    let startDate = date.toISOString().split('T')[0];
+                    let startDate = element.fecha_entrega;
+                    if (element.fecha_entrega) {
+                        try {
+                            let date = new Date(element.fecha_entrega);
+                            if (!isNaN(date.getTime())) {
+                                date.setDate(date.getDate() - 1);
+                                startDate = date.toISOString().split('T')[0];
+                            }
+                        } catch (error) {
+                            console.error('Error al procesar fecha para primaria:', error);
+                        }
+                    }
 
                     return {
-                        title: element.titulo,
+                        title: element.titulo || 'Sin título',
                         start: startDate,
                         color: '#4F46E5',
                         allDay: false,
                         extendedProps: {
-                            description: element.descripcion,
-                            fecha_entrega: element.fecha_entrega,
-                            hora_entrega: element.hora_entrega,
-                            archivo: element.archivo
+                            description: element.descripcion || 'Sin descripción',
+                            fecha_entrega: element.fecha_entrega || '',
+                            hora_entrega: element.hora_entrega || '',
+                            archivo: element.archivo || ''
                         }
                     };
                 });
             } else {
                 eventos = tareas.map(function(element) {
-                return {
-                    title: element.titulo,
-                    start: element.fecha_entrega,
-                    color: '#4F46E5',
-                    allDay: false,
-                    extendedProps: {
-                        description: element.descripcion,
-                        fecha_entrega: element.fecha_entrega,
-                        hora_entrega: element.hora_entrega,
-                        archivo: element.archivo
-                    }
-                };
-            });
+                    return {
+                        title: element.titulo || 'Sin título',
+                        start: element.fecha_entrega || new Date().toISOString().split('T')[0],
+                        color: '#4F46E5',
+                        allDay: false,
+                        extendedProps: {
+                            description: element.descripcion || 'Sin descripción',
+                            fecha_entrega: element.fecha_entrega || '',
+                            hora_entrega: element.hora_entrega || '',
+                            archivo: element.archivo || ''
+                        }
+                    };
+                });
             }
 
             var calendarEl = document.getElementById('calendar');
@@ -575,15 +622,13 @@
                 eventClick: function(info) {
                     $('#modalTitle').text(info.event.title);
                     $('#modalDescription').html(info.event.extendedProps.description);
-                    $('#modalDate').text(new Date(info.event.extendedProps.fecha_entrega + 'T00:00:00').toLocaleDateString('es-ES', {
-                        weekday: 'long',
-                        year: 'numeric',
-                        month: 'long',
-                        day: 'numeric'
-                    }));
-                    if(info.event.extendedProps.hora_entrega != null){
-                        $('#modalDate').append(' a las ' + info.event.extendedProps.hora_entrega);
-                    }
+                    
+                    // Usar la función auxiliar para formatear la fecha de manera segura
+                    const fechaFormateada = formatearFecha(
+                        info.event.extendedProps.fecha_entrega, 
+                        info.event.extendedProps.hora_entrega
+                    );
+                    $('#modalDate').text(fechaFormateada);
                     
                     if (info.event.extendedProps.archivo) {
                         // Generar la URL de S3 usando la configuración del servidor
