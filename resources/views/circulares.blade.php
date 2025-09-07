@@ -183,7 +183,7 @@
                 </button>
             </div>
 
-            <form action="{{ route('circulares.store') }}" method="POST" enctype="multipart/form-data">
+            <form action="{{ route('circulares.store') }}" method="POST" enctype="multipart/form-data" id="formNuevaCircular">
                 @csrf
                 <div class="space-y-4">
                     <div>
@@ -442,8 +442,18 @@
                 const grupoSelect = grupoSeccionContainer.querySelector('select[name="grupo_id"]');
                 const seccionSelect = grupoSeccionContainer.querySelector('select[name="seccion"]');
                 
-                if (grupoSelect) grupoSelect.required = !isGlobal;
-                if (seccionSelect) seccionSelect.required = !isGlobal;
+                if (grupoSelect) {
+                    grupoSelect.required = !isGlobal;
+                    if (isGlobal) {
+                        grupoSelect.value = '';
+                    }
+                }
+                if (seccionSelect) {
+                    seccionSelect.required = !isGlobal;
+                    if (isGlobal) {
+                        seccionSelect.value = '';
+                    }
+                }
             }
         }
 
@@ -461,6 +471,30 @@
             if (editEsGlobalCheckbox) {
                 editEsGlobalCheckbox.addEventListener('change', function() {
                     toggleCircularGlobal(this.checked, 'edit-grupo-seccion-container');
+                });
+            }
+            
+            // Validación del formulario de nueva circular
+            const formNuevaCircular = document.getElementById('formNuevaCircular');
+            if (formNuevaCircular) {
+                formNuevaCircular.addEventListener('submit', function(e) {
+                    const esGlobal = document.getElementById('es_global').checked;
+                    const grupoId = document.getElementById('grupo_id').value;
+                    const seccion = document.getElementById('seccion').value;
+                    
+                    // Si no es global, validar que se seleccione grupo y sección
+                    if (!esGlobal) {
+                        if (!grupoId) {
+                            e.preventDefault();
+                            alert('Debe seleccionar un grupo para la circular.');
+                            return false;
+                        }
+                        if (!seccion) {
+                            e.preventDefault();
+                            alert('Debe seleccionar una sección para la circular.');
+                            return false;
+                        }
+                    }
                 });
             }
         });

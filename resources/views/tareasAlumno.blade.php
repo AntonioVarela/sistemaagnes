@@ -508,42 +508,19 @@
     </div>
 
     <script>
-        // Función auxiliar para formatear fechas de manera segura
+        // Función auxiliar para mostrar la fecha exacta de la base de datos
         function formatearFecha(fechaString, horaString = null) {
             if (!fechaString) return 'Fecha no disponible';
             
-            try {
-                // Limpiar la fecha si viene con formato extraño
-                let fechaLimpia = fechaString.toString().trim();
-                
-                // Si la fecha no tiene formato ISO, intentar parsearla
-                if (!fechaLimpia.includes('T') && !fechaLimpia.includes('Z')) {
-                    fechaLimpia += 'T00:00:00';
-                }
-                
-                const fecha = new Date(fechaLimpia);
-                
-                if (isNaN(fecha.getTime())) {
-                    // Si no se puede parsear, devolver la fecha original
-                    return fechaString + (horaString ? ' a las ' + horaString : '');
-                }
-                
-                let fechaFormateada = fecha.toLocaleDateString('es-ES', {
-                    weekday: 'long',
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                });
-                
-                if (horaString && horaString !== 'null' && horaString !== '') {
-                    fechaFormateada += ' a las ' + horaString;
-                }
-                
-                return fechaFormateada;
-            } catch (error) {
-                console.error('Error al formatear fecha:', error);
-                return fechaString + (horaString ? ' a las ' + horaString : '');
+            // Mostrar la fecha exacta de la base de datos sin modificaciones
+            let fechaOriginal = fechaString.toString().trim();
+            
+            // Si hay hora, agregarla al final
+            if (horaString && horaString !== 'null' && horaString !== '') {
+                fechaOriginal += ' a las ' + horaString;
             }
+            
+            return fechaOriginal;
         }
 
         $(document).ready(function () {

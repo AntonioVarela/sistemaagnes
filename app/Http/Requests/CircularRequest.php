@@ -21,15 +21,24 @@ class CircularRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $rules = [
             'titulo' => 'required|string|max:255',
             'descripcion' => 'nullable|string|max:1000',
             'archivo' => 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240', // 10MB máximo
-            'grupo_id' => 'nullable|exists:grupos,id',
-            'seccion' => 'nullable|in:Primaria,Secundaria',
             'fecha_expiracion' => 'nullable|date|after:today',
             'es_global' => 'nullable|boolean'
         ];
+
+        // Si no es global, grupo_id y seccion son requeridos
+        if (!$this->input('es_global')) {
+            $rules['grupo_id'] = 'required|exists:grupos,id';
+            $rules['seccion'] = 'required|in:Primaria,Secundaria';
+        } else {
+            $rules['grupo_id'] = 'nullable|exists:grupos,id';
+            $rules['seccion'] = 'nullable|in:Primaria,Secundaria';
+        }
+
+        return $rules;
     }
 
     /**
@@ -47,9 +56,9 @@ class CircularRequest extends FormRequest
             'archivo.file' => 'El archivo seleccionado no es válido.',
             'archivo.mimes' => 'El archivo debe ser de tipo: PDF, DOC, DOCX, JPG, JPEG o PNG.',
             'archivo.max' => 'El archivo no puede ser mayor a 10MB.',
-            'grupo_id.required' => 'Debe seleccionar un grupo.',
+            'grupo_id.required' => 'Debe seleccionar un grupo para circulares no globales.',
             'grupo_id.exists' => 'El grupo seleccionado no existe.',
-            'seccion.required' => 'Debe seleccionar una sección.',
+            'seccion.required' => 'Debe seleccionar una sección para circulares no globales.',
             'seccion.in' => 'La sección debe ser Primaria o Secundaria.',
             'fecha_expiracion.date' => 'La fecha de expiración debe ser una fecha válida.',
             'fecha_expiracion.after' => 'La fecha de expiración debe ser posterior a hoy.'
