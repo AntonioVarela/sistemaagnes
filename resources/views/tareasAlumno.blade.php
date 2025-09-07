@@ -516,12 +516,22 @@
                 // Limpiar la fecha
                 let fechaLimpia = fechaString.toString().trim();
                 
-                // Si la fecha no tiene formato ISO, intentar parsearla
-                if (!fechaLimpia.includes('T') && !fechaLimpia.includes('Z')) {
-                    fechaLimpia += 'T00:00:00';
-                }
+                let fecha;
                 
-                const fecha = new Date(fechaLimpia);
+                // Si la fecha viene en formato YYYY-MM-DD, parsearla como fecha local
+                if (/^\d{4}-\d{2}-\d{2}$/.test(fechaLimpia)) {
+                    const partes = fechaLimpia.split('-');
+                    const año = parseInt(partes[0]);
+                    const mes = parseInt(partes[1]) - 1; // Los meses van de 0-11
+                    const dia = parseInt(partes[2]);
+                    fecha = new Date(año, mes, dia);
+                } else {
+                    // Para otros formatos, usar el método original
+                    if (!fechaLimpia.includes('T') && !fechaLimpia.includes('Z')) {
+                        fechaLimpia += 'T00:00:00';
+                    }
+                    fecha = new Date(fechaLimpia);
+                }
                 
                 if (isNaN(fecha.getTime())) {
                     // Si no se puede parsear, devolver la fecha original
@@ -630,7 +640,7 @@
                     
                     // Usar la función auxiliar para formatear la fecha de manera segura
                     const fechaFormateada = formatearFecha(
-                        info.event.extendedProps.fecha_entrega, 
+                        info.event.extendedProps.fecha_entrega,
                         info.event.extendedProps.hora_entrega
                     );
                     $('#modalDate').text(fechaFormateada);
