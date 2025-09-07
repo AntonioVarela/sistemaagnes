@@ -508,19 +508,47 @@
     </div>
 
     <script>
-        // Función auxiliar para mostrar la fecha exacta de la base de datos
+        // Función auxiliar para formatear fechas en español de manera legible
         function formatearFecha(fechaString, horaString = null) {
             if (!fechaString) return 'Fecha no disponible';
             
-            // Mostrar la fecha exacta de la base de datos sin modificaciones
-            let fechaOriginal = fechaString.toString().trim();
-            
-            // Si hay hora, agregarla al final
-            if (horaString && horaString !== 'null' && horaString !== '') {
-                fechaOriginal += ' a las ' + horaString;
+            try {
+                // Limpiar la fecha
+                let fechaLimpia = fechaString.toString().trim();
+                
+                // Si la fecha no tiene formato ISO, intentar parsearla
+                if (!fechaLimpia.includes('T') && !fechaLimpia.includes('Z')) {
+                    fechaLimpia += 'T00:00:00';
+                }
+                
+                const fecha = new Date(fechaLimpia);
+                
+                if (isNaN(fecha.getTime())) {
+                    // Si no se puede parsear, devolver la fecha original
+                    return fechaString + (horaString ? ' a las ' + horaString : '');
+                }
+                
+                // Formatear la fecha en español
+                let fechaFormateada = fecha.toLocaleDateString('es-ES', {
+                    weekday: 'long',
+                    year: 'numeric',
+                    month: 'long',
+                    day: 'numeric'
+                });
+                
+                // Capitalizar la primera letra
+                fechaFormateada = fechaFormateada.charAt(0).toUpperCase() + fechaFormateada.slice(1);
+                
+                // Si hay hora, agregarla al final
+                if (horaString && horaString !== 'null' && horaString !== '') {
+                    fechaFormateada += ' a las ' + horaString;
+                }
+                
+                return fechaFormateada;
+            } catch (error) {
+                console.error('Error al formatear fecha:', error);
+                return fechaString + (horaString ? ' a las ' + horaString : '');
             }
-            
-            return fechaOriginal;
         }
 
         $(document).ready(function () {
