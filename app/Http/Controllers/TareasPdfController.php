@@ -24,6 +24,18 @@ class TareasPdfController extends Controller
     }
 
     /**
+     * Obtener tareas desde viernes de la semana pasada hasta jueves de la siguiente semana
+     */
+    private function obtenerTareasViernesAJueves($grupoId)
+    {
+        return tarea::where('grupo', $grupoId)
+            ->deViernesAJueves()
+            ->with(['materia', 'grupo'])
+            ->orderBy('fecha_entrega', 'asc')
+            ->get();
+    }
+
+    /**
      * Generar PDF de tareas para un grupo específico
      */
     public function downloadTareasPdf($grupoId)
@@ -98,8 +110,12 @@ class TareasPdfController extends Controller
         // Obtener el grupo
         $grupo = grupo::findOrFail($grupoId);
         
-        // Obtener las tareas del grupo para la semana en curso
-        $tareas = $this->obtenerTareasSemana($grupoId);
+        // Obtener las tareas del grupo desde viernes de la semana pasada hasta jueves de la semana en curso
+        $tareas = $this->obtenerTareasViernesAJueves($grupoId);
+
+        // Calcular las fechas del rango
+        $viernesSemanaPasada = now()->subWeek()->next(5);
+        $juevesSemanaActual = now()->next(4);
 
         // Preparar datos para la tabla
         $tareasData = [];
@@ -129,8 +145,8 @@ class TareasPdfController extends Controller
             'tareas' => $tareasData,
             'fechaGeneracion' => now()->format('d/m/Y H:i:s'),
             'usuario' => Auth::user() ?? (object)['name' => 'Usuario Público'],
-            'inicioSemana' => now()->startOfWeek()->format('d/m/Y'),
-            'finSemana' => now()->endOfWeek()->format('d/m/Y')
+            'inicioSemana' => $viernesSemanaPasada->format('d/m/Y'),
+            'finSemana' => $juevesSemanaActual->format('d/m/Y')
         ]);
 
         // Configurar el PDF

@@ -93,4 +93,21 @@ class tarea extends Model
             now()->endOfWeek()->toDateString()
         ]);
     }
+
+    /**
+     * Scope para tareas desde viernes de la semana pasada hasta jueves de la semana en curso
+     */
+    public function scopeDeViernesAJueves($query)
+    {
+        // Obtener el viernes de la semana pasada
+        $viernesSemanaPasada = now()->subWeek()->next(5); // Viernes de la semana pasada
+        
+        // Obtener el jueves de la semana en curso
+        $juevesSemanaActual = now()->next(4); // Jueves de la semana actual
+        
+        return $query->whereBetween('fecha_entrega', [
+            $viernesSemanaPasada->toDateString(), 
+            $juevesSemanaActual->toDateString()
+        ]);
+    }
 }
