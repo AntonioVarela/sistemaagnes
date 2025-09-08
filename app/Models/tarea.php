@@ -33,7 +33,7 @@ class tarea extends Model
      */
     public function materia(): BelongsTo
     {
-        return $this->belongsTo(Materia::class, 'materia');
+        return $this->belongsTo(\App\Models\Materia::class, 'materia');
     }
 
     /**

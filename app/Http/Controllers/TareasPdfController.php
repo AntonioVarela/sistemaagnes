@@ -18,7 +18,6 @@ class TareasPdfController extends Controller
     {
         return tarea::where('grupo', $grupoId)
             ->deEstaSemana()
-            ->with(['materia', 'grupo'])
             ->orderBy('fecha_entrega', 'asc')
             ->get();
     }
@@ -30,7 +29,6 @@ class TareasPdfController extends Controller
     {
         return tarea::where('grupo', $grupoId)
             ->deViernesAJueves()
-            ->with(['materia', 'grupo'])
             ->orderBy('fecha_entrega', 'asc')
             ->get();
     }
@@ -51,21 +49,10 @@ class TareasPdfController extends Controller
         // Preparar datos para la tabla
         $tareasData = [];
         foreach ($tareas as $tarea) {
-            // Debug: verificar qué contiene la tarea
-            \Log::info('Tarea:', [
-                'id' => $tarea->id,
-                'materia_id' => $tarea->materia,
-                'materia_relation' => $tarea->materia,
-                'materia_type' => gettype($tarea->materia)
-            ]);
-            
-            // Obtener nombre de materia de forma segura
+            // Obtener nombre de materia de forma segura usando consulta directa
             $nombreMateria = 'No especificada';
-            if ($tarea->materia && is_object($tarea->materia) && isset($tarea->materia->nombre)) {
-                $nombreMateria = $tarea->materia->nombre;
-            } elseif (is_numeric($tarea->materia)) {
-                // Si es solo el ID, buscar la materia
-                $materia = materia::find($tarea->materia);
+            if ($tarea->materia && is_numeric($tarea->materia)) {
+                $materia = \DB::table('materias')->where('id', $tarea->materia)->first();
                 $nombreMateria = $materia ? $materia->nombre : 'Materia ID: ' . $tarea->materia;
             }
             
@@ -120,13 +107,10 @@ class TareasPdfController extends Controller
         // Preparar datos para la tabla
         $tareasData = [];
         foreach ($tareas as $tarea) {
-            // Obtener nombre de materia de forma segura
+            // Obtener nombre de materia de forma segura usando consulta directa
             $nombreMateria = 'No especificada';
-            if ($tarea->materia && is_object($tarea->materia) && isset($tarea->materia->nombre)) {
-                $nombreMateria = $tarea->materia->nombre;
-            } elseif (is_numeric($tarea->materia)) {
-                // Si es solo el ID, buscar la materia
-                $materia = materia::find($tarea->materia);
+            if ($tarea->materia && is_numeric($tarea->materia)) {
+                $materia = \DB::table('materias')->where('id', $tarea->materia)->first();
                 $nombreMateria = $materia ? $materia->nombre : 'Materia ID: ' . $tarea->materia;
             }
             
