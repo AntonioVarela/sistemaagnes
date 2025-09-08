@@ -65,7 +65,7 @@ class TareasPdfController extends Controller
                 $nombreMateria = $tarea->materia->nombre;
             } elseif (is_numeric($tarea->materia)) {
                 // Si es solo el ID, buscar la materia
-                $materia = \App\Models\Materia::find($tarea->materia);
+                $materia = materia::find($tarea->materia);
                 $nombreMateria = $materia ? $materia->nombre : 'Materia ID: ' . $tarea->materia;
             }
             
@@ -126,7 +126,7 @@ class TareasPdfController extends Controller
                 $nombreMateria = $tarea->materia->nombre;
             } elseif (is_numeric($tarea->materia)) {
                 // Si es solo el ID, buscar la materia
-                $materia = \App\Models\Materia::find($tarea->materia);
+                $materia = materia::find($tarea->materia);
                 $nombreMateria = $materia ? $materia->nombre : 'Materia ID: ' . $tarea->materia;
             }
             
