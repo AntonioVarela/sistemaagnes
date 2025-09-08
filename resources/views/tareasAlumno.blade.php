@@ -516,34 +516,21 @@
                 // Limpiar la fecha
                 let fechaLimpia = fechaString.toString().trim();
                 
-                let fecha;
-                
-                // Si la fecha viene en formato YYYY-MM-DD, parsearla como fecha local
-                if (/^\d{4}-\d{2}-\d{2}$/.test(fechaLimpia)) {
-                    const partes = fechaLimpia.split('-');
-                    const año = parseInt(partes[0]);
-                    const mes = parseInt(partes[1]) - 1; // Los meses van de 0-11
-                    const dia = parseInt(partes[2]);
-                    fecha = new Date(año, mes, dia);
-                } else {
-                    // Para otros formatos, usar el método original
-                    if (!fechaLimpia.includes('T') && !fechaLimpia.includes('Z')) {
-                        fechaLimpia += 'T00:00:00';
-                    }
-                    fecha = new Date(fechaLimpia);
-                }
+                // Crear objeto Date con la fecha original
+                let fecha = new Date(fechaLimpia);
                 
                 if (isNaN(fecha.getTime())) {
                     // Si no se puede parsear, devolver la fecha original
                     return fechaString + (horaString ? ' a las ' + horaString : '');
                 }
                 
-                // Formatear la fecha en español
-                let fechaFormateada = fecha.toLocaleDateString('es-ES', {
+                // Formatear la fecha en español usando UTC para evitar problemas de zona horaria
+                let fechaFormateada = fecha.toLocaleDateString('es-MX', {
                     weekday: 'long',
                     year: 'numeric',
                     month: 'long',
-                    day: 'numeric'
+                    day: 'numeric',
+                    timeZone: "UTC"
                 });
                 
                 // Capitalizar la primera letra
