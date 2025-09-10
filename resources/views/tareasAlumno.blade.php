@@ -552,7 +552,7 @@
                         try {
                             let date = new Date(element.fecha_entrega);
                             if (!isNaN(date.getTime())) {
-                                date.setDate(date.getDate() - 1);
+                                date.setDate(date.getDate());
                                 startDate = date.toISOString().split('T')[0];
                             }
                         } catch (error) {

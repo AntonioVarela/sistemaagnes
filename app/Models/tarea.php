@@ -103,8 +103,8 @@ class tarea extends Model
         // Obtener el viernes de la semana pasada
         $viernesSemanaPasada = now()->subWeek()->next(5); // Viernes de la semana pasada
         
-        // Obtener el jueves de la semana en curso
-        $juevesSemanaActual = now()->next(4); // Jueves de la semana actual
+        // Obtener el viernesjueves de la semana en curso
+        $juevesSemanaActual = now()->next(5); // viernes de la semana actual
         
         return $query->whereBetween('fecha_entrega', [
             $viernesSemanaPasada->toDateString(), 
