@@ -223,7 +223,7 @@
                                         <div class="flex-1">
                                             <div class="flex items-center gap-2 mb-1">
                                                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                                                    📢 Anuncio
+                                                     Anuncio
                                                 </span>
                                                 <h3 class="text-lg font-semibold text-indigo-900">{{ $anuncio->titulo }}</h3>
                                             </div>
@@ -280,11 +280,11 @@
                                         <div class="flex-1">
                                             <div class="flex items-center gap-2 mb-1">
                                                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                                    📋 Circular
+                                                     Circular
                                                 </span>
                                                 @if($circular->es_global)
                                                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                                        🌍 Global
+                                                         Global
                                                     </span>
                                                 @endif
                                                 <h4 class="text-lg font-semibold text-blue-900">{{ $circular->titulo }}</h4>
@@ -526,9 +526,22 @@
                 // Capitalizar la primera letra
                 fechaFormateada = fechaFormateada.charAt(0).toUpperCase() + fechaFormateada.slice(1);
                 
-                // Si hay hora, agregarla al final
-                if (horaString && horaString !== 'null' && horaString !== '') {
-                    fechaFormateada += ' a las ' + horaString;
+                // Solo agregar la hora si existe y no es null o vacía
+                if (horaString && horaString !== 'null' && horaString !== '' && horaString !== 'undefined') {
+                    // Limpiar la hora para que solo muestre la parte de tiempo, no la fecha completa
+                    let horaLimpia = horaString.toString().trim();
+                    // Si la hora contiene una fecha ISO completa, extraer solo la parte de tiempo
+                    if (horaLimpia.includes('T')) {
+                        let fechaHora = new Date(horaLimpia);
+                        if (!isNaN(fechaHora.getTime())) {
+                            horaLimpia = fechaHora.toLocaleTimeString('es-MX', {
+                                hour: '2-digit',
+                                minute: '2-digit',
+                                timeZone: "UTC"
+                            });
+                        }
+                    }
+                    fechaFormateada += ' a las ' + horaLimpia;
                 }
                 
                 return fechaFormateada;
