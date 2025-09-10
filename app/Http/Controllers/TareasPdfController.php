@@ -102,7 +102,7 @@ class TareasPdfController extends Controller
 
         // Calcular las fechas del rango
         $viernesSemanaPasada = now()->subWeek()->next(5);
-        $juevesSemanaActual = now()->next(4);
+        $juevesSemanaActual = now()->next(5);
 
         // Preparar datos para la tabla
         $tareasData = [];
