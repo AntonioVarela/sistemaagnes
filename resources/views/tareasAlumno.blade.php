@@ -219,9 +219,7 @@
                                     <div class="flex justify-between items-start">
                                         <div class="flex-1">
                                             <div class="flex items-center gap-2 mb-1">
-                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-indigo-100 text-indigo-800">
-                                                     Anuncio
-                                                </span>
+                                                
                                                 <h3 class="text-lg font-semibold text-indigo-900">{{ $anuncio->titulo }}</h3>
                                             </div>
                                             <p class="text-sm text-indigo-600 mt-1">
@@ -276,20 +274,18 @@
                                     <div class="flex justify-between items-start">
                                         <div class="flex-1">
                                             <div class="flex items-center gap-2 mb-1 flex-wrap">
-                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                                    📋 Circular
-                                                </span>
+                                               
                                                 @if($circular->es_global)
                                                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                                        🌍 Para todos los grupos
+                                                         Para todos los grupos
                                                     </span>
                                                 @elseif($circular->grupo)
                                                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                        📚 {{ $circular->grupo->nombre }} {{ $circular->grupo->seccion }}
+                                                         {{ $circular->grupo->nombre }} {{ $circular->grupo->seccion }}
                                                     </span>
                                                 @elseif($circular->seccion)
                                                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                                                        🏫 Sección {{ $circular->seccion }}
+                                                        Sección {{ $circular->seccion }}
                                                     </span>
                                                 @endif
                                             </div>
