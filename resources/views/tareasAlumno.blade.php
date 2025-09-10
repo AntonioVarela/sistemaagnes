@@ -79,16 +79,10 @@
             }
         }
 
-        /* Estilos para el logo */
+        /* Estilos responsivos para el header */
         @media (max-width: 768px) {
-            .header-logo {
-                height: 2rem !important;
-            }
-        }
-        
-        @media (max-width: 480px) {
-            .header-logo {
-                height: 1.5rem !important;
+            .header-mobile {
+                padding: 1rem 0;
             }
         }
 
@@ -142,33 +136,11 @@
             }
         }
         
-        /* Responsive para los botones de descarga */
-        @media (max-width: 1024px) {
-            .header-buttons {
-                flex-direction: column;
-                gap: 0.5rem;
-            }
-            
-            .header-buttons .space-x-2 {
-                justify-content: center;
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .header-buttons {
-                flex-direction: column;
-                gap: 0.5rem;
-                width: 100%;
-            }
-            
-            .header-buttons a {
-                width: 100%;
-                justify-content: center;
-            }
-            
-            .header h1 {
-                font-size: 1.5rem !important;
-                text-align: center;
+        /* Estilos adicionales para mejor responsividad */
+        @media (max-width: 640px) {
+            .header-mobile h1 {
+                font-size: 1rem !important;
+                line-height: 1.3;
             }
         }
     </style>
@@ -176,27 +148,52 @@
 <body class="bg-gray-50 text-gray-800">
 
     <div class="min-h-screen">
-        <!-- Header -->
+        <!-- Header Responsivo -->
         <header class="bg-white shadow-sm">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-                <div class="flex justify-between items-center">
-                    <h1 class="text-3xl font-bold text-gray-900">Panel de Actividades de {{ $grupo->nombre }} {{ $grupo->seccion }}</h1>
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 sm:py-6">
+                <!-- Layout para desktop -->
+                <div class="hidden md:flex justify-between items-center">
+                    <h1 class="text-2xl lg:text-3xl font-bold text-gray-900">Panel de Actividades de {{ $grupo->nombre }} {{ $grupo->seccion }}</h1>
                     <div class="flex items-center space-x-4">
                         <!-- Botón de Preview -->
-                        <div class="flex items-center space-x-2 header-buttons">
-                            <a href="{{ route('tareas.pdf.preview', $grupo->id) }}" 
-                               target="_blank"
-                               class="inline-flex items-center px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md">
-                                <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
-                                </svg>
-                                 PDF de tareas 
-                            </a>
-                        </div>
+                        <a href="{{ route('tareas.pdf.preview', $grupo->id) }}" 
+                           target="_blank"
+                           class="inline-flex items-center px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md">
+                            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                            </svg>
+                            PDF de tareas 
+                        </a>
                         
                         <a href="{{ route('home') }}" class="hover:opacity-80 transition-opacity duration-200">
-                            <img src="/logo.png" alt="Logo" class="header-logo h-12 w-auto opacity-60" />
+                            <img src="/logo.png" alt="Logo" class="h-10 lg:h-12 w-auto opacity-60" />
                         </a>
+                    </div>
+                </div>
+
+                <!-- Layout para móvil -->
+                <div class="md:hidden">
+                    <!-- Fila superior: Logo y botón PDF -->
+                    <div class="flex justify-between items-center mb-4">
+                        <a href="{{ route('home') }}" class="hover:opacity-80 transition-opacity duration-200">
+                            <img src="/logo.png" alt="Logo" class="h-8 w-auto opacity-60" />
+                        </a>
+                        
+                        <a href="{{ route('tareas.pdf.preview', $grupo->id) }}" 
+                           target="_blank"
+                           class="inline-flex items-center px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded-lg transition-colors duration-200 shadow-sm hover:shadow-md">
+                            <svg class="w-3 h-3 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"></path>
+                            </svg>
+                            PDF
+                        </a>
+                    </div>
+                    
+                    <!-- Fila inferior: Título -->
+                    <div class="text-center">
+                        <h1 class="text-lg sm:text-xl font-bold text-gray-900 leading-tight">
+                            Panel de Actividades de {{ $grupo->nombre }} {{ $grupo->seccion }}
+                        </h1>
                     </div>
                 </div>
             </div>
