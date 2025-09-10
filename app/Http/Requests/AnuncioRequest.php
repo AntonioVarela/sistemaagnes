@@ -21,15 +21,27 @@ class AnuncioRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        $rules = [
             'titulo' => 'required|string|max:255',
             'contenido' => 'required|string|max:5000',
             'archivo' => 'nullable|file|mimes:pdf,doc,docx,xls,xlsx,ppt,pptx,txt,jpg,jpeg,png,gif,zip,rar|max:10240', // 10MB máximo
             'fecha_expiracion' => 'nullable|date|after_or_equal:today',
-            'grupo_id' => 'nullable|exists:grupos,id',
-            'materia_id' => 'nullable|exists:materias,id',
-            'es_global' => 'nullable|boolean',
+            'es_global' => 'nullable|boolean'
         ];
+
+        // Verificar si es global de manera más robusta
+        $esGlobal = $this->has('es_global') && $this->input('es_global');
+        
+        if (!$esGlobal) {
+            $rules['grupo_id'] = 'nullable|exists:grupos,id';
+            $rules['materia_id'] = 'nullable|exists:materias,id';
+        } else {
+            // Para anuncios globales, grupo_id y materia_id se asignan automáticamente
+            $rules['grupo_id'] = 'nullable';
+            $rules['materia_id'] = 'nullable';
+        }
+
+        return $rules;
     }
 
     /**

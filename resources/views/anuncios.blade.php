@@ -53,9 +53,10 @@
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap">
                                     @if($anuncio->es_global)
-                                        <span class="px-2 py-1 text-xs font-semibold rounded-full bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200">
-                                            🌍 Global
-                                        </span>
+                                        <div class="text-sm text-gray-900 dark:text-white">
+                                            <div class="font-medium">🌍 Global</div>
+                                            <div class="text-xs text-gray-500">General</div>
+                                        </div>
                                     @else
                                         <div class="text-sm text-gray-900 dark:text-white">
                                             <div class="font-medium">{{ $anuncio->grupo->nombre ?? 'N/A' }}</div>

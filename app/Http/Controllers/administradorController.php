@@ -546,20 +546,41 @@ class administradorController extends Controller
         if(Auth::user()->rol == 'administrador'){
             $horario = horario::all();
             $grupos = grupo::all(); 
-            $anuncios = anuncio::activos()->get();
+            $anuncios = anuncio::with(['user', 'grupo', 'materia'])->activos()->orderBy('created_at', 'desc')->get();
         }
         if(Auth::user()->rol == 'Maestro'){
             $horario = horario::where('maestro_id', Auth::user()->id)->get();
             $grupos = grupo::whereIn('id', $horario->pluck('grupo_id'))->get();
-            $anuncios = anuncio::with('user')->where('usuario_id', Auth::user()->id)->activos()->get();
+            $anuncios = anuncio::with(['user', 'grupo', 'materia'])
+                ->where(function($query) use ($horario) {
+                    $query->whereIn('grupo_id', $horario->pluck('grupo_id'))
+                          ->orWhere('es_global', true);
+                })
+                ->activos()
+                ->orderBy('created_at', 'desc')
+                ->get();
         }
         if(Auth::user()->rol == 'Coordinador Primaria'){
             $grupos = grupo::where('seccion', 'Primaria')->get();
-            $anuncios = anuncio::with('user')->whereIn('grupo_id', $grupos->pluck('id'))->activos()->get();
+            $anuncios = anuncio::with(['user', 'grupo', 'materia'])
+                ->where(function($query) use ($grupos) {
+                    $query->whereIn('grupo_id', $grupos->pluck('id'))
+                          ->orWhere('es_global', true);
+                })
+                ->activos()
+                ->orderBy('created_at', 'desc')
+                ->get();
         }
         if(Auth::user()->rol == 'Coordinador Secundaria'){
             $grupos = grupo::where('seccion', 'Secundaria')->get();
-            $anuncios = anuncio::with('user')->whereIn('grupo_id', $grupos->pluck('id'))->activos()->get();
+            $anuncios = anuncio::with(['user', 'grupo', 'materia'])
+                ->where(function($query) use ($grupos) {
+                    $query->whereIn('grupo_id', $grupos->pluck('id'))
+                          ->orWhere('es_global', true);
+                })
+                ->activos()
+                ->orderBy('created_at', 'desc')
+                ->get();
         }
         $materias = materia::whereIn('id', $horario->pluck('materia_id'))->get();
         return view("anuncios", compact(['anuncios','horario','grupos','materias']));
@@ -587,12 +608,15 @@ class administradorController extends Controller
                 return redirect()->route('anuncios.index');
             }
         }
-        // Si es un anuncio global, no se asigna grupo ni materia específica
+        // Si es un anuncio global, asignar grupo 1A pero marcar como global
         if ($request->es_global) {
             $anuncio->es_global = true;
-            $anuncio->grupo_id = null;
-            $anuncio->materia_id = null;
-            $anuncio->seccion = null;
+            // Asignar grupo 1A (ID 1) para anuncios globales
+            $anuncio->grupo_id = 1; // Grupo 1A
+            // Asignar la primera materia disponible para mantener consistencia en BD
+            $primeraMateria = materia::first();
+            $anuncio->materia_id = $primeraMateria ? $primeraMateria->id : 1;
+            $anuncio->seccion = 'Primaria'; // Sección del grupo 1A
         } else {
             $anuncio->es_global = false;
             if(count($horario) == 1){
@@ -677,12 +701,15 @@ class administradorController extends Controller
                 return redirect()->route('anuncios.index');
             }
         }
-        // Si es un anuncio global, no se asigna grupo ni materia específica
+        // Si es un anuncio global, asignar grupo 1A pero marcar como global
         if ($request->es_global) {
             $anuncio->es_global = true;
-            $anuncio->grupo_id = null;
-            $anuncio->materia_id = null;
-            $anuncio->seccion = null;
+            // Asignar grupo 1A (ID 1) para anuncios globales
+            $anuncio->grupo_id = 1; // Grupo 1A
+            // Asignar la primera materia disponible para mantener consistencia en BD
+            $primeraMateria = materia::first();
+            $anuncio->materia_id = $primeraMateria ? $primeraMateria->id : 1;
+            $anuncio->seccion = 'Primaria'; // Sección del grupo 1A
         } else {
             $anuncio->es_global = false;
             $horario = horario::where('maestro_id', Auth::user()->id)->get();

@@ -29,12 +29,12 @@ class anuncio extends Model
     
     public function grupo()
     {
-        return $this->belongsTo(Grupo::class);
+        return $this->belongsTo(grupo::class);
     }
 
     public function materia()
     {
-        return $this->belongsTo(Materia::class);
+        return $this->belongsTo(materia::class);
     }
 
     public function user()
@@ -67,8 +67,14 @@ class anuncio extends Model
     public function scopePorGrupo($query, $grupoId)
     {
         return $query->where(function($q) use ($grupoId) {
-            $q->where('es_global', true)
-              ->orWhere('grupo_id', $grupoId);
+            // Anuncios específicos del grupo
+            $q->where('grupo_id', $grupoId);
+            
+            // Anuncios globales (tienen grupo_id = 1 pero es_global = true)
+            $q->orWhere(function($subQ) {
+                $subQ->where('es_global', true)
+                     ->where('grupo_id', 1); // Grupo 1A
+            });
         });
     }
 
