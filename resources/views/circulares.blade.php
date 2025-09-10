@@ -210,12 +210,14 @@
                         </p>
                     </div>
 
-                    <div class="flex items-center mb-4">
+                    <div class="flex items-center mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                         <input type="checkbox" name="es_global" id="es_global" value="1" 
                                class="w-4 h-4 text-blue-600 bg-zinc-100 dark:bg-zinc-700 border-zinc-300 dark:border-zinc-600 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-zinc-800 focus:ring-2">
                         <label for="es_global" class="ml-2 text-sm font-medium text-gray-700 dark:text-zinc-300">
-                            Circular Global (visible para todos los grupos)
+                            🌍 Circular Global (visible para todos los grupos)
                         </label>
+                        <!-- Campo oculto para asegurar que se envíe el valor -->
+                        <input type="hidden" name="es_global_hidden" value="0">
                     </div>
 
                     <div id="grupo-seccion-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -306,12 +308,14 @@
                         </p>
                     </div>
 
-                    <div class="flex items-center mb-4">
+                    <div class="flex items-center mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
                         <input type="checkbox" name="es_global" id="edit_es_global" value="1" 
                                class="w-4 h-4 text-blue-600 bg-zinc-100 dark:bg-zinc-700 border-zinc-300 dark:border-zinc-600 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-zinc-800 focus:ring-2">
                         <label for="edit_es_global" class="ml-2 text-sm font-medium text-gray-700 dark:text-zinc-300">
-                            Circular Global (visible para todos los grupos)
+                            🌍 Circular Global (visible para todos los grupos)
                         </label>
+                        <!-- Campo oculto para asegurar que se envíe el valor -->
+                        <input type="hidden" name="es_global_hidden" value="0">
                     </div>
 
                     <div id="edit-grupo-seccion-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -419,6 +423,9 @@
             // Actualizar la acción del formulario
             document.getElementById('editCircularForm').action = `/circulares/${id}`;
             
+            // Aplicar la lógica de mostrar/ocultar campos según si es global
+            toggleCircularGlobal(esGlobal === 'true', 'edit-grupo-seccion-container');
+            
             // Abrir el modal
             openModal('edit-circular');
         }
@@ -436,9 +443,10 @@
         function toggleCircularGlobal(isGlobal, containerId) {
             const grupoSeccionContainer = document.getElementById(containerId);
             if (grupoSeccionContainer) {
+                // Mostrar/ocultar el contenedor
                 grupoSeccionContainer.style.display = isGlobal ? 'none' : 'grid';
                 
-                // Marcar campos como requeridos o no
+                // Obtener los campos de grupo y sección
                 const grupoSelect = grupoSeccionContainer.querySelector('select[name="grupo_id"]');
                 const seccionSelect = grupoSeccionContainer.querySelector('select[name="seccion"]');
                 
@@ -446,13 +454,27 @@
                     grupoSelect.required = !isGlobal;
                     if (isGlobal) {
                         grupoSelect.value = '';
+                        grupoSelect.disabled = true;
+                    } else {
+                        grupoSelect.disabled = false;
                     }
                 }
+                
                 if (seccionSelect) {
                     seccionSelect.required = !isGlobal;
                     if (isGlobal) {
                         seccionSelect.value = '';
+                        seccionSelect.disabled = true;
+                    } else {
+                        seccionSelect.disabled = false;
                     }
+                }
+                
+                // Agregar una clase visual para indicar que está deshabilitado
+                if (isGlobal) {
+                    grupoSeccionContainer.classList.add('opacity-50', 'pointer-events-none');
+                } else {
+                    grupoSeccionContainer.classList.remove('opacity-50', 'pointer-events-none');
                 }
             }
         }
@@ -482,18 +504,58 @@
                     const grupoId = document.getElementById('grupo_id').value;
                     const seccion = document.getElementById('seccion').value;
                     
+                    console.log('Enviando formulario - esGlobal:', esGlobal);
+                    
                     // Si no es global, validar que se seleccione grupo y sección
                     if (!esGlobal) {
                         if (!grupoId) {
                             e.preventDefault();
                             alert('Debe seleccionar un grupo para la circular.');
+                            document.getElementById('grupo_id').focus();
                             return false;
                         }
                         if (!seccion) {
                             e.preventDefault();
                             alert('Debe seleccionar una sección para la circular.');
+                            document.getElementById('seccion').focus();
                             return false;
                         }
+                    } else {
+                        // Si es global, limpiar los valores de grupo y sección
+                        document.getElementById('grupo_id').value = '';
+                        document.getElementById('seccion').value = '';
+                        // Asegurar que el campo oculto tenga el valor correcto
+                        document.querySelector('input[name="es_global_hidden"]').value = '1';
+                    }
+                });
+            }
+            
+            // Validación del formulario de edición
+            const editCircularForm = document.getElementById('editCircularForm');
+            if (editCircularForm) {
+                editCircularForm.addEventListener('submit', function(e) {
+                    const esGlobal = document.getElementById('edit_es_global').checked;
+                    const grupoId = document.getElementById('edit_grupo_id').value;
+                    const seccion = document.getElementById('edit_seccion').value;
+                    
+                    // Si no es global, validar que se seleccione grupo y sección
+                    if (!esGlobal) {
+                        if (!grupoId) {
+                            e.preventDefault();
+                            alert('Debe seleccionar un grupo para la circular.');
+                            document.getElementById('edit_grupo_id').focus();
+                            return false;
+                        }
+                        if (!seccion) {
+                            e.preventDefault();
+                            alert('Debe seleccionar una sección para la circular.');
+                            document.getElementById('edit_seccion').focus();
+                            return false;
+                        }
+                    } else {
+                        // Si es global, limpiar los valores de grupo y sección
+                        document.getElementById('edit_grupo_id').value = '';
+                        document.getElementById('edit_seccion').value = '';
                     }
                 });
             }

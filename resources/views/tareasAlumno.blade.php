@@ -275,27 +275,42 @@
                                     </h3>
                                 </div>
                                 @foreach($circulares as $circular)
-                                <div class="bg-blue-50 rounded-lg p-4 border border-blue-100 hover:border-blue-200 transition-colors">
+                                <div class="bg-blue-50 rounded-lg p-4 border border-blue-100 hover:border-blue-200 transition-colors {{ $circular->es_global ? 'ring-2 ring-purple-200' : '' }}">
                                     <div class="flex justify-between items-start">
                                         <div class="flex-1">
-                                            <div class="flex items-center gap-2 mb-1">
+                                            <div class="flex items-center gap-2 mb-1 flex-wrap">
                                                 <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-                                                     Circular
+                                                    📋 Circular
                                                 </span>
                                                 @if($circular->es_global)
                                                     <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                                         Global
+                                                        🌍 Para todos los grupos
+                                                    </span>
+                                                @elseif($circular->grupo)
+                                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                        📚 {{ $circular->grupo->nombre }} {{ $circular->grupo->seccion }}
+                                                    </span>
+                                                @elseif($circular->seccion)
+                                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                                                        🏫 Sección {{ $circular->seccion }}
                                                     </span>
                                                 @endif
-                                                <h4 class="text-lg font-semibold text-blue-900">{{ $circular->titulo }}</h4>
                                             </div>
+                                            <h4 class="text-lg font-semibold text-blue-900 mt-2">{{ $circular->titulo }}</h4>
                                             @if($circular->descripcion)
-                                                <p class="text-sm text-blue-700 mt-1">{{ Str::limit($circular->descripcion, 100) }}</p>
+                                                <p class="text-sm text-blue-700 mt-2">{{ Str::limit($circular->descripcion, 120) }}</p>
                                             @endif
                                         </div>
-                                        <span class="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full ml-2">
-                                            {{ $circular->created_at->format('d M Y') }}
-                                        </span>
+                                        <div class="flex flex-col items-end ml-2">
+                                            <span class="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full mb-1">
+                                                {{ $circular->created_at->format('d M Y') }}
+                                            </span>
+                                            @if($circular->fecha_expiracion)
+                                                <span class="text-xs text-orange-600 bg-orange-100 px-2 py-1 rounded-full">
+                                                    Expira: {{ $circular->fecha_expiracion->format('d M Y') }}
+                                                </span>
+                                            @endif
+                                        </div>
                                     </div>
                                     
                                     <div class="mt-4 flex items-center justify-between">
@@ -305,14 +320,21 @@
                                             </svg>
                                             {{ $circular->user->name ?? 'Usuario no disponible' }}
                                         </div>
-                                        <a href="{{ $circular->url_archivo }}" 
-                                           class="text-blue-600 hover:text-blue-800 font-medium flex items-center"
-                                           target="_blank">
-                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                            </svg>
-                                            Ver archivo
-                                        </a>
+                                        <div class="flex items-center gap-2">
+                                            @if($circular->tamanio_formateado)
+                                                <span class="text-xs text-gray-500">
+                                                    {{ $circular->tamanio_formateado }}
+                                                </span>
+                                            @endif
+                                            <a href="{{ $circular->url_archivo }}" 
+                                               class="text-blue-600 hover:text-blue-800 font-medium flex items-center"
+                                               target="_blank">
+                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                                </svg>
+                                                Ver archivo
+                                            </a>
+                                        </div>
                                     </div>
                                 </div>
                                 @endforeach

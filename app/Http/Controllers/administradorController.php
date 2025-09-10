@@ -749,11 +749,12 @@ class administradorController extends Controller
             $circular->tipo_archivo = $archivo->getClientMimeType();
             $circular->usuario_id = Auth::user()->id;
             
-            // Si es global, no asignar grupo ni sección específicos
+            // Si es global, asignar grupo 1A pero marcar como global
             if ($request->es_global) {
                 $circular->es_global = true;
-                $circular->grupo_id = null;
-                $circular->seccion = null;
+                // Asignar grupo 1A (ID 1) para circulares globales
+                $circular->grupo_id = 1; // Grupo 1A
+                $circular->seccion = 'Primaria'; // Sección del grupo 1A
             } else {
                 $circular->es_global = false;
                 $circular->grupo_id = $request->grupo_id;
@@ -794,11 +795,12 @@ class administradorController extends Controller
         $circular->titulo = $request->titulo;
         $circular->descripcion = $request->descripcion;
         
-        // Si es global, no asignar grupo ni sección específicos
+        // Si es global, asignar grupo 1A pero marcar como global
         if ($request->es_global) {
             $circular->es_global = true;
-            $circular->grupo_id = null;
-            $circular->seccion = null;
+            // Asignar grupo 1A (ID 1) para circulares globales
+            $circular->grupo_id = 1; // Grupo 1A
+            $circular->seccion = 'Primaria'; // Sección del grupo 1A
         } else {
             $circular->es_global = false;
             $circular->grupo_id = $request->grupo_id;

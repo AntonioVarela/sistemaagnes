@@ -29,13 +29,16 @@ class CircularRequest extends FormRequest
             'es_global' => 'nullable|boolean'
         ];
 
-        // Si no es global, grupo_id y seccion son requeridos
-        if (!$this->input('es_global')) {
+        // Verificar si es global de manera más robusta
+        $esGlobal = $this->has('es_global') && $this->input('es_global');
+        
+        if (!$esGlobal) {
             $rules['grupo_id'] = 'required|exists:grupos,id';
             $rules['seccion'] = 'required|in:Primaria,Secundaria';
         } else {
-            $rules['grupo_id'] = 'nullable|exists:grupos,id';
-            $rules['seccion'] = 'nullable|in:Primaria,Secundaria';
+            // Para circulares globales, grupo_id y seccion se asignan automáticamente
+            $rules['grupo_id'] = 'nullable';
+            $rules['seccion'] = 'nullable';
         }
 
         return $rules;

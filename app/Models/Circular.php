@@ -31,7 +31,7 @@ class Circular extends Model
     
     public function grupo()
     {
-        return $this->belongsTo(Grupo::class);
+        return $this->belongsTo(grupo::class);
     }
 
     public function user()
@@ -64,8 +64,37 @@ class Circular extends Model
     public function scopePorGrupo($query, $grupoId)
     {
         return $query->where(function($q) use ($grupoId) {
-            $q->where('grupo_id', $grupoId)
-              ->orWhere('es_global', true);
+            // Circulares específicas del grupo
+            $q->where('grupo_id', $grupoId);
+            
+            // Circulares globales (tienen grupo_id = 1 pero es_global = true)
+            $q->orWhere(function($subQ) {
+                $subQ->where('es_global', true)
+                     ->where('grupo_id', 1); // Grupo 1A
+            });
+        });
+    }
+
+    // Scope para obtener circulares por grupo específico, globales y por sección
+    public function scopePorGrupoYSeccion($query, $grupoId, $seccion = null)
+    {
+        return $query->where(function($q) use ($grupoId, $seccion) {
+            // Circulares específicas del grupo
+            $q->where('grupo_id', $grupoId);
+            
+            // Circulares globales (tienen grupo_id = 1 pero es_global = true)
+            $q->orWhere(function($subQ) {
+                $subQ->where('es_global', true)
+                     ->where('grupo_id', 1); // Grupo 1A
+            });
+            
+            // Circulares por sección (si se especifica)
+            if ($seccion) {
+                $q->orWhere(function($subQ) use ($seccion) {
+                    $subQ->where('es_global', false)
+                         ->where('seccion', $seccion);
+                });
+            }
         });
     }
 

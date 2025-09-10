@@ -56,6 +56,36 @@ Route::put('/circulares/{id}', [administradorController::class,'updateCircular']
 Route::delete('/circulares/{id}', [administradorController::class,'destroyCircular'])->name('circulares.destroy');
 Route::get('/circulares/{id}/download', [administradorController::class,'downloadCircular'])->name('circulares.download');
 
+// Ruta de prueba para crear circular global
+Route::get('/test-circular-global', function() {
+    try {
+        $circular = new \App\Models\Circular();
+        $circular->titulo = 'Circular Global de Prueba';
+        $circular->descripcion = 'Esta es una circular global de prueba';
+        $circular->archivo = 'test/test.pdf';
+        $circular->nombre_archivo_original = 'test.pdf';
+        $circular->tipo_archivo = 'application/pdf';
+        $circular->usuario_id = auth()->id();
+        $circular->es_global = true;
+        $circular->grupo_id = null;
+        $circular->seccion = null;
+        $circular->fecha_expiracion = null;
+        
+        $circular->save();
+        
+        return response()->json([
+            'success' => true,
+            'message' => 'Circular global creada exitosamente',
+            'circular_id' => $circular->id
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'success' => false,
+            'message' => 'Error: ' . $e->getMessage()
+        ]);
+    }
+})->name('test.circular.global');
+
 // Rutas para cursos
 Route::resource('cursos', CursosController::class)->middleware('auth');
 Route::post('/cursos/{curso}/toggle-status', [CursosController::class, 'toggleStatus'])->name('cursos.toggle-status')->middleware('auth');
