@@ -86,55 +86,6 @@
             }
         }
 
-        /* Estilos para el carrusel */
-        .carousel-indicator.active {
-            background-color: #10b981 !important;
-        }
-        
-        .carousel-indicator:hover {
-            background-color: #059669 !important;
-        }
-        
-        /* Animaciones del carrusel */
-        #cursosCarouselTrack {
-            transition: transform 0.5s ease-in-out;
-        }
-        
-        /* Efectos hover para las imágenes del carrusel */
-        #cursosCarousel .group:hover img {
-            transform: scale(1.02);
-            transition: transform 0.3s ease-in-out;
-        }
-        
-        /* Estilos para imágenes clickeables */
-        #cursosCarousel .group[data-image] {
-            transition: all 0.3s ease-in-out;
-        }
-        
-        #cursosCarousel .group[data-image]:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
-        
-        #cursosCarousel .group[data-image]:active {
-            transform: translateY(0);
-        }
-        
-        /* Responsive para el carrusel */
-        @media (max-width: 768px) {
-            #cursosCarousel .w-full {
-                height: 12rem !important;
-            }
-            
-            #prevBtn, #nextBtn {
-                padding: 0.5rem !important;
-            }
-            
-            #prevBtn svg, #nextBtn svg {
-                width: 1rem !important;
-                height: 1rem !important;
-            }
-        }
         
         /* Estilos adicionales para mejor responsividad */
         @media (max-width: 640px) {
@@ -346,100 +297,6 @@
                         </div>
                     </div>
 
-                    <!-- Carrusel de Cursos Adicionales -->
-                    <div class="bg-white rounded-xl shadow-sm p-6">
-                        <h2 class="text-xl font-semibold text-gray-900 mb-6 flex items-center">
-                            <svg class="w-6 h-6 mr-2 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                            </svg>
-                            Cursos Adicionales
-                        </h2>
-                        
-                        <!-- Carrusel de Imágenes -->
-                        <div class="relative">
-                            <div id="cursosCarousel" class="overflow-hidden rounded-lg">
-                                <div class="flex transition-transform duration-500 ease-in-out" id="cursosCarouselTrack">
-                                    @php
-                                        $cursosActivos = \App\Models\Curso::activos()->ordenados()->take(5)->get();
-                                    @endphp
-                                    
-                                    @if($cursosActivos->count() > 0)
-                                        @foreach($cursosActivos as $curso)
-                                        <div class="w-full flex-shrink-0">
-                                            <div class="relative group cursor-pointer" data-image="{{ $curso->imagen ? $curso->url_imagen : '' }}" data-title="{{ $curso->titulo }}">
-                                                @if($curso->imagen)
-                                                    <img src="{{ $curso->url_imagen }}" alt="{{ $curso->titulo }}" class="w-full h-48 object-cover rounded-lg cursor-pointer">
-                                                @else
-                                                    <div class="w-full h-48 bg-gradient-to-br from-{{ $loop->index % 2 == 0 ? 'blue' : 'emerald' }}-500 to-{{ $loop->index % 2 == 0 ? 'purple' : 'teal' }}-600 rounded-lg flex items-center justify-center">
-                                                        <svg class="w-16 h-16 text-white opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                                                        </svg>
-                                                    </div>
-                                                @endif
-                                                <div class="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent rounded-lg"></div>
-                                                <div class="absolute bottom-0 left-0 right-0 p-4 text-white">
-                                                    <h3 class="text-lg font-semibold mb-1">{{ $curso->titulo }}</h3>
-                                                    <p class="text-sm opacity-90">{{ $curso->descripcion }}</p>
-                                                </div>
-                                                <div class="absolute top-3 right-3">
-                                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-500 text-white">
-                                                        {{ ucfirst($curso->categoria) }}
-                                                    </span>
-                                                </div>
-                                                @if($curso->imagen)
-                                                <div class="absolute top-3 left-3">
-                                                    <div class="bg-white/20 backdrop-blur-sm rounded-full p-1.5">
-                                                        <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 8V4m0 0h4M4 4l5 5m11-1V4m0 0h-4m4 0l-5 5M4 16v4m0 0h4m-4 0l5-5m11 5l-5-5m5 5v-4m0 4h-4"></path>
-                                                        </svg>
-                                                    </div>
-                                                </div>
-                                                @endif
-                                            </div>
-                                        </div>
-                                        @endforeach
-                                    @else
-                                        <!-- Fallback si no hay cursos -->
-                                        <div class="w-full flex-shrink-0">
-                                            <div class="relative group cursor-pointer">
-                                                <div class="w-full h-48 bg-gradient-to-br from-blue-500 to-purple-600 rounded-lg flex items-center justify-center">
-                                                    <div class="text-center text-white">
-                                                        <svg class="w-16 h-16 mx-auto mb-2 opacity-80" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path>
-                                                        </svg>
-                                                        <p class="text-lg font-semibold">No hay cursos disponibles</p>
-                                                        <p class="text-sm opacity-80">Contacta con tu administrador</p>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    @endif
-                                </div>
-                            </div>
-                            
-                            <!-- Botones de Navegación -->
-                            <button id="prevBtn" class="absolute left-2 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 rounded-full p-2 shadow-lg transition-all duration-200 hover:scale-110">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
-                                </svg>
-                            </button>
-                            <button id="nextBtn" class="absolute right-2 top-1/2 transform -translate-y-1/2 bg-white/80 hover:bg-white text-gray-800 rounded-full p-2 shadow-lg transition-all duration-200 hover:scale-110">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"></path>
-                                </svg>
-                            </button>
-                            
-                            <!-- Indicadores de Página -->
-                            <div class="flex justify-center mt-4 space-x-2" id="carouselIndicators">
-                                @php
-                                    $cursosActivos = \App\Models\Curso::activos()->ordenados()->take(5)->get();
-                                @endphp
-                                @for($i = 0; $i < $cursosActivos->count(); $i++)
-                                    <button class="w-2 h-2 rounded-full bg-gray-300 hover:bg-gray-400 transition-colors duration-200 carousel-indicator {{ $i === 0 ? 'active' : '' }}" data-slide="{{ $i }}"></button>
-                                @endfor
-                            </div>
-                        </div>
-                    </div>
 
 
                 </div>
@@ -447,12 +304,22 @@
                 <!-- Sección del calendario -->
                 <div class="lg:col-span-2">
                     <div class="bg-white rounded-xl shadow-sm p-6">
-                        <h2 class="text-xl font-semibold text-gray-900 mb-6 flex items-center">
-                            <svg class="w-6 h-6 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
-                            </svg>
-                            Calendario de Tareas
-                        </h2>
+                        <div class="flex flex-col sm:flex-row sm:items-center justify-between mb-6">
+                            <h2 class="text-xl font-semibold text-gray-900 flex items-center">
+                                <svg class="w-6 h-6 mr-2 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                </svg>
+                                Calendario de Tareas
+                            </h2>
+                            <div id="restrictionMessage" class="mt-2 sm:mt-0 text-sm text-gray-600 bg-blue-50 border border-blue-200 rounded-lg px-3 py-2 hidden">
+                                <div class="flex items-center">
+                                    <svg class="w-4 h-4 mr-2 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                    </svg>
+                                    Las tareas de la siguiente semana se mostrarán los viernes a las 2:00 PM
+                                </div>
+                            </div>
+                        </div>
                         <div id='calendar' class="calendar-container"></div>
                     </div>
                 </div>
@@ -483,8 +350,11 @@
                 </div>
 
                 <div class="text-gray-600">
-                    
+                    @if($grupo->seccion == 'Primaria')
+                    <small>Tarea del dia</small>
+                    @else
                     <small>¿Cuándo tengo que entregarla?</small>
+                    @endif
                     <br>
                     <div class="bg-indigo-50 rounded-lg p-4">
                         <p id="modalDate" class="font-medium"></p>
@@ -566,14 +436,65 @@
             }
         }
 
+        // Función para verificar si se pueden mostrar tareas de la siguiente semana
+        function puedeVerTareasSiguienteSemana() {
+            const ahora = new Date();
+            const diaSemana = ahora.getDay(); // 0 = Domingo, 1 = Lunes, ..., 5 = Viernes
+            const hora = ahora.getHours();
+            
+            // Solo permitir los viernes a las 2 PM o después
+            return diaSemana === 5 && hora >= 14;
+        }
+        
+        // Función para filtrar tareas según la restricción
+        function filtrarTareasPorRestriccion(tareas) {
+            const ahora = new Date();
+            const inicioSemanaActual = new Date(ahora);
+            inicioSemanaActual.setDate(ahora.getDate() - ahora.getDay() + 1); // Lunes de esta semana
+            const finSemanaActual = new Date(inicioSemanaActual);
+            finSemanaActual.setDate(inicioSemanaActual.getDate() + 6); // Domingo de esta semana
+            
+            const inicioSemanaSiguiente = new Date(finSemanaActual);
+            inicioSemanaSiguiente.setDate(finSemanaActual.getDate() + 1); // Lunes de la siguiente semana
+            const finSemanaSiguiente = new Date(inicioSemanaSiguiente);
+            finSemanaSiguiente.setDate(inicioSemanaSiguiente.getDate() + 6); // Domingo de la siguiente semana
+            
+            return tareas.filter(function(tarea) {
+                if (!tarea.fecha_entrega) return true;
+                
+                const fechaEntrega = new Date(tarea.fecha_entrega);
+                
+                // Si la tarea es de esta semana, siempre se muestra
+                if (fechaEntrega >= inicioSemanaActual && fechaEntrega <= finSemanaActual) {
+                    return true;
+                }
+                
+                // Si la tarea es de la siguiente semana, solo se muestra si es viernes 2 PM o después
+                if (fechaEntrega >= inicioSemanaSiguiente && fechaEntrega <= finSemanaSiguiente) {
+                    return puedeVerTareasSiguienteSemana();
+                }
+                
+                // Para tareas de otras semanas, siempre se muestran
+                return true;
+            });
+        }
+
         $(document).ready(function () {
             var tareas = @json($tareas);
             var grupo = @json($grupo); 
             var s3BaseUrl = '{{ config("filesystems.disks.s3.url") }}';
             var eventos;
             
+            // Filtrar tareas según la restricción
+            var tareasFiltradas = filtrarTareasPorRestriccion(tareas);
+            
+            // Mostrar mensaje informativo si no se pueden ver tareas de la siguiente semana
+            if (!puedeVerTareasSiguienteSemana()) {
+                document.getElementById('restrictionMessage').classList.remove('hidden');
+            }
+            
             if(grupo.seccion == 'Primaria') {
-                eventos = tareas.map(function(element) {
+                eventos = tareasFiltradas.map(function(element) {
                     // Restar un día a la fecha para primaria
                     let startDate = element.fecha_entrega;
                     if (element.fecha_entrega) {
@@ -602,7 +523,7 @@
                     };
                 });
             } else {
-                eventos = tareas.map(function(element) {
+                eventos = tareasFiltradas.map(function(element) {
                     return {
                         title: element.titulo || 'Sin título',
                         start: element.fecha_entrega || new Date().toISOString().split('T')[0],
@@ -675,92 +596,9 @@
                 }
             });
             
-            // Inicializar el carrusel de cursos
-            initCursosCarousel();
             
         });
         
-        // Función para inicializar el carrusel de cursos
-        function initCursosCarousel() {
-            const track = document.getElementById('cursosCarouselTrack');
-            const prevBtn = document.getElementById('prevBtn');
-            const nextBtn = document.getElementById('nextBtn');
-            const indicators = document.querySelectorAll('.carousel-indicator');
-            
-            // Agregar event listeners para las imágenes de cursos
-            const cursoContainers = document.querySelectorAll('[data-image]');
-            cursoContainers.forEach(container => {
-                if (container.dataset.image) {
-                    container.addEventListener('click', function() {
-                        const imageSrc = this.dataset.image;
-                        const imageTitle = this.dataset.title;
-                        if (imageSrc) {
-                            openFullscreenImage(imageSrc, imageTitle);
-                        }
-                    });
-                }
-            });
-            
-            let currentSlide = 0;
-            const totalSlides = indicators.length;
-            
-            // Función para ir a una slide específica
-            function goToSlide(slideIndex) {
-                currentSlide = slideIndex;
-                const translateX = -slideIndex * 100;
-                track.style.transform = `translateX(${translateX}%)`;
-                
-                // Actualizar indicadores
-                indicators.forEach((indicator, index) => {
-                    indicator.classList.toggle('active', index === slideIndex);
-                    indicator.classList.toggle('bg-emerald-500', index === slideIndex);
-                    indicator.classList.toggle('bg-gray-300', index !== slideIndex);
-                });
-            }
-            
-            // Event listeners para botones de navegación
-            if (prevBtn) {
-                prevBtn.addEventListener('click', () => {
-                    currentSlide = (currentSlide - 1 + totalSlides) % totalSlides;
-                    goToSlide(currentSlide);
-                });
-            }
-            
-            if (nextBtn) {
-                nextBtn.addEventListener('click', () => {
-                    currentSlide = (currentSlide + 1) % totalSlides;
-                    goToSlide(currentSlide);
-                });
-            }
-            
-            // Event listeners para indicadores
-            indicators.forEach((indicator, index) => {
-                indicator.addEventListener('click', () => {
-                    goToSlide(index);
-                });
-            });
-            
-            // Auto-play del carrusel (opcional)
-            let autoPlayInterval = setInterval(() => {
-                currentSlide = (currentSlide + 1) % totalSlides;
-                goToSlide(currentSlide);
-            }, 5000); // Cambiar cada 5 segundos
-            
-            // Pausar auto-play al hacer hover
-            const carousel = document.getElementById('cursosCarousel');
-            if (carousel) {
-                carousel.addEventListener('mouseenter', () => {
-                    clearInterval(autoPlayInterval);
-                });
-                
-                carousel.addEventListener('mouseleave', () => {
-                    autoPlayInterval = setInterval(() => {
-                        currentSlide = (currentSlide + 1) % totalSlides;
-                        goToSlide(currentSlide);
-                    }, 5000);
-                });
-            }
-        }
         
         // La función descargarCircular() ya no es necesaria ya que ahora usamos enlaces directos
         
