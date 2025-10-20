@@ -21,24 +21,24 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/tareas', [administradorController::class,'index'])->name('tareas.index');
 Route::post('/tareasguardar', [administradorController::class,'store'])->name('tareas.store');
 
-Route::get("/grupos",[administradorController::class,'showGrupos'])->name('grupos.index');
-Route::post('/gruposguardar', [administradorController::class,'storeGrupo'])->name('grupos.store');
-Route::delete('/grupos/{id}', [administradorController::class,'destroyGrupo'])->name('grupos.destroy');
-Route::post('/grupos/{id}/update', [administradorController::class,'updateGrupo'])->name('grupos.update');
+Route::get("/grupos",[administradorController::class,'showGrupos'])->name('grupos.index')->middleware('admin');
+Route::post('/gruposguardar', [administradorController::class,'storeGrupo'])->name('grupos.store')->middleware('admin');
+Route::delete('/grupos/{id}', [administradorController::class,'destroyGrupo'])->name('grupos.destroy')->middleware('admin');
+Route::post('/grupos/{id}/update', [administradorController::class,'updateGrupo'])->name('grupos.update')->middleware('admin');
 
-Route::get('/materias',[administradorController::class,'showMaterias'])->name('materias.index');
-Route::post('/materiasguardar', [administradorController::class,'storeMateria'])->name('materias.store');
-Route::delete('/materias/{id}', [administradorController::class,'destroyMateria'])->name('materias.destroy');
-Route::post('/materias/{id}/update', [administradorController::class,'updateMateria'])->name('materias.update');
+Route::get('/materias',[administradorController::class,'showMaterias'])->name('materias.index')->middleware('admin');
+Route::post('/materiasguardar', [administradorController::class,'storeMateria'])->name('materias.store')->middleware('admin');
+Route::delete('/materias/{id}', [administradorController::class,'destroyMateria'])->name('materias.destroy')->middleware('admin');
+Route::post('/materias/{id}/update', [administradorController::class,'updateMateria'])->name('materias.update')->middleware('admin');
 
 Route::post('/tareas/{id}/update', [administradorController::class,'updateTareas'])->name('tareas.update');
 Route::post('/tareas/{id}/destroy', [administradorController::class,'destroyTarea'])->name('tareas.destroy');
 Route::get('/dashboard', [administradorController::class,'indexDashboard'])->name('dashboard')->middleware(['auth', 'verified']);
 
-    Route::get('/usuarios',[administradorController::class,'showUsuarios'])->name('usuarios.index');
-Route::post('/usuarios', [administradorController::class,'storeUsuario'])->name('usuarios.store');
-Route::delete('/usuarios/{id}', [administradorController::class,'destroyUsuario'])->name('usuarios.destroy');
-Route::put('/usuarios/{id}', [administradorController::class,'updateUsuario'])->name('usuarios.update');
+    Route::get('/usuarios',[administradorController::class,'showUsuarios'])->name('usuarios.index')->middleware('admin');
+Route::post('/usuarios', [administradorController::class,'storeUsuario'])->name('usuarios.store')->middleware('admin');
+Route::delete('/usuarios/{id}', [administradorController::class,'destroyUsuario'])->name('usuarios.destroy')->middleware('admin');
+Route::put('/usuarios/{id}', [administradorController::class,'updateUsuario'])->name('usuarios.update')->middleware('admin');
 
 Route::get('/horarios',[administradorController::class,'showHorarios'])->name('horarios.index');
 Route::post('/horariosguardar', [administradorController::class,'storeHorario'])->name('horarios.store');

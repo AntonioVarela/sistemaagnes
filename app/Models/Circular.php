@@ -4,12 +4,13 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Storage;
 
 class Circular extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, HasFactory;
     protected $table = 'circulares';
 
     protected $fillable = [
@@ -26,7 +27,7 @@ class Circular extends Model
     ];
 
     protected $casts = [
-        'fecha_expiracion' => 'date',
+        'fecha_expiracion' => 'date:Y-m-d',
     ];
     
     public function grupo()

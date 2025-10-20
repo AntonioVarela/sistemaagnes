@@ -413,12 +413,20 @@
 
         // Función para preparar el modal de edición
         function prepareEditCircular(id, titulo, descripcion, grupoId, seccion, fechaExpiracion, esGlobal) {
+            console.log('Preparando edición de circular:', {
+                id, titulo, descripcion, grupoId, seccion, fechaExpiracion, esGlobal
+            });
+            
             document.getElementById('edit_titulo').value = titulo;
             document.getElementById('edit_descripcion').value = descripcion;
             document.getElementById('edit_es_global').checked = esGlobal === 'true';
             document.getElementById('edit_grupo_id').value = grupoId;
             document.getElementById('edit_seccion').value = seccion;
-            document.getElementById('edit_fecha_expiracion').value = fechaExpiracion !== 'null' ? fechaExpiracion : '';
+            
+            // Manejar la fecha de expiración
+            const fechaExpiracionValue = fechaExpiracion !== 'null' ? fechaExpiracion : '';
+            document.getElementById('edit_fecha_expiracion').value = fechaExpiracionValue;
+            console.log('Fecha de expiración asignada:', fechaExpiracionValue);
             
             // Actualizar la acción del formulario
             document.getElementById('editCircularForm').action = `/circulares/${id}`;
@@ -537,6 +545,11 @@
                     const esGlobal = document.getElementById('edit_es_global').checked;
                     const grupoId = document.getElementById('edit_grupo_id').value;
                     const seccion = document.getElementById('edit_seccion').value;
+                    const fechaExpiracion = document.getElementById('edit_fecha_expiracion').value;
+                    
+                    console.log('Datos del formulario de edición:', {
+                        esGlobal, grupoId, seccion, fechaExpiracion
+                    });
                     
                     // Si no es global, validar que se seleccione grupo y sección
                     if (!esGlobal) {

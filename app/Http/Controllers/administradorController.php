@@ -9,9 +9,11 @@ use App\Models\User;
 use App\Models\tarea;
 use App\Models\horario;
 use App\Models\anuncio;
+use App\Models\Curso;
 use App\Http\Requests\AnuncioRequest;
 use App\Http\Requests\TareaRequest;
 use App\Http\Requests\CircularRequest;
+use App\Http\Requests\UsuarioRequest;
 use App\Models\Circular;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
@@ -19,6 +21,76 @@ use Illuminate\Support\Facades\Log;
 
 class administradorController extends Controller
 {
+    /**
+     * Helper method para manejar archivos
+     */
+    private function handleFileUpload($request, $object, $directory = 'archivos')
+    {
+        if ($request->hasFile('archivo')) {
+            try {
+                // Eliminar el archivo anterior si existe
+                if ($object->archivo) {
+                    Storage::disk('s3')->delete($object->archivo);
+                }
+                
+                $archivo = $request->file('archivo');
+                $nombreArchivo = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '', $archivo->getClientOriginalName());
+                $rutaArchivo = $archivo->storeAs($directory, $nombreArchivo, 's3');
+                
+                return [
+                    'success' => true,
+                    'ruta' => $rutaArchivo,
+                    'nombre_original' => $archivo->getClientOriginalName(),
+                    'tipo' => $archivo->getClientMimeType()
+                ];
+            } catch (\Exception $e) {
+                Log::error("Error al subir archivo: " . $e->getMessage());
+                return [
+                    'success' => false,
+                    'error' => 'Error al subir el archivo. Por favor, inténtalo de nuevo.'
+                ];
+            }
+        }
+        return ['success' => true];
+    }
+
+    /**
+     * Helper method para mostrar toast messages
+     */
+    private function flashToast($type, $message)
+    {
+        session()->flash('toast', [
+            'type' => $type,
+            'message' => $message
+        ]);
+    }
+
+    /**
+     * Helper method para verificar permisos de eliminación
+     */
+    private function checkDeletePermission($object, $redirectRoute)
+    {
+        if (Auth::user()->id !== $object->usuario_id && Auth::user()->rol !== 'administrador') {
+            $this->flashToast('error', 'No tienes permiso para eliminar este elemento');
+            return redirect()->route($redirectRoute);
+        }
+        return null;
+    }
+
+    /**
+     * Helper method para eliminar archivo y objeto
+     */
+    private function deleteWithFile($object, $successMessage, $redirectRoute)
+    {
+        // Eliminar el archivo si existe
+        if ($object->archivo) {
+            Storage::disk('s3')->delete($object->archivo);
+        }
+        
+        $object->delete();
+        $this->flashToast('success', $successMessage);
+        return redirect()->route($redirectRoute);
+    }
     public function indexDashboard()
     {
         if(Auth::user()->rol == 'Coordinador Primaria'){
@@ -61,6 +133,9 @@ class administradorController extends Controller
             $grupos = grupo::whereIn('id', $horarios->pluck('grupo_id'))->get();
         }
 
+        // Asegurar que las variables estén definidas
+        $horarios = $horarios ?? collect();
+        $grupos = $grupos ?? collect();
 
         return view('dashboard', compact('horarios', 'grupos'));
     }
@@ -105,24 +180,15 @@ class administradorController extends Controller
         $tarea->fecha_entrega = $request->fecha_entrega;
         $tarea->hora_entrega = $request->hora_entrega;
         
-        if ($request->hasFile('archivo')) {
-            try {
-                // Eliminar el archivo anterior si existe
-                if ($tarea->archivo) {
-                    Storage::disk('s3')->delete($tarea->archivo);
-                }
-                $archivo = $request->file('archivo');
-                $nombreArchivo = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '', $archivo->getClientOriginalName());
-                $rutaArchivo = $archivo->storeAs('archivos', $nombreArchivo, 's3');
-                $tarea->archivo = $rutaArchivo;
-            } catch (\Exception $e) {
-                Log::error('Error al actualizar archivo de tarea: ' . $e->getMessage());
-                session()->flash('toast', [
-                    'type' => 'error',
-                    'message' => 'Error al subir el archivo. Por favor, inténtalo de nuevo.'
-                ]);
-                return redirect()->route('tareas.index');
-            }
+        // Manejar archivo si se sube uno nuevo
+        $fileResult = $this->handleFileUpload($request, $tarea, 'archivos');
+        if (!$fileResult['success']) {
+            $this->flashToast('error', $fileResult['error']);
+            return redirect()->route('tareas.index');
+        }
+        
+        if ($fileResult['ruta']) {
+            $tarea->archivo = $fileResult['ruta'];
         }
 
         if ($request->has('grupo')) {
@@ -135,10 +201,7 @@ class administradorController extends Controller
         }
 
         $tarea->save();
-        session()->flash('toast', [
-            'type' => 'success',
-            'message' => '¡Tarea actualizada exitosamente!'
-        ]);
+        $this->flashToast('success', '¡Tarea actualizada exitosamente!');
         return redirect()->route('tareas.index');
     }
     public function store(TareaRequest $request)
@@ -308,19 +371,9 @@ class administradorController extends Controller
         $usuarios = User::all();
         return view("usuarios", compact('usuarios')); // Cambiado a 'usuarios'
     }
-    public function storeUsuario(Request $request)
+    public function storeUsuario(UsuarioRequest $request)
     {
         try {
-            // Validar que el email no esté duplicado
-            $emailExists = User::where('email', $request->email)->exists();
-            if ($emailExists) {
-                session()->flash('toast', [
-                    'type' => 'error',
-                    'message' => 'El email ya está en uso'
-                ]);
-                return redirect()->route('usuarios.index');
-            }
-            
             $usuario = new User();
             $usuario->name = $request->name;
             $usuario->email = $request->email;
@@ -376,18 +429,34 @@ class administradorController extends Controller
                 return redirect()->route('usuarios.index');
             }
 
-            // Verificar si el usuario tiene anuncios o circulares
-            $anunciosUsuario = anuncio::where('user_id', $id)->count();
+            // Verificar si el usuario tiene circulares creadas
             $circularesUsuario = Circular::where('usuario_id', $id)->count();
-            
-            if ($anunciosUsuario > 0 || $circularesUsuario > 0) {
+            if ($circularesUsuario > 0) {
                 session()->flash('toast', [
                     'type' => 'error',
-                    'message' => 'No se puede eliminar el usuario porque tiene contenido publicado'
+                    'message' => 'No se puede eliminar el usuario porque tiene circulares publicadas'
                 ]);
                 return redirect()->route('usuarios.index');
             }
 
+            // Verificar si el usuario tiene cursos creados
+            $cursosUsuario = Curso::where('user_id', $id)->count();
+            if ($cursosUsuario > 0) {
+                session()->flash('toast', [
+                    'type' => 'error',
+                    'message' => 'No se puede eliminar el usuario porque tiene cursos creados'
+                ]);
+                return redirect()->route('usuarios.index');
+            }
+
+            // Nota: Las tareas no tienen un campo user_id, por lo que no se puede verificar
+            // si el usuario creó tareas específicas
+
+            // Log de la eliminación
+            \Log::info("Eliminando usuario: {$usuario->name} (ID: {$id})");
+
+            // Usar delete() para soft delete (recomendado para mantener integridad de datos)
+            // Si necesitas eliminación permanente, usar forceDelete()
             $usuario->delete();
             
             session()->flash('toast', [
@@ -396,6 +465,7 @@ class administradorController extends Controller
             ]);
             
         } catch (\Exception $e) {
+            \Log::error('Error al eliminar usuario: ' . $e->getMessage());
             session()->flash('toast', [
                 'type' => 'error',
                 'message' => 'Error al eliminar el usuario: ' . $e->getMessage()
@@ -404,23 +474,126 @@ class administradorController extends Controller
         
         return redirect()->route('usuarios.index');
     }
-    public function updateUsuario(Request $request, $id)
+
+    /**
+     * Restaurar un usuario eliminado (soft delete)
+     */
+    public function restoreUsuario($id)
     {
         try {
-            $usuario = User::findOrFail($id);
+            $usuario = User::withTrashed()->findOrFail($id);
             
-            // Validar que el email no esté duplicado (excluyendo el usuario actual)
-            $emailExists = User::where('email', $request->email)
-                ->where('id', '!=', $id)
-                ->exists();
-                
-            if ($emailExists) {
+            if (!$usuario->trashed()) {
                 session()->flash('toast', [
-                    'type' => 'error',
-                    'message' => 'El email ya está en uso por otro usuario'
+                    'type' => 'warning',
+                    'message' => 'El usuario no está eliminado'
                 ]);
                 return redirect()->route('usuarios.index');
             }
+
+            $usuario->restore();
+            
+            \Log::info("Usuario restaurado: {$usuario->name} (ID: {$id})");
+            
+            session()->flash('toast', [
+                'type' => 'success',
+                'message' => '¡Usuario restaurado exitosamente!'
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Error al restaurar usuario: ' . $e->getMessage());
+            session()->flash('toast', [
+                'type' => 'error',
+                'message' => 'Error al restaurar el usuario: ' . $e->getMessage()
+            ]);
+        }
+        
+        return redirect()->route('usuarios.index');
+    }
+
+    /**
+     * Eliminar permanentemente un usuario (force delete)
+     */
+    public function forceDeleteUsuario($id)
+    {
+        try {
+            // Verificar que no se esté eliminando a sí mismo
+            if (Auth::id() == $id) {
+                session()->flash('toast', [
+                    'type' => 'error',
+                    'message' => 'No puedes eliminar tu propia cuenta'
+                ]);
+                return redirect()->route('usuarios.index');
+            }
+
+            $usuario = User::withTrashed()->findOrFail($id);
+            
+            // Verificar si el usuario tiene horarios asignados
+            $horariosAsignados = horario::where('maestro_id', $id)->count();
+            if ($horariosAsignados > 0) {
+                session()->flash('toast', [
+                    'type' => 'error',
+                    'message' => 'No se puede eliminar permanentemente el usuario porque tiene horarios asignados'
+                ]);
+                return redirect()->route('usuarios.index');
+            }
+
+            // Verificar si el usuario es titular de algún grupo
+            $gruposTitular = grupo::where('titular', $id)->count();
+            if ($gruposTitular > 0) {
+                session()->flash('toast', [
+                    'type' => 'error',
+                    'message' => 'No se puede eliminar permanentemente el usuario porque es titular de un grupo'
+                ]);
+                return redirect()->route('usuarios.index');
+            }
+
+            // Verificar si el usuario tiene circulares creadas
+            $circularesUsuario = Circular::where('usuario_id', $id)->count();
+            if ($circularesUsuario > 0) {
+                session()->flash('toast', [
+                    'type' => 'error',
+                    'message' => 'No se puede eliminar permanentemente el usuario porque tiene circulares publicadas'
+                ]);
+                return redirect()->route('usuarios.index');
+            }
+
+            // Verificar si el usuario tiene cursos creados
+            $cursosUsuario = Curso::where('user_id', $id)->count();
+            if ($cursosUsuario > 0) {
+                session()->flash('toast', [
+                    'type' => 'error',
+                    'message' => 'No se puede eliminar permanentemente el usuario porque tiene cursos creados'
+                ]);
+                return redirect()->route('usuarios.index');
+            }
+
+            // Log de la eliminación permanente
+            \Log::info("Eliminando permanentemente usuario: {$usuario->name} (ID: {$id})");
+
+            // Eliminación permanente
+            $usuario->forceDelete();
+            
+            session()->flash('toast', [
+                'type' => 'success',
+                'message' => '¡Usuario eliminado permanentemente!'
+            ]);
+            
+        } catch (\Exception $e) {
+            \Log::error('Error al eliminar permanentemente usuario: ' . $e->getMessage());
+            session()->flash('toast', [
+                'type' => 'error',
+                'message' => 'Error al eliminar permanentemente el usuario: ' . $e->getMessage()
+            ]);
+        }
+        
+        return redirect()->route('usuarios.index');
+    }
+
+    public function updateUsuario(UsuarioRequest $request, $id)
+    {
+        try {
+            $usuario = User::findOrFail($id);
             
             $usuario->name = $request->name;
             $usuario->email = $request->email;
@@ -646,25 +819,13 @@ class administradorController extends Controller
     {
         $anuncio = anuncio::findOrFail($id);
         
-        // Verificar si el usuario es el creador o administrador
-        if (Auth::user()->id !== $anuncio->user_id && Auth::user()->rol !== 'administrador') {
-            session()->flash('toast', [
-                'type' => 'error',
-                'message' => 'No tienes permiso para eliminar este anuncio'
-            ]);
-            return redirect()->route('anuncios.index');
+        // Verificar permisos
+        $permissionCheck = $this->checkDeletePermission($anuncio, 'anuncios.index');
+        if ($permissionCheck) {
+            return $permissionCheck;
         }
 
-        // Eliminar el archivo si existe
-        if ($anuncio->archivo) {
-            Storage::disk('s3')->delete($anuncio->archivo);
-        }
-        $anuncio->delete();
-        session()->flash('toast', [
-            'type' => 'success',
-            'message' => '¡Anuncio eliminado exitosamente!'
-        ]);
-        return redirect()->route('anuncios.index');
+        return $this->deleteWithFile($anuncio, '¡Anuncio eliminado exitosamente!', 'anuncios.index');
     }
     public function updateAnuncio(AnuncioRequest $request, $id)
     {
@@ -834,35 +995,33 @@ class administradorController extends Controller
             $circular->seccion = $request->seccion;
         }
         
-        $circular->fecha_expiracion = $request->fecha_expiracion ? $request->fecha_expiracion : null;
+        // Debug: Log the fecha_expiracion value
+        \Log::info('Fecha expiración recibida: ' . $request->fecha_expiracion);
+        
+        // Manejar la fecha de expiración correctamente
+        if ($request->filled('fecha_expiracion')) {
+            $circular->fecha_expiracion = $request->fecha_expiracion;
+        } else {
+            $circular->fecha_expiracion = null;
+        }
+        
+        \Log::info('Fecha expiración asignada: ' . $circular->fecha_expiracion);
 
-        if ($request->hasFile('archivo')) {
-            try {
-                // Eliminar el archivo anterior si existe
-                if ($circular->archivo) {
-                    Storage::disk('s3')->delete($circular->archivo);
-                }
-                $archivo = $request->file('archivo');
-                $nombreArchivo = time() . '_' . preg_replace('/[^a-zA-Z0-9._-]/', '', $archivo->getClientOriginalName());
-                $rutaArchivo = $archivo->storeAs('circulares', $nombreArchivo, 's3');
-                $circular->archivo = $rutaArchivo;
-                $circular->nombre_archivo_original = $archivo->getClientOriginalName();
-                $circular->tipo_archivo = $archivo->getClientMimeType();
-            } catch (\Exception $e) {
-                Log::error('Error al actualizar archivo de circular: ' . $e->getMessage());
-                session()->flash('toast', [
-                    'type' => 'error',
-                    'message' => 'Error al subir el archivo. Por favor, inténtalo de nuevo.'
-                ]);
-                return redirect()->route('circulares.index');
-            }
+        // Manejar archivo si se sube uno nuevo
+        $fileResult = $this->handleFileUpload($request, $circular, 'circulares');
+        if (!$fileResult['success']) {
+            $this->flashToast('error', $fileResult['error']);
+            return redirect()->route('circulares.index');
+        }
+        
+        if (isset($fileResult['ruta']) && $fileResult['ruta']) {
+            $circular->archivo = $fileResult['ruta'];
+            $circular->nombre_archivo_original = $fileResult['nombre_original'];
+            $circular->tipo_archivo = $fileResult['tipo'];
         }
 
         $circular->save();
-        session()->flash('toast', [
-            'type' => 'success',
-            'message' => '¡Circular actualizada exitosamente!'
-        ]);
+        $this->flashToast('success', '¡Circular actualizada exitosamente!');
         return redirect()->route('circulares.index');
     }
 
@@ -870,25 +1029,13 @@ class administradorController extends Controller
     {
         $circular = Circular::findOrFail($id);
         
-        // Verificar si el usuario es el creador o administrador
-        if (Auth::user()->id !== $circular->usuario_id && Auth::user()->rol !== 'administrador') {
-            session()->flash('toast', [
-                'type' => 'error',
-                'message' => 'No tienes permiso para eliminar esta circular'
-            ]);
-            return redirect()->route('circulares.index');
+        // Verificar permisos
+        $permissionCheck = $this->checkDeletePermission($circular, 'circulares.index');
+        if ($permissionCheck) {
+            return $permissionCheck;
         }
 
-        // Eliminar el archivo si existe
-        if ($circular->archivo) {
-            Storage::disk('s3')->delete($circular->archivo);
-        }
-        $circular->delete();
-        session()->flash('toast', [
-            'type' => 'success',
-            'message' => '¡Circular eliminada exitosamente!'
-        ]);
-        return redirect()->route('circulares.index');
+        return $this->deleteWithFile($circular, '¡Circular eliminada exitosamente!', 'circulares.index');
     }
 
     public function downloadCircular($id)

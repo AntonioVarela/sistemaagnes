@@ -15,6 +15,16 @@ class AdminMiddleware
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // Verificar que el usuario esté autenticado
+        if (!auth()->check()) {
+            return redirect()->route('login');
+        }
+
+        // Verificar que el usuario sea administrador
+        if (auth()->user()->rol !== 'administrador') {
+            abort(403, 'No tienes permisos para acceder a esta sección.');
+        }
+
         return $next($request);
     }
 }

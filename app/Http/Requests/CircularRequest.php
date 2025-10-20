@@ -24,8 +24,8 @@ class CircularRequest extends FormRequest
         $rules = [
             'titulo' => 'required|string|max:255',
             'descripcion' => 'nullable|string|max:1000',
-            'archivo' => 'required|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240', // 10MB máximo
-            'fecha_expiracion' => 'nullable|date|after:today',
+            'archivo' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240', // 10MB máximo
+            'fecha_expiracion' => 'nullable|date|after_or_equal:today',
             'es_global' => 'nullable|boolean'
         ];
 
