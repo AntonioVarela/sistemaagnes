@@ -1,73 +1,104 @@
 <x-layouts.app :title="__('Circulares')">
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <!-- Header de la página -->
-        <div class="mb-8">
-            <div class="flex justify-between items-center">
-                <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Circulares Semanales</h1>
-                <button onclick="openModal('new-circular')" class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-medium transition-colors duration-200 flex items-center">
-                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
-                    </svg>
-                    Nueva Circular
-                </button>
+    <!-- Librerías para notificaciones -->
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+    
+    <div class="flex h-full w-full flex-1 flex-col gap-6 rounded-xl p-6 shadow-sm">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('Circulares') }}</h1>
+                <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Gestiona las circulares del sistema</p>
             </div>
+            <flux:modal.trigger name="new-circular">
+                <flux:button icon='plus' variant="primary" class="flex items-center gap-2">
+                    <span>Nueva Circular</span>
+                </flux:button>
+            </flux:modal.trigger>
         </div>
+
             <!-- Filtros -->
-            <div class="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700 p-4 mb-6">
-                <div class="flex flex-wrap gap-4 items-center">
-                    <div class="flex items-center gap-2">
-                        <label class="text-sm font-medium text-gray-700 dark:text-zinc-300">Filtrar por:</label>
-                        <select id="filtroSeccion" class="text-sm border border-zinc-300 dark:border-zinc-600 rounded-md px-3 py-1 bg-white dark:bg-zinc-700 text-gray-900 dark:text-zinc-100">
+        <div class="bg-indigo-100 dark:bg-gray-800 rounded-lg shadow-sm p-4 border border-gray-300 dark:border-gray-600">
+            <div class="flex flex-col sm:flex-row flex-wrap gap-4 items-start sm:items-center">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
+                    <label class="text-sm font-medium text-gray-700 dark:text-gray-200 whitespace-nowrap">Filtrar por sección:</label>
+                    <flux:select name="filtroSeccion" id="filtroSeccion" class="w-full sm:w-48">
                             <option value="">Todas las secciones</option>
                             <option value="Primaria">Primaria</option>
                             <option value="Secundaria">Secundaria</option>
-                        </select>
+                    </flux:select>
                     </div>
-                    <div class="flex items-center gap-2">
-                        <label class="text-sm font-medium text-gray-700 dark:text-zinc-300">Estado:</label>
-                        <select id="filtroEstado" class="text-sm border border-zinc-300 dark:border-zinc-600 rounded-md px-3 py-1 bg-white dark:bg-zinc-700 text-gray-900 dark:text-zinc-100">
+                <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
+                    <label class="text-sm font-medium text-gray-700 dark:text-gray-200 whitespace-nowrap">Estado:</label>
+                    <flux:select name="filtroEstado" id="filtroEstado" class="w-full sm:w-48">
                             <option value="">Todos</option>
                             <option value="activas">Activas</option>
                             <option value="expiradas">Expiradas</option>
-                        </select>
-                    </div>
+                    </flux:select>
+                </div>
                 </div>
             </div>
 
-            <!-- Tabla de Circulares -->
-            <div class="bg-white dark:bg-zinc-800 rounded-lg shadow-sm border border-zinc-200 dark:border-zinc-700 overflow-hidden">
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead class="bg-zinc-50 dark:bg-zinc-700">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Título</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Descripción</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Archivo</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Alcance</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Subido por</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Fecha</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Expira</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider">Acciones</th>
+        <div class="overflow-x-auto rounded-lg">
+            <table id="myTable" class="w-full min-w-full">
+                <thead class="bg-indigo-200 dark:bg-gray-600">
+                    <tr>
+                        <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Título</th>
+                        <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider hidden sm:table-cell">Descripción</th>
+                        <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider hidden md:table-cell">Archivo</th>
+                        <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider hidden lg:table-cell">Alcance</th>
+                        <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider hidden xl:table-cell">Fecha</th>
+                        <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider hidden xl:table-cell">Expira</th>
+                        <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Acciones</th>
                             </tr>
                         </thead>
-                        <tbody class="divide-y divide-zinc-200 dark:divide-zinc-700">
+                <tbody class="divide-y divide-gray-300 dark:divide-gray-600">
                             @if(isset($circulares) && count($circulares) > 0)
                                 @foreach ($circulares as $circular)
-                                    <tr class="hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors circular-row" 
+                                    <tr class="hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors circular-row" 
                                         data-seccion="{{ $circular->seccion }}" 
                                         data-estado="{{ $circular->estaActiva() ? 'activas' : 'expiradas' }}">
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm font-medium text-gray-900 dark:text-zinc-100">{{ $circular->titulo }}</div>
-                                            <div class="text-xs text-gray-500 dark:text-zinc-400">
+                                        <td class="px-3 sm:px-6 py-4">
+                                            <div class="flex items-center">
+                                                <div class="ml-2 sm:ml-4">
+                                                    <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $circular->titulo }}</div>
+                                                    <div class="text-xs text-gray-500 dark:text-gray-400">
                                                 {{ $circular->seccion }}
+                                                    </div>
+                                                    <!-- Información adicional para móviles -->
+                                                    <div class="sm:hidden text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                                        <div>{{ Str::limit($circular->descripcion, 100) ?: 'Sin descripción' }}</div>
+                                                        @if($circular->archivo)
+                                                            <div class="mt-1">
+                                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200">
+                                                                    📄 {{ $circular->nombre_archivo_original }}
+                                                                </span>
+                                                            </div>
+                                                        @endif
+                                                        @if($circular->es_global)
+                                                            <div class="mt-1">
+                                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
+                                                                    Global
+                                                                </span>
+                                                            </div>
+                                                        @else
+                                                            <div class="mt-1">
+                                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
+                                                                    {{ $circular->grupo->nombre ?? 'N/A' }}
+                                                                </span>
+                                                            </div>
+                                                        @endif
+                                                        <div>{{ $circular->created_at->format('d/m/Y H:i') }}</div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4">
-                                            <div class="text-sm text-gray-900 dark:text-zinc-100">
-                                                {{ Str::limit($circular->descripcion, 100) ?: 'Sin descripción' }}
+                                        <td class="px-3 sm:px-6 py-4 hidden sm:table-cell">
+                                            <div class="text-sm text-gray-900 dark:text-white">
+                                                {{ Str::limit($circular->descripcion, 200) ?: 'Sin descripción' }}
                                             </div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
+                                        <td class="px-3 sm:px-6 py-4 whitespace-nowrap hidden md:table-cell">
                                             @if($circular->archivo)
                                                 <div class="flex items-center gap-2">
                                                     <a href="{{ route('circulares.download', $circular->id) }}" 
@@ -86,67 +117,58 @@
                                                 <span class="text-gray-500">Sin archivo</span>
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
+                                        <td class="px-3 sm:px-6 py-4 whitespace-nowrap hidden lg:table-cell">
                                             @if($circular->es_global)
-                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                                    🌍 Global
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
+                                                    Global
                                                 </span>
                                             @else
-                                                <div class="text-sm text-gray-900">
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
                                                     {{ $circular->grupo->nombre ?? 'N/A' }}
-                                                </div>
-                                                <div class="text-xs text-gray-500">
-                                                    {{ $circular->seccion }}
-                                                </div>
+                                                </span>
                                             @endif
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm text-gray-900 dark:text-zinc-100">
+                                        <td class="px-3 sm:px-6 py-4 whitespace-nowrap hidden xl:table-cell">
+                                            <div class="text-sm text-gray-900 dark:text-white">{{ $circular->created_at->format('d/m/Y H:i') }}</div>
+                                            <div class="text-xs text-gray-500 dark:text-gray-400">
                                                 {{ $circular->user->name ?? 'Usuario no disponible' }}
                                             </div>
-                                            <div class="text-xs text-gray-500 dark:text-zinc-400">
-                                                {{ $circular->created_at->format('d/m/Y H:i') }}
-                                            </div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm text-gray-900 dark:text-zinc-100">
-                                                {{ $circular->created_at->format('d/m/Y') }}
-                                            </div>
-                                        </td>
-                                        <td class="px-6 py-4 whitespace-nowrap">
-                                            <div class="text-sm text-gray-900 dark:text-zinc-100">
+                                        <td class="px-3 sm:px-6 py-4 whitespace-nowrap hidden xl:table-cell">
                                                 @if($circular->fecha_expiracion)
                                                     <span class="px-2 py-1 text-xs font-semibold rounded-full 
                                                         @if($circular->fecha_expiracion->isPast()) 
-                                                            bg-red-100 text-red-800
+                                                        bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
                                                         @elseif($circular->fecha_expiracion->isToday()) 
-                                                            bg-yellow-100 text-yellow-800
+                                                        bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
                                                         @else 
-                                                            bg-green-100 text-green-800
+                                                        bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
                                                         @endif">
                                                         {{ $circular->fecha_expiracion->format('d/m/Y') }}
                                                     </span>
                                                 @else
-                                                    <span class="text-gray-500 dark:text-zinc-400">Sin expiración</span>
+                                                <span class="text-gray-500 dark:text-gray-400">Sin expiración</span>
                                                 @endif
-                                            </div>
                                         </td>
-                                        <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                            <div class="flex items-center gap-2">
+                                        <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                            <div class="flex items-center gap-1 sm:gap-2">
                                                 @if(auth()->user()->id === $circular->usuario_id || auth()->user()->rol === 'administrador')
-                                                    <button onclick="prepareEditCircular({{ $circular->id }}, '{{ $circular->titulo }}', '{{ $circular->descripcion }}', '{{ $circular->grupo_id }}', '{{ $circular->seccion }}', '{{ $circular->fecha_expiracion ? $circular->fecha_expiracion->format('Y-m-d') : 'null' }}', '{{ $circular->es_global ? 'true' : 'false' }}')" 
-                                                            class="text-indigo-600 hover:text-indigo-900 dark:text-indigo-400 dark:hover:text-indigo-300">
-                                                        Editar
+                                                    <flux:modal.trigger name="edit-circular">
+                                                        <button type="button"
+                                                            onclick="prepareEditCircular({{ $circular->id }}, '{{ addslashes($circular->titulo) }}', '{{ addslashes($circular->descripcion) }}', '{{ $circular->grupo_id }}', '{{ $circular->seccion }}', '{{ $circular->fecha_expiracion ? $circular->fecha_expiracion->format('Y-m-d') : 'null' }}', {{ $circular->es_global ? 'true' : 'false' }})"
+                                                            class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 transition-colors p-1">
+                                                            <flux:icon name="pencil" class="w-4 h-4" />
                                                     </button>
+                                                    </flux:modal.trigger>
                                                     <form action="{{ route('circulares.destroy', $circular->id) }}" method="POST" class="form-eliminar inline">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" class="text-red-600 hover:text-red-900 dark:text-red-400 dark:hover:text-red-300 transition-colors">
-                                                            Eliminar
+                                                        <button type="submit" class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors p-1">
+                                                            <flux:icon name="trash" class="w-4 h-4" />
                                                         </button>
                                                     </form>
                                                 @else
-                                                    <span class="text-gray-500 dark:text-zinc-400">Solo el creador puede editar</span>
+                                                    <span class="text-gray-500 dark:text-gray-400 text-xs">Solo el creador puede editar</span>
                                                 @endif
                                             </div>
                                         </td>
@@ -154,14 +176,8 @@
                                 @endforeach
                             @else
                                 <tr>
-                                    <td colspan="8" class="px-6 py-8 text-center">
-                                        <div class="bg-zinc-50 dark:bg-zinc-700 rounded-lg p-8">
-                                            <svg class="w-12 h-12 mx-auto text-zinc-400 dark:text-zinc-500 mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                            </svg>
-                                            <h3 class="text-lg font-medium text-gray-900 dark:text-zinc-100 mb-1">No hay circulares disponibles</h3>
-                                            <p class="text-sm text-gray-500 dark:text-zinc-400">Las circulares aparecerán aquí cuando estén disponibles.</p>
-                                        </div>
+                                    <td colspan="7" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+                                        No hay circulares disponibles
                                     </td>
                                 </tr>
                             @endif
@@ -172,203 +188,152 @@
         </div>
 
     <!-- Modal para nueva circular -->
-    <div id="new-circular" class="fixed inset-0 hidden bg-gray-900 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
-        <div class="bg-white dark:bg-zinc-800 rounded-2xl shadow-xl p-8 w-full max-w-2xl mx-4 transform transition-all border border-zinc-200 dark:border-zinc-700">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-zinc-100">Nueva Circular Semanal</h2>
-                <button onclick="closeModal('new-circular')" class="text-gray-400 hover:text-gray-500 dark:text-zinc-400 dark:hover:text-zinc-300 focus:outline-none">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
+    <flux:modal name="new-circular" class="md:w-[500px] p-6">
+        <flux:container class="space-y-6">
+            <div class="flex items-center justify-between">
+                <flux:heading size="xl" class="dark:text-white">Nueva Circular</flux:heading>
             </div>
+            <flux:separator />
 
-            <form action="{{ route('circulares.store') }}" method="POST" enctype="multipart/form-data" id="formNuevaCircular">
+            <form action="{{ route('circulares.store') }}" method="POST" class="space-y-4" enctype="multipart/form-data">
                 @csrf
-                <div class="space-y-4">
-                    <div>
-                        <label for="titulo" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Título de la Circular *</label>
-                        <input type="text" id="titulo" name="titulo" required 
-                               placeholder="Ej: Circular Semanal del 1-5 de Septiembre"
-                               class="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-zinc-700 text-gray-900 dark:text-zinc-100">
-                    </div>
-
-                    <div>
-                        <label for="descripcion" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Descripción (opcional)</label>
-                        <textarea id="descripcion" name="descripcion" rows="3" 
-                                  placeholder="Breve descripción del contenido de la circular..."
-                                  class="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-zinc-700 text-gray-900 dark:text-zinc-100"></textarea>
-                    </div>
-
-                    <div>
-                        <label for="archivo" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Archivo de la Circular *</label>
-                        <input type="file" id="archivo" name="archivo" required 
-                               accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                               class="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-zinc-700 text-gray-900 dark:text-zinc-100">
-                        <p class="text-xs text-gray-500 dark:text-zinc-400 mt-1">
-                            Formatos permitidos: PDF, DOC, DOCX, JPG, JPEG, PNG. Máximo 10MB.
-                        </p>
-                    </div>
-
-                    <div class="flex items-center mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                        <input type="checkbox" name="es_global" id="es_global" value="1" 
-                               class="w-4 h-4 text-blue-600 bg-zinc-100 dark:bg-zinc-700 border-zinc-300 dark:border-zinc-600 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-zinc-800 focus:ring-2">
-                        <label for="es_global" class="ml-2 text-sm font-medium text-gray-700 dark:text-zinc-300">
-                            🌍 Circular Global (visible para todos los grupos)
+                <div class="grid gap-4">
+                    <flux:input name="titulo" id="titulo" label="Título de la Circular" type="text"
+                        placeholder="Ej: Circular Semanal del 1-5 de Septiembre" required />
+                    <flux:textarea name="descripcion" id="descripcion" label="Descripción (opcional)"
+                        placeholder="Breve descripción del contenido de la circular..." />
+                    <flux:input name="archivo" id="archivo" label="Archivo de la Circular" type="file" 
+                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" required />
+                    
+                    <!-- Checkbox para circular global -->
+                    <div class="flex items-center space-x-3">
+                        <input type="checkbox" name="es_global" id="es_global" value="1" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                        <label for="es_global" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Circular Global (visible para todos los grupos)
                         </label>
-                        <!-- Campo oculto para asegurar que se envíe el valor -->
-                        <input type="hidden" name="es_global_hidden" value="0">
                     </div>
 
                     <div id="grupo-seccion-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label for="grupo_id" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Grupo *</label>
-                            <select id="grupo_id" name="grupo_id" required
-                                    class="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-zinc-700 text-gray-900 dark:text-zinc-100">
+                        <flux:select name="grupo_id" id="grupo_id" label="Grupo" required>
                                 <option value="">Selecciona un grupo</option>
                                 @if(isset($grupos))
                                     @foreach($grupos as $grupo)
                                         <option value="{{ $grupo->id }}">{{ $grupo->nombre }} - {{ $grupo->seccion }}</option>
                                     @endforeach
                                 @endif
-                            </select>
-                        </div>
+                        </flux:select>
 
-                        <div>
-                            <label for="seccion" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Sección *</label>
-                            <select id="seccion" name="seccion" required
-                                    class="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-zinc-700 text-gray-900 dark:text-zinc-100">
+                        <flux:select name="seccion" id="seccion" label="Sección" required>
                                 <option value="">Selecciona una sección</option>
                                 <option value="Primaria">Primaria</option>
                                 <option value="Secundaria">Secundaria</option>
-                            </select>
-                        </div>
+                        </flux:select>
                     </div>
 
-                    <div>
-                        <label for="fecha_expiracion" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Fecha de Expiración (opcional)</label>
-                        <input type="date" id="fecha_expiracion" name="fecha_expiracion" 
-                               min="{{ date('Y-m-d', strtotime('+1 day')) }}"
-                               class="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-zinc-700 text-gray-900 dark:text-zinc-100">
-                        <p class="text-xs text-gray-500 dark:text-zinc-400 mt-1">
-                            Si no se especifica, la circular no expirará.
-                        </p>
-                    </div>
+                    <flux:input name="fecha_expiracion" id="fecha_expiracion" label="Fecha de Expiración (opcional)" type="date" 
+                        min="{{ date('Y-m-d', strtotime('+1 day')) }}" />
                 </div>
 
-                <div class="flex justify-end gap-3 mt-6">
-                    <button type="button" onclick="closeModal('new-circular')" 
-                            class="px-4 py-2 text-gray-700 dark:text-zinc-300 bg-zinc-200 dark:bg-zinc-600 rounded-md hover:bg-zinc-300 dark:hover:bg-zinc-500 transition-colors">
-                        Cancelar
-                    </button>
-                    <button type="submit" 
-                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
-                        Subir Circular
-                    </button>
-                </div>
+                <flux:footer class="flex justify-end gap-3">
+                    <flux:modal.close>
+                        <flux:button type="button" variant="filled" class="dark:text-white">Cancelar</flux:button>
+                    </flux:modal.close>
+                    <flux:button type="submit" variant="primary">Subir Circular</flux:button>
+                </flux:footer>
             </form>
-        </div>
-    </div>
+        </flux:container>
+    </flux:modal>
 
     <!-- Modal para editar circular -->
-    <div id="edit-circular" class="fixed inset-0 hidden bg-gray-900 bg-opacity-50 backdrop-blur-sm flex items-center justify-center z-50">
-        <div class="bg-white dark:bg-zinc-800 rounded-2xl shadow-xl p-8 w-full max-w-2xl mx-4 transform transition-all border border-zinc-200 dark:border-zinc-700">
-            <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-bold text-gray-900 dark:text-zinc-100">Editar Circular</h2>
-                <button onclick="closeModal('edit-circular')" class="text-gray-400 hover:text-gray-500 dark:text-zinc-400 dark:hover:text-zinc-300 focus:outline-none">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
+    <flux:modal name="edit-circular" class="md:w-[500px] p-6">
+        <flux:container class="space-y-6">
+            <div class="flex items-center justify-between">
+                <flux:heading size="xl" class="dark:text-white">Editar Circular</flux:heading>
             </div>
+            <flux:separator />
 
-            <form id="editCircularForm" method="POST" enctype="multipart/form-data">
+            <form id="editCircularForm" method="POST" class="space-y-4" enctype="multipart/form-data">
                 @csrf
                 @method('PUT')
-                <div class="space-y-4">
-                    <div>
-                        <label for="edit_titulo" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Título de la Circular *</label>
-                        <input type="text" id="edit_titulo" name="titulo" required
-                               class="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-zinc-700 text-gray-900 dark:text-zinc-100">
-                    </div>
-
-                    <div>
-                        <label for="edit_descripcion" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Descripción (opcional)</label>
-                        <textarea id="edit_descripcion" name="descripcion" rows="3"
-                                  class="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-zinc-700 text-gray-900 dark:text-zinc-100"></textarea>
-                    </div>
-
-                    <div>
-                        <label for="edit_archivo" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Archivo de la Circular</label>
-                        <input type="file" id="edit_archivo" name="archivo" 
-                               accept=".pdf,.doc,.docx,.jpg,.jpeg,.png"
-                               class="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-zinc-700 text-gray-900 dark:text-zinc-100">
-                        <p class="text-xs text-gray-500 dark:text-zinc-400 mt-1">
-                            Deja vacío para mantener el archivo actual. Formatos permitidos: PDF, DOC, DOCX, JPG, JPEG, PNG. Máximo 10MB.
-                        </p>
-                    </div>
-
-                    <div class="flex items-center mb-4 p-3 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                        <input type="checkbox" name="es_global" id="edit_es_global" value="1" 
-                               class="w-4 h-4 text-blue-600 bg-zinc-100 dark:bg-zinc-700 border-zinc-300 dark:border-zinc-600 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-zinc-800 focus:ring-2">
-                        <label for="edit_es_global" class="ml-2 text-sm font-medium text-gray-700 dark:text-zinc-300">
-                            🌍 Circular Global (visible para todos los grupos)
+                <div class="grid gap-4">
+                    <flux:input name="titulo" id="edit_titulo" label="Título de la Circular" type="text" required />
+                    <flux:textarea name="descripcion" id="edit_descripcion" label="Descripción (opcional)" />
+                    <flux:input name="archivo" id="edit_archivo" label="Archivo de la Circular" type="file" 
+                        accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" />
+                    
+                    <!-- Checkbox para circular global -->
+                    <div class="flex items-center space-x-3">
+                        <input type="checkbox" name="es_global" id="edit_es_global" value="1" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 rounded focus:ring-blue-500 dark:focus:ring-blue-600 dark:ring-offset-gray-800 focus:ring-2 dark:bg-gray-700 dark:border-gray-600">
+                        <label for="edit_es_global" class="text-sm font-medium text-gray-700 dark:text-gray-300">
+                            Circular Global (visible para todos los grupos)
                         </label>
-                        <!-- Campo oculto para asegurar que se envíe el valor -->
-                        <input type="hidden" name="es_global_hidden" value="0">
                     </div>
 
                     <div id="edit-grupo-seccion-container" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <div>
-                            <label for="edit_grupo_id" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Grupo *</label>
-                            <select id="edit_grupo_id" name="grupo_id" required
-                                    class="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-zinc-700 text-gray-900 dark:text-zinc-100">
+                        <flux:select name="grupo_id" id="edit_grupo_id" label="Grupo" required>
                                 <option value="">Selecciona un grupo</option>
                                 @if(isset($grupos))
                                     @foreach($grupos as $grupo)
                                         <option value="{{ $grupo->id }}">{{ $grupo->nombre }} - {{ $grupo->seccion }}</option>
                                     @endforeach
                                 @endif
-                            </select>
-                        </div>
+                        </flux:select>
 
-                        <div>
-                            <label for="edit_seccion" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Sección *</label>
-                            <select id="edit_seccion" name="seccion" required
-                                    class="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-zinc-700 text-gray-900 dark:text-zinc-100">
+                        <flux:select name="seccion" id="edit_seccion" label="Sección" required>
                                 <option value="">Selecciona una sección</option>
                                 <option value="Primaria">Primaria</option>
                                 <option value="Secundaria">Secundaria</option>
-                            </select>
-                        </div>
+                        </flux:select>
                     </div>
 
-                    <div>
-                        <label for="edit_fecha_expiracion" class="block text-sm font-medium text-gray-700 dark:text-zinc-300 mb-1">Fecha de Expiración (opcional)</label>
-                        <input type="date" id="edit_fecha_expiracion" name="fecha_expiracion" 
-                               min="{{ date('Y-m-d', strtotime('+1 day')) }}"
-                               class="w-full px-3 py-2 border border-zinc-300 dark:border-zinc-600 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 bg-white dark:bg-zinc-700 text-gray-900 dark:text-zinc-100">
-                        <p class="text-xs text-gray-500 dark:text-zinc-400 mt-1">
-                            Si no se especifica, la circular no expirará.
-                        </p>
-                    </div>
+                    <flux:input name="fecha_expiracion" id="edit_fecha_expiracion" label="Fecha de Expiración (opcional)" type="date" 
+                        min="{{ date('Y-m-d', strtotime('+1 day')) }}" />
                 </div>
 
-                <div class="flex justify-end gap-3 mt-6">
-                    <button type="button" onclick="closeModal('edit-circular')" 
-                            class="px-4 py-2 text-gray-700 dark:text-zinc-300 bg-zinc-200 dark:bg-zinc-600 rounded-md hover:bg-zinc-300 dark:hover:bg-zinc-500 transition-colors">
-                        Cancelar
-                    </button>
-                    <button type="submit" 
-                            class="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
-                        Actualizar Circular
-                    </button>
-                </div>
+                <flux:footer class="flex justify-end gap-3">
+                    <flux:modal.close>
+                        <flux:button type="button" variant="filled" class="dark:text-white">Cancelar</flux:button>
+                    </flux:modal.close>
+                    <flux:button type="submit" variant="primary">Actualizar Circular</flux:button>
+                </flux:footer>
             </form>
-        </div>
-    </div>
+        </flux:container>
+    </flux:modal>
 
     <script>
+        // Flag global para evitar inicializaciones duplicadas
+        let componentesInicializados = false;
+        
+        function iniciarComponentes() {
+            // Evitar inicialización duplicada
+            if (componentesInicializados) {
+                return;
+            }
+            componentesInicializados = true;
+            
+            // Configuración de formularios de eliminación
+            const formsEliminar = document.querySelectorAll('.form-eliminar');
+            formsEliminar.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: '¿Estás seguro?',
+                        text: "¡Esta acción no se puede deshacer!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Sí, eliminar',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
+        }
+
         // Funciones para modales
         function openModal(modalId) {
             document.getElementById(modalId).classList.remove('hidden');
@@ -438,14 +403,6 @@
             openModal('edit-circular');
         }
 
-        // Confirmación para eliminar
-        document.querySelectorAll('.form-eliminar').forEach(form => {
-            form.addEventListener('submit', function(e) {
-                if (!confirm('¿Estás seguro de que quieres eliminar esta circular? Esta acción no se puede deshacer.')) {
-                    e.preventDefault();
-                }
-            });
-        });
 
         // Función para manejar el checkbox de circular global
         function toggleCircularGlobal(isGlobal, containerId) {
@@ -489,6 +446,7 @@
 
         // Event listeners para los checkboxes de circular global
         document.addEventListener('DOMContentLoaded', function() {
+            iniciarComponentes();
             const esGlobalCheckbox = document.getElementById('es_global');
             const editEsGlobalCheckbox = document.getElementById('edit_es_global');
             
@@ -573,5 +531,25 @@
                 });
             }
         });
+        
+        // Inicializar componentes también en navegación de Livewire
+        document.addEventListener('livewire:navigated', iniciarComponentes);
+        
+        // Mostrar toast si existe mensaje
+        @if(session('toast'))
+            Toastify({
+                text: "{{ session('toast.message') }}",
+                duration: 3500,
+                gravity: "top",
+                position: "right",
+                backgroundColor: 
+                    @if(session('toast.type') == 'success') "#22c55e"
+                    @elseif(session('toast.type') == 'error') "#ef4444"
+                    @elseif(session('toast.type') == 'warning') "#f59e42"
+                    @else "#3b82f6" @endif,
+                stopOnFocus: true,
+                close: true
+            }).showToast();
+        @endif
     </script>
 </x-layouts.app>

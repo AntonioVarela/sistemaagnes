@@ -13,10 +13,10 @@
         </div>
 
         <!-- Filtros -->
-        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm p-4 border border-gray-200 dark:border-gray-700">
+        <div class="bg-indigo-100 dark:bg-gray-800 rounded-lg shadow-sm p-4 border border-gray-300 dark:border-gray-600">
             <div class="flex flex-col sm:flex-row flex-wrap gap-4 items-start sm:items-center">
                 <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">Filtrar por grupo:</label>
+                    <label class="text-sm font-medium text-gray-700 dark:text-gray-200 whitespace-nowrap">Filtrar por grupo:</label>
                     <flux:select name="grupo_filter" class="w-full sm:w-48" onchange="window.location.href=this.value">
                         <option value="{{ route('tareas.index') }}">Todos los grupos</option>
                         @foreach($grupos as $grupo)
@@ -28,7 +28,7 @@
                     </flux:select>
                 </div>
                 <div class="flex flex-col sm:flex-row items-start sm:items-center gap-2 w-full sm:w-auto">
-                    <label class="text-sm font-medium text-gray-700 dark:text-gray-300 whitespace-nowrap">Filtrar por materia:</label>
+                    <label class="text-sm font-medium text-gray-700 dark:text-gray-200 whitespace-nowrap">Filtrar por materia:</label>
                     <flux:select name="materia_filter" class="w-full sm:w-48" onchange="window.location.href=this.value">
                         <option value="{{ route('tareas.index') }}">Todas las materias</option>
                         @foreach($materias as $materia)
@@ -41,7 +41,7 @@
                 </div>
                 @if(request('grupo_filter') || request('materia_filter'))
                     <a href="{{ route('tareas.index') }}" 
-                       class="inline-flex items-center px-3 py-2 text-sm text-gray-600 bg-gray-100 rounded-md hover:bg-gray-200 transition-colors w-full sm:w-auto justify-center">
+                       class="inline-flex items-center px-3 py-2 text-sm text-gray-700 dark:text-gray-200 bg-gray-200 dark:bg-gray-700 rounded-md hover:bg-gray-300 dark:hover:bg-gray-600 transition-colors w-full sm:w-auto justify-center">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
                         </svg>
@@ -50,34 +50,30 @@
                 @endif
             </div>
         </div>
-        <div class="overflow-x-auto rounded-lg border border-gray-200 dark:border-gray-700">
+        <div class="overflow-x-auto rounded-lg">
             <table id="myTable" class="w-full min-w-full">
-                <thead class="bg-gray-50 dark:bg-gray-700">
+                <thead class="bg-indigo-200 dark:bg-gray-600">
                     <tr>
-                        <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Tarea</th>
-                        <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden sm:table-cell">Fecha entrega</th>
-                        <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden md:table-cell">Grupo</th>
-                        <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider hidden lg:table-cell">Descripción</th>
-                        <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Acciones</th>
+                        <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Tarea</th>
+                        <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider hidden sm:table-cell">Fecha entrega</th>
+                        <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider hidden md:table-cell">Grupo</th>
+                        <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider hidden lg:table-cell">Descripción</th>
+                        <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Acciones</th>
                     </tr>
                 </thead>
-                <tbody class=" divide-y divide-gray-200 dark:divide-gray-700">
+                <tbody class="divide-y divide-gray-300 dark:divide-gray-600">
                     @foreach ($tareas as $tarea)
-                        <tr class="hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+                        <tr class="hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
                             <td class="px-3 sm:px-6 py-4">
                                 <div class="flex items-center">
-                                    <div class="flex-shrink-0 h-8 w-8 sm:h-10 sm:w-10 flex items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900">
-                                        <svg class="h-4 w-4 sm:h-6 sm:w-6 text-indigo-600 dark:text-indigo-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"></path>
-                                        </svg>
-                                    </div>
+                                    
                                     <div class="ml-2 sm:ml-4">
                                         <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $tarea->titulo }}</div>
                                         <!-- Información adicional para móviles -->
                                         <div class="sm:hidden text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                            <div>{{ $tarea->fecha_entrega }}</div>
+                                            <div>{{ \Carbon\Carbon::parse($tarea->fecha_entrega)->format('d/m/Y') }}</div>
                                             @if($tarea->hora_entrega)
-                                                <div>{{ $tarea->hora_entrega }}</div>
+                                                <div>{{ \Carbon\Carbon::parse($tarea->hora_entrega)->format('H:i') }}</div>
                                             @endif
                                             @foreach ($grupos as $grupo)
                                                 @if ($tarea->grupo == $grupo->id)
@@ -93,8 +89,8 @@
                                 </div>
                             </td>
                             <td class="px-3 sm:px-6 py-4 whitespace-nowrap hidden sm:table-cell">
-                                <div class="text-sm text-gray-900 dark:text-white">{{ $tarea->fecha_entrega }}</div>
-                                <div class="text-sm text-gray-500 dark:text-gray-400">{{ $tarea->hora_entrega }}</div>
+                                <div class="text-sm text-gray-900 dark:text-white">{{ \Carbon\Carbon::parse($tarea->fecha_entrega)->format('d/m/Y') }}</div>
+                                <div class="text-sm text-gray-500 dark:text-gray-400">{{ $tarea->hora_entrega ? \Carbon\Carbon::parse($tarea->hora_entrega)->format('H:i') : '' }}</div>
                             </td>
                             <td class="px-3 sm:px-6 py-4 whitespace-nowrap hidden md:table-cell">
                                 @foreach ($grupos as $grupo)
@@ -126,11 +122,11 @@
                             <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <div class="flex items-center gap-1 sm:gap-2">
                                     <flux:modal.trigger name="edit-task">
-                                        <flux:button icon='pencil' variant="filled" size="sm"
-                                            onclick="prepareEditModal({{ $tarea->id }}, `{{ addslashes($tarea->descripcion) }}`, '{{ $tarea->fecha_entrega }}', '{{ $tarea->hora_entrega }}', '{{ $tarea->grupo }}', '{{ $tarea->materia }}')" 
-                                            class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300">
-                                            <span class="hidden sm:inline">Editar</span>
-                                        </flux:button>
+                                        <button type="button"
+                                            onclick="prepareEditModal({{ $tarea->id }}, `{{ addslashes($tarea->descripcion) }}`, '{{ $tarea->fecha_entrega }}', '{{ $tarea->hora_entrega }}', '{{ $tarea->grupo }}', '{{ $tarea->materia }}')"
+                                            class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 transition-colors p-1">
+                                            <flux:icon name="pencil" class="w-4 h-4" />
+                                        </button>
                                     </flux:modal.trigger>
                                     <form action="{{ route('tareas.destroy', $tarea->id) }}" method="POST" class="form-eliminar inline">
                                         @csrf
@@ -207,7 +203,7 @@
     <flux:modal name="edit-task" class="md:w-[500px] p-6">
         <flux:container class="space-y-6">
             <div class="flex items-center justify-between">
-                <flux:heading size="lg" class="dark:text-white">Editar Tarea</flux:heading>
+                <flux:heading size="xl" class="dark:text-white">Editar Tarea</flux:heading>
             </div>
             <flux:separator class="dark:border-gray-700" />
 
@@ -354,8 +350,17 @@
     </style>
     
     <script>
+        // Flag global para evitar inicializaciones duplicadas
+        let componentesInicializados = false;
         
         function iniciarComponentes() {
+            // Solo evitar duplicación de event listeners, no de inicialización completa
+            if (componentesInicializados) {
+                // Reinicializar solo los componentes necesarios sin duplicar event listeners
+                reinicializarComponentes();
+                return;
+            }
+            componentesInicializados = true;
             // Configuración del editor Quill para nueva tarea
             const editorNueva = document.getElementById('editor-nueva');
             if (editorNueva && !document.querySelector('#editor-nueva .ql-editor')) {
@@ -540,6 +545,38 @@
                     close: true
                 }).showToast();
             @endif
+        }
+
+        function reinicializarComponentes() {
+            // Solo reinicializar componentes que necesitan ser actualizados
+            // sin duplicar event listeners
+            
+            // Reinicializar DataTable si es necesario
+            if ($.fn.DataTable && $.fn.DataTable.isDataTable('#myTable')) {
+                $('#myTable').DataTable().destroy();
+                $('#myTable').DataTable({
+                    language: {
+                        url: 'https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json',
+                    },
+                    responsive: true,
+                    pageLength: 10,
+                    lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
+                    dom: '<"flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4"lf>rt<"flex flex-col sm:flex-row justify-between items-start sm:items-center mt-4 gap-4"ip>',
+                    order: [[1, 'asc']],
+                    columnDefs: [
+                        { orderable: false, targets: -1 },
+                        { responsivePriority: 1, targets: 0 },
+                        { responsivePriority: 2, targets: -1 },
+                        { responsivePriority: 3, targets: 1 },
+                        { responsivePriority: 4, targets: 2 },
+                        { responsivePriority: 5, targets: 3 }
+                    ],
+                    scrollX: true,
+                    autoWidth: false,
+                    processing: true,
+                    stateSave: false
+                });
+            }
         }
 
         // Funciones globales

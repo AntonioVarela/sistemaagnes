@@ -187,7 +187,7 @@ class administradorController extends Controller
             return redirect()->route('tareas.index');
         }
         
-        if ($fileResult['ruta']) {
+        if (isset($fileResult['ruta']) && $fileResult['ruta']) {
             $tarea->archivo = $fileResult['ruta'];
         }
 
@@ -373,6 +373,9 @@ class administradorController extends Controller
     }
     public function storeUsuario(UsuarioRequest $request)
     {
+        // Debug temporal
+        \Log::info('Datos recibidos en storeUsuario:', $request->all());
+        
         try {
             $usuario = new User();
             $usuario->name = $request->name;
@@ -380,6 +383,8 @@ class administradorController extends Controller
             $usuario->password = bcrypt($request->password);
             $usuario->rol = $request->rol;
             $usuario->save();
+            
+            \Log::info('Usuario guardado con ID: ' . $usuario->id);
             
             session()->flash('toast', [
                 'type' => 'success',
@@ -592,6 +597,9 @@ class administradorController extends Controller
 
     public function updateUsuario(UsuarioRequest $request, $id)
     {
+        // Debug temporal
+        \Log::info('Datos recibidos en updateUsuario:', $request->all());
+        
         try {
             $usuario = User::findOrFail($id);
             
@@ -605,6 +613,8 @@ class administradorController extends Controller
             }
             
             $usuario->save();
+            
+            \Log::info('Usuario actualizado con ID: ' . $usuario->id);
             
             session()->flash('toast', [
                 'type' => 'success',
@@ -760,6 +770,9 @@ class administradorController extends Controller
     }
     public function storeAnuncio(AnuncioRequest $request)
     {
+        // Debug temporal
+        \Log::info('Datos recibidos en storeAnuncio:', $request->all());
+        
         $horario = horario::where('maestro_id', Auth::user()->id)->get();
         $anuncio = new anuncio();
         $anuncio->titulo = $request->titulo;
@@ -808,6 +821,10 @@ class administradorController extends Controller
             }
         }
         $anuncio->save();
+        
+        // Debug temporal
+        \Log::info('Anuncio guardado con ID:', $anuncio->id);
+        
         session()->flash('toast', [
             'type' => 'success',
             'message' => '¡Anuncio creado exitosamente!'

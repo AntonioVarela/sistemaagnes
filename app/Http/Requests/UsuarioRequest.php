@@ -38,7 +38,7 @@ class UsuarioRequest extends FormRequest
                 'min:8',
                 'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/',
             ],
-            'rol' => 'required|in:administrador,profesor,maestro,alumno'
+            'rol' => 'required|in:Administrador,Maestro,Coordinador Primaria,Coordinador Secundaria'
         ];
     }
 
@@ -60,7 +60,7 @@ class UsuarioRequest extends FormRequest
             'password.min' => 'La contraseña debe tener al menos 8 caracteres.',
             'password.regex' => 'La contraseña debe contener al menos: una letra minúscula, una mayúscula, un número y un carácter especial.',
             'rol.required' => 'El rol es obligatorio.',
-            'rol.in' => 'El rol debe ser: administrador, profesor, maestro o alumno.'
+            'rol.in' => 'El rol debe ser: Administrador, Maestro, Coordinador Primaria o Coordinador Secundaria.'
         ];
     }
 }

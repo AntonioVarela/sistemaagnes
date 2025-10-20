@@ -1,5 +1,5 @@
 <x-layouts.app :title="__('Anuncios')">
-    <div class="flex h-full w-full flex-1 flex-col gap-6 rounded-xl p-6">
+    <div class="flex h-full w-full flex-1 flex-col gap-6 rounded-xl p-6 shadow-sm">
         <div class="flex items-center justify-between">
             <div>
                 <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('Anuncios') }}</h1>
@@ -12,108 +12,122 @@
             </flux:modal.trigger>
         </div>
 
-        <div class="rounded-xl shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-                <table id="myTable" class="w-full">
-                    <thead class="bg-gray-50 dark:bg-gray-800">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Título</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Contenido</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Alcance</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Fecha</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Expira</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Acciones</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
-                        @foreach ($anuncios as $anuncio)
-                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $anuncio->titulo }}</div>
-                                    <div class="text-xs text-gray-500 dark:text-gray-400">
-                                        Creado por: {{ $anuncio->user->name ?? 'Usuario no disponible' }}
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4">
-                                    <div class="text-sm text-gray-900 dark:text-white">
-                                        {{ Str::limit($anuncio->contenido, 2000) }}
-                                    </div>
-                                    @if($anuncio->archivo)
-                                        <div class="mt-2">
-                                            <a href="{{ $anuncio->url_archivo }}" 
-                                               class="inline-flex items-center px-3 py-1 text-sm text-indigo-600 bg-indigo-100 rounded-full hover:bg-indigo-200 transition-colors" 
-                                               target="_blank">
-                                                <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
-                                                </svg>
-                                                Ver archivo
-                                            </a>
+        <div class="overflow-x-auto rounded-lg">
+            <table id="myTable" class="w-full min-w-full">
+                <thead class="bg-indigo-200 dark:bg-gray-600">
+                    <tr>
+                        <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Título</th>
+                        <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider hidden sm:table-cell">Contenido</th>
+                        <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider hidden md:table-cell">Alcance</th>
+                        <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider hidden lg:table-cell">Fecha</th>
+                        <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider hidden xl:table-cell">Expira</th>
+                        <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-300 dark:divide-gray-600">
+                    @foreach ($anuncios as $anuncio)
+                        <tr class="hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                            <td class="px-3 sm:px-6 py-4">
+                                <div class="flex items-center">
+                                    <div class="ml-2 sm:ml-4">
+                                        <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $anuncio->titulo }}</div>
+                                        <div class="text-xs text-gray-500 dark:text-gray-400">
+                                            Creado por: {{ $anuncio->user->name ?? 'Usuario no disponible' }}
                                         </div>
-                                    @endif
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    @if($anuncio->es_global)
-                                        <div class="text-sm text-gray-900 dark:text-white">
-                                            <div class="font-medium">🌍 Global</div>
-                                            <div class="text-xs text-gray-500">General</div>
+                                        <!-- Información adicional para móviles -->
+                                        <div class="sm:hidden text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                            <div>{{ Str::limit($anuncio->contenido, 100) }}</div>
+                                            @if($anuncio->es_global)
+                                                <div class="mt-1">
+                                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
+                                                        🌍 Global
+                                                    </span>
+                                                </div>
+                                            @else
+                                                <div class="mt-1">
+                                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
+                                                        {{ $anuncio->grupo->nombre ?? 'N/A' }}
+                                                    </span>
+                                                </div>
+                                            @endif
+                                            <div>{{ $anuncio->created_at->format('d/m/Y H:i') }}</div>
                                         </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-3 sm:px-6 py-4 hidden sm:table-cell">
+                                <div class="text-sm text-gray-900 dark:text-white">
+                                    {{ Str::limit($anuncio->contenido, 200) }}
+                                </div>
+                                @if($anuncio->archivo)
+                                    <div class="mt-2">
+                                        <a href="{{ $anuncio->url_archivo }}" 
+                                           class="inline-flex items-center px-3 py-1 text-sm text-indigo-600 bg-indigo-100 rounded-full hover:bg-indigo-200 transition-colors" 
+                                           target="_blank">
+                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13"></path>
+                                            </svg>
+                                            Ver archivo
+                                        </a>
+                                    </div>
+                                @endif
+                            </td>
+                            <td class="px-3 sm:px-6 py-4 whitespace-nowrap hidden md:table-cell">
+                                @if($anuncio->es_global)
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
+                                        Global
+                                    </span>
+                                @else
+                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
+                                        {{ $anuncio->grupo->nombre ?? 'N/A' }}
+                                    </span>
+                                @endif
+                            </td>
+                            <td class="px-3 sm:px-6 py-4 whitespace-nowrap hidden lg:table-cell">
+                                <div class="text-sm text-gray-900 dark:text-white">{{ $anuncio->created_at->format('d/m/Y H:i') }}</div>
+                            </td>
+                            <td class="px-3 sm:px-6 py-4 whitespace-nowrap hidden xl:table-cell">
+                                @if($anuncio->fecha_expiracion)
+                                    <span class="px-2 py-1 text-xs font-semibold rounded-full 
+                                        @if($anuncio->fecha_expiracion->isPast()) 
+                                            bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
+                                        @elseif($anuncio->fecha_expiracion->isToday()) 
+                                            bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
+                                        @else 
+                                            bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
+                                        @endif">
+                                        {{ $anuncio->fecha_expiracion->format('d/m/Y') }}
+                                    </span>
+                                @else
+                                    <span class="text-gray-500 dark:text-gray-400">Sin expiración</span>
+                                @endif
+                            </td>
+                            <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <div class="flex items-center gap-1 sm:gap-2">
+                                    @if(auth()->user()->id === $anuncio->user_id || auth()->user()->rol === 'administrador')
+                                        <flux:modal.trigger name="edit-announcement">
+                                            <button type="button"
+                                                onclick="prepareEditModal({{ $anuncio->id }}, '{{ addslashes($anuncio->titulo) }}', '{{ addslashes($anuncio->contenido) }}', '{{ $anuncio->grupo_id }}', '{{ $anuncio->materia_id }}', '{{ $anuncio->fecha_expiracion ? $anuncio->fecha_expiracion->format('Y-m-d') : 'null' }}', {{ $anuncio->es_global ? 'true' : 'false' }})"
+                                                class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 transition-colors p-1">
+                                                <flux:icon name="pencil" class="w-4 h-4" />
+                                            </button>
+                                        </flux:modal.trigger>
+                                        <form action="{{ route('anuncios.destroy', $anuncio->id) }}" method="POST" class="form-eliminar inline">
+                                            @csrf
+                                            @method('DELETE')
+                                            <button type="submit" class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors p-1">
+                                                <flux:icon name="trash" class="w-4 h-4" />
+                                            </button>
+                                        </form>
                                     @else
-                                        <div class="text-sm text-gray-900 dark:text-white">
-                                            <div class="font-medium">{{ $anuncio->grupo->nombre ?? 'N/A' }}</div>
-                                            <div class="text-xs text-gray-500">{{ $anuncio->materia->nombre ?? 'N/A' }}</div>
-                                        </div>
+                                        <span class="text-gray-500 dark:text-gray-400 text-xs">Solo el creador puede editar</span>
                                     @endif
-                                </td>
-                                                                 <td class="px-6 py-4 whitespace-nowrap">
-                                     <div class="text-sm text-gray-900 dark:text-white">
-                                         {{ $anuncio->created_at->format('d/m/Y H:i') }}
-                                     </div>
-                                 </td>
-                                 <td class="px-6 py-4 whitespace-nowrap">
-                                     <div class="text-sm text-gray-900 dark:text-white">
-                                         @if($anuncio->fecha_expiracion)
-                                             <span class="px-2 py-1 text-xs font-semibold rounded-full 
-                                                 @if($anuncio->fecha_expiracion->isPast()) 
-                                                     bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200
-                                                 @elseif($anuncio->fecha_expiracion->isToday()) 
-                                                     bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200
-                                                 @else 
-                                                     bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200
-                                                 @endif">
-                                                 {{ $anuncio->fecha_expiracion->format('d/m/Y') }}
-                                             </span>
-                                         @else
-                                             <span class="text-gray-500 dark:text-gray-400">Sin expiración</span>
-                                         @endif
-                                     </div>
-                                 </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <div class="flex items-center gap-2">
-                                        @if(auth()->user()->id === $anuncio->user_id || auth()->user()->rol === 'administrador')
-                                                                                         <flux:modal.trigger name="edit-announcement">
-                                                 <flux:button icon='pencil' variant="filled" 
-                                                     onclick="prepareEditModal({{ $anuncio->id }}, '{{ $anuncio->titulo }}', '{{ $anuncio->contenido }}', '{{ $anuncio->grupo_id }}', '{{ $anuncio->materia_id }}', '{{ $anuncio->fecha_expiracion ? $anuncio->fecha_expiracion->format('Y-m-d') : 'null' }}', {{ $anuncio->es_global ? 'true' : 'false' }})" 
-                                                     class="text-indigo-600 hover:text-indigo-900">
-                                                     Editar
-                                                 </flux:button>
-                                             </flux:modal.trigger>
-                                            <form action="{{ route('anuncios.destroy', $anuncio->id) }}" method="POST" class="form-eliminar inline">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:text-red-900 transition-colors">
-                                                    <flux:icon name="trash" />
-                                                </button>
-                                            </form>
-                                        @else
-                                            <span class="text-gray-500 dark:text-gray-400">Solo el creador puede editar</span>
-                                        @endif
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-            </div>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
         </div>
     </div>
 
@@ -121,7 +135,7 @@
     <flux:modal name="new-announcement" class="md:w-[500px] p-6">
         <flux:container class="space-y-6">
             <div class="flex items-center justify-between">
-                <flux:heading size="xl">Nuevo Anuncio</flux:heading>
+                <flux:heading size="xl" class="dark:text-white">Nuevo Anuncio</flux:heading>
             </div>
             <flux:separator />
 
@@ -173,7 +187,7 @@
     <flux:modal name="edit-announcement" class="md:w-[500px] p-6">
         <flux:container class="space-y-6">
             <div class="flex items-center justify-between">
-                <flux:heading size="lg">Editar Anuncio</flux:heading>
+                <flux:heading size="xl" class="dark:text-white">Editar Anuncio</flux:heading>
             </div>
             <flux:separator />
 
@@ -225,7 +239,15 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script>
+        // Flag global para evitar inicializaciones duplicadas
+        let componentesInicializados = false;
+        
         function iniciarComponentes() {
+            // Evitar inicialización duplicada
+            if (componentesInicializados) {
+                return;
+            }
+            componentesInicializados = true;
             // Inicializar DataTable con configuración específica
             if ($.fn.DataTable && !$.fn.DataTable.isDataTable('#myTable')) {
                 $('#myTable').DataTable({
@@ -248,8 +270,27 @@
                 filtrarMaterias(grupoSelect.value);
             }
 
-            // Inicializar formularios de eliminación
-            initDeleteForms();
+            // Configuración de formularios de eliminación
+            const formsEliminar = document.querySelectorAll('.form-eliminar');
+            formsEliminar.forEach(form => {
+                form.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    Swal.fire({
+                        title: '¿Estás seguro?',
+                        text: "¡Esta acción no se puede deshacer!",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3085d6',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Sí, eliminar',
+                        cancelButtonText: 'Cancelar'
+                    }).then((result) => {
+                        if (result.isConfirmed) {
+                            form.submit();
+                        }
+                    });
+                });
+            });
         }
 
         // Funciones globales
@@ -424,5 +465,22 @@
 
         document.addEventListener('DOMContentLoaded', iniciarComponentes);
         document.addEventListener('livewire:navigated', iniciarComponentes);
+        
+        // Mostrar toast si existe mensaje
+        @if(session('toast'))
+            Toastify({
+                text: "{{ session('toast.message') }}",
+                duration: 3500,
+                gravity: "top",
+                position: "right",
+                backgroundColor: 
+                    @if(session('toast.type') == 'success') "#22c55e"
+                    @elseif(session('toast.type') == 'error') "#ef4444"
+                    @elseif(session('toast.type') == 'warning') "#f59e42"
+                    @else "#3b82f6" @endif,
+                stopOnFocus: true,
+                close: true
+            }).showToast();
+        @endif
     </script>
 </x-layouts.app>

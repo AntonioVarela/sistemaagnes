@@ -12,48 +12,47 @@
             </flux:modal.trigger>
         </div>
 
-        <div class="rounded-xl shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-                <table id="myTable" class="w-full">
-                    <thead class="bg-gray-50 dark:bg-gray-800">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Nombre</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Acciones</th>
+        <div class="overflow-x-auto rounded-lg">
+            <table id="myTable" class="w-full min-w-full">
+                <thead class="bg-indigo-200 dark:bg-gray-600">
+                    <tr>
+                        <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Nombre</th>
+                        <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-300 dark:divide-gray-600">
+                    @foreach ($materias as $materia)
+                        <tr class="hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                            <td class="px-3 sm:px-6 py-4">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900">
+                                        <flux:icon name="book-open" class="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                                    </div>
+                                    <div class="ml-2 sm:ml-4">
+                                        <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $materia->nombre }}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <div class="flex items-center gap-1 sm:gap-2">
+                                    <flux:modal.trigger name="edit-task">
+                                        <button type="button"
+                                            onclick="prepareEditModal({{ $materia->id }}, '{{ addslashes($materia->nombre) }}')"
+                                            class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 transition-colors p-1">
+                                            <flux:icon name="pencil" class="w-4 h-4" />
+                                        </button>
+                                    </flux:modal.trigger>
+                                    <form action="{{ route('materias.destroy', $materia->id) }}" method="POST" class="form-eliminar inline">
+                                        @csrf
+                                        @method('DELETE')
+                                        <button type="submit" class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors p-1">
+                                            <flux:icon name="trash" class="w-4 h-4" />
+                                        </button>
+                                    </form>
+                                </div>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-gray-600">
-                        @foreach ($materias as $materia)
-                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center">
-                                        <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-purple-100 dark:bg-purple-900">
-                                            <flux:icon name="book-open" class="h-6 w-6 text-purple-600 dark:text-purple-400" />
-                                        </div>
-                                        <div class="ml-4">
-                                            <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $materia->nombre }}</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <div class="flex items-center gap-2">
-                                        <flux:modal.trigger name="edit-task">
-                                            <flux:button icon='pencil' variant="filled" 
-                                                onclick="prepareEditModal({{ $materia->id }}, '{{ $materia->nombre }}')" 
-                                                class="text-indigo-600 hover:text-indigo-900">
-                                                Editar
-                                            </flux:button>
-                                        </flux:modal.trigger>
-                                        <form action="{{ route('materias.destroy', $materia->id) }}" method="POST" class="form-eliminar inline">
-                                            @csrf
-                                            @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:text-red-900 transition-colors">
-                                                <flux:icon name="trash" />
-                                            </button>
-                                        </form>
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforeach
+                    @endforeach
                     </tbody>
                 </table>
             </div>
@@ -64,7 +63,7 @@
     <flux:modal name="edit-profile" class="md:w-[500px] p-6">
         <flux:container class="space-y-6">
             <div class="flex items-center justify-between">
-                <flux:heading size="xl">Nueva Materia</flux:heading>
+                <flux:heading size="xl" class="dark:text-white">Nueva Materia</flux:heading>
             </div>
             <flux:separator />
 
@@ -91,7 +90,7 @@
     <flux:modal name="edit-task" class="md:w-[500px] p-6">
         <flux:container class="space-y-6">
             <div class="flex items-center justify-between">
-                <flux:heading size="lg">Editar Materia</flux:heading>
+                <flux:heading size="xl" class="dark:text-white">Editar Materia</flux:heading>
             </div>
             <flux:separator />
 

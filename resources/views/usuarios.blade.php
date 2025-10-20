@@ -12,72 +12,90 @@
             </flux:modal.trigger>
         </div>
 
-        <div class=" rounded-xl shadow-sm overflow-hidden">
-            <div class="overflow-x-auto">
-                <table id="myTable" class="w-full">
-                    <thead class="bg-gray-50 dark:bg-gray-800">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Nombre</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Email</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Rol</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Estado</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-300 uppercase tracking-wider">Acciones</th>
+        <div class="overflow-x-auto rounded-lg">
+            <table id="myTable" class="w-full min-w-full">
+                <thead class="bg-indigo-200 dark:bg-gray-600">
+                    <tr>
+                        <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Nombre</th>
+                        <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider hidden sm:table-cell">Email</th>
+                        <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider hidden md:table-cell">Rol</th>
+                        <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider hidden lg:table-cell">Estado</th>
+                        <th class="px-3 sm:px-6 py-3 text-left text-xs font-medium text-gray-700 dark:text-gray-200 uppercase tracking-wider">Acciones</th>
+                    </tr>
+                </thead>
+                <tbody class="divide-y divide-gray-300 dark:divide-gray-600">
+                    @foreach ($usuarios as $usuario)
+                        <tr class="hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
+                            <td class="px-3 sm:px-6 py-4">
+                                <div class="flex items-center">
+                                    <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900">
+                                        <flux:icon name="user" class="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
+                                    </div>
+                                    <div class="ml-2 sm:ml-4">
+                                        <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $usuario->name }}</div>
+                                        <!-- Información adicional para móviles -->
+                                        <div class="sm:hidden text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                            <div>{{ $usuario->email }}</div>
+                                            <div class="mt-1">
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
+                                                    {{ $usuario->rol }}
+                                                </span>
+                                            </div>
+                                            <div class="mt-1">
+                                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
+                                                    @if($usuario->id === Auth::id())
+                                                        <flux:icon name="user" class="w-3 h-3 mr-1" />
+                                                        Tú
+                                                    @else
+                                                        Activo
+                                                    @endif
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td class="px-3 sm:px-6 py-4 whitespace-nowrap hidden sm:table-cell">
+                                <div class="text-sm text-gray-900 dark:text-white">{{ $usuario->email }}</div>
+                            </td>
+                            <td class="px-3 sm:px-6 py-4 whitespace-nowrap hidden md:table-cell">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
+                                    {{ $usuario->rol }}
+                                </span>
+                            </td>
+                            <td class="px-3 sm:px-6 py-4 whitespace-nowrap hidden lg:table-cell">
+                                <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
+                                    @if($usuario->id === Auth::id())
+                                        <flux:icon name="user" class="w-3 h-3 mr-1" />
+                                        Tú
+                                    @else
+                                        Activo
+                                    @endif
+                                </span>
+                            </td>
+                            <td class="px-3 sm:px-6 py-4 whitespace-nowrap text-sm font-medium">
+                                <div class="flex items-center gap-1 sm:gap-2">
+                                    <flux:modal.trigger name="edit-usuario">
+                                        <button type="button"
+                                            onclick="prepareEditModal({{ $usuario->id }}, '{{ addslashes($usuario->name) }}', '{{ $usuario->email }}', '{{ $usuario->rol }}')"
+                                            class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 transition-colors p-1">
+                                            <flux:icon name="pencil" class="w-4 h-4" />
+                                        </button>
+                                    </flux:modal.trigger>
+                                    @if($usuario->id !== Auth::id())
+                                        <button onclick="confirmarEliminacion({{ $usuario->id }}, '{{ addslashes($usuario->name) }}')" 
+                                                class="text-red-600 dark:text-red-400 hover:text-red-900 dark:hover:text-red-300 transition-colors p-1">
+                                            <flux:icon name="trash" class="w-4 h-4" />
+                                        </button>
+                                    @else
+                                        <span class="text-gray-400 cursor-not-allowed p-1" title="No puedes eliminar tu propia cuenta">
+                                            <flux:icon name="lock-closed" class="w-4 h-4" />
+                                        </span>
+                                    @endif
+                                </div>
+                            </td>
                         </tr>
-                    </thead>
-                    <tbody class=" divide-y divide-gray-200 dark:divide-gray-600">
-                        @foreach ($usuarios as $usuario)
-                            <tr class="hover:bg-gray-50 dark:hover:bg-gray-600 transition-colors">
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="flex items-center">
-                                        <div class="flex-shrink-0 h-10 w-10 flex items-center justify-center rounded-full bg-indigo-100 dark:bg-indigo-900">
-                                            <flux:icon name="user" class="h-6 w-6 text-indigo-600 dark:text-indigo-400" />
-                                        </div>
-                                        <div class="ml-4">
-                                            <div class="text-sm font-medium text-gray-900 dark:text-white">{{ $usuario->name }}</div>
-                                        </div>
-                                    </div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <div class="text-sm text-gray-900 dark:text-white">{{ $usuario->email }}</div>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200">
-                                        {{ $usuario->rol }}
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap">
-                                    <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200">
-                                        @if($usuario->id === Auth::id())
-                                            <flux:icon name="user" class="w-3 h-3 mr-1" />
-                                            Tú
-                                        @else
-                                            Activo
-                                        @endif
-                                    </span>
-                                </td>
-                                <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                                    <div class="flex items-center gap-2">
-                                        <flux:modal.trigger name="edit-usuario">
-                                            <flux:button icon='pencil' variant="filled" 
-                                                onclick="prepareEditModal({{ $usuario->id }}, '{{ $usuario->name }}', '{{ $usuario->email }}', '{{ $usuario->rol }}')" 
-                                                class="text-indigo-600 hover:text-indigo-900">
-                                                Editar
-                                            </flux:button>
-                                        </flux:modal.trigger>
-                                        @if($usuario->id !== Auth::id())
-                                            <button onclick="confirmarEliminacion({{ $usuario->id }}, '{{ $usuario->name }}')" 
-                                                    class="text-red-600 hover:text-red-900 transition-colors">
-                                                <flux:icon name="trash" />
-                                            </button>
-                                        @else
-                                            <span class="text-gray-400 cursor-not-allowed" title="No puedes eliminar tu propia cuenta">
-                                                <flux:icon name="lock-closed" />
-                                            </span>
-                                        @endif
-                                    </div>
-                                </td>
-                            </tr>
-                        @endforeach
+                    @endforeach
                     </tbody>
                 </table>
             </div>
@@ -88,7 +106,7 @@
     <flux:modal name="edit-profile" class="md:w-[500px] p-6">
         <flux:container class="space-y-6">
             <div class="flex items-center justify-between">
-                <flux:heading size="xl">Nuevo Usuario</flux:heading>
+                <flux:heading size="xl" class="dark:text-white">Nuevo Usuario</flux:heading>
             </div>
             <flux:separator />
 
@@ -122,7 +140,7 @@
     <flux:modal name="edit-usuario" class="md:w-[500px] p-6">
         <flux:container class="space-y-6">
             <div class="flex items-center justify-between">
-                <flux:heading size="lg">Editar Usuario</flux:heading>
+                <flux:heading size="xl" class="dark:text-white">Editar Usuario</flux:heading>
             </div>
             <flux:separator />
 
@@ -156,19 +174,35 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script>
+        // Flag global para evitar inicializaciones duplicadas
+        let componentesInicializados = false;
+        
+        function iniciarComponentes() {
+            // Evitar inicialización duplicada
+            if (componentesInicializados) {
+                return;
+            }
+            componentesInicializados = true;
+            
+            // Configuración de DataTable
+            if ($.fn.DataTable && !$.fn.DataTable.isDataTable('#myTable')) {
+                $('#myTable').DataTable({
+                    language: {
+                        url: 'https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json',
+                    },
+                    pageLength: 10,
+                    lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
+                    dom: '<"flex justify-between items-center mb-4"lf>rt<"flex justify-between items-center mt-4"ip>',
+                    order: [[0, 'asc']],
+                    columnDefs: [
+                        { orderable: false, targets: -1 }
+                    ]
+                });
+            }
+        }
+        
         $(document).ready(function() {
-            $('#myTable').DataTable({
-                language: {
-                    url: 'https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json',
-                },
-                pageLength: 10,
-                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
-                dom: '<"flex justify-between items-center mb-4"lf>rt<"flex justify-between items-center mt-4"ip>',
-                order: [[0, 'asc']],
-                columnDefs: [
-                    { orderable: false, targets: -1 }
-                ]
-            });
+            iniciarComponentes();
         });
 
         function closeModal(modalName) {
@@ -261,6 +295,9 @@
                 close: true
             }).showToast();
         @endif
+        
+        // Inicializar componentes también en navegación de Livewire
+        document.addEventListener('livewire:navigated', iniciarComponentes);
     </script>
 </x-layouts.app>
 
