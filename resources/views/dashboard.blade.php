@@ -17,11 +17,11 @@
         @php
             // Agrupar por secciones disponibles (A y B)
             $gruposSeccionA = $grupos->filter(function($grupo) {
-                return $grupo->seccion === 'A';
+                return $grupo->seccion === 'Primaria';
             });
             
             $gruposSeccionB = $grupos->filter(function($grupo) {
-                return $grupo->seccion === 'B';
+                return $grupo->seccion === 'Secundaria';
             });
         @endphp
         
@@ -29,7 +29,7 @@
             <div class="mb-8">
                 <div class="flex items-center mb-4">
                     <h2 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-                        Sección A
+                        Sección Primaria
                     </h2>
                     <div class="ml-4 px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 rounded-full text-sm font-semibold">
                         {{ $gruposSeccionA->count() }} grupo{{ $gruposSeccionA->count() != 1 ? 's' : '' }}
@@ -120,7 +120,7 @@
             <div class="mb-8">
                 <div class="flex items-center mb-4">
                     <h2 class="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-                        Sección B
+                        Sección Secundaria
                     </h2>
                     <div class="ml-4 px-3 py-1 bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200 rounded-full text-sm font-semibold">
                         {{ $gruposSeccionB->count() }} grupo{{ $gruposSeccionB->count() != 1 ? 's' : '' }}
