@@ -94,8 +94,8 @@ class administradorController extends Controller
     public function indexDashboard()
     {
         if(Auth::user()->rol == 'Coordinador Primaria'){
-            // Primero verificamos los grupos de primaria
-            $gruposPrimaria = grupo::where('seccion', 'Primaria')->get();
+            // Buscar grupos de sección A (primaria)
+            $gruposPrimaria = grupo::where('seccion', 'A')->get();
             
             // Luego obtenemos los horarios para estos grupos
             $horarios = horario::with(['grupo', 'materia'])
@@ -107,8 +107,8 @@ class administradorController extends Controller
                 ->sortBy('nombre');
 
         } else if(Auth::user()->rol == 'Coordinador Secundaria'){
-            // Primero verificamos los grupos de secundaria
-            $gruposSecundaria = grupo::where('seccion', 'Secundaria')->get();
+            // Buscar grupos de sección B (secundaria)
+            $gruposSecundaria = grupo::where('seccion', 'B')->get();
             
             // Luego obtenemos los horarios para estos grupos
             $horarios = horario::with(['grupo', 'materia'])
