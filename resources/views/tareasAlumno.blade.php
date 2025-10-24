@@ -225,20 +225,11 @@
                                     <div class="flex justify-between items-start">
                                         <div class="flex-1">
                                             <div class="flex items-center gap-2 mb-1 flex-wrap">
-                                               
-                                                @if($circular->es_global)
-                                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-purple-100 text-purple-800">
-                                                         Para todos los grupos
-                                                    </span>
-                                                @elseif($circular->grupo)
-                                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                         {{ $circular->grupo->nombre }} {{ $circular->grupo->seccion }}
-                                                    </span>
-                                                @elseif($circular->seccion)
-                                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
-                                                        Sección {{ $circular->seccion }}
-                                                    </span>
-                                                @endif
+                                                @if($circular->fecha_expiracion)
+                                                <span class="text-xs text-orange-600 bg-orange-100 px-2 py-1 rounded-full">
+                                                    Expira: {{ $circular->fecha_expiracion->format('d M Y') }}
+                                                </span>
+                                            @endif
                                             </div>
                                             <h4 class="text-lg font-semibold text-blue-900 mt-2">{{ $circular->titulo }}</h4>
                                             @if($circular->descripcion)
@@ -249,27 +240,13 @@
                                             <span class="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full mb-1">
                                                 {{ $circular->created_at->format('d M Y') }}
                                             </span>
-                                            @if($circular->fecha_expiracion)
-                                                <span class="text-xs text-orange-600 bg-orange-100 px-2 py-1 rounded-full">
-                                                    Expira: {{ $circular->fecha_expiracion->format('d M Y') }}
-                                                </span>
-                                            @endif
+                                            
                                         </div>
                                     </div>
                                     
                                     <div class="mt-4 flex items-center justify-between">
-                                        <div class="flex items-center text-xs text-blue-600">
-                                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
-                                            </svg>
-                                            {{ $circular->user->name ?? 'Usuario no disponible' }}
-                                        </div>
                                         <div class="flex items-center gap-2">
-                                            @if($circular->tamanio_formateado)
-                                                <span class="text-xs text-gray-500">
-                                                    {{ $circular->tamanio_formateado }}
-                                                </span>
-                                            @endif
+                                           
                                             <a href="{{ $circular->url_archivo }}" 
                                                class="text-blue-600 hover:text-blue-800 font-medium flex items-center"
                                                target="_blank">
