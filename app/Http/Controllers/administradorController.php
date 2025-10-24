@@ -373,14 +373,14 @@ class administradorController extends Controller
     }
     public function storeUsuario(UsuarioRequest $request)
     {
-       
         try {
-            $usuario = new User();
-            $usuario->name = $request->name;
-            $usuario->email = $request->email;
-            $usuario->password = bcrypt($request->password);
-            $usuario->rol = $request->rol;
-            $usuario->save();
+            // Crear el usuario usando create() para mejor manejo de errores
+            $usuario = User::create([
+                'name' => $request->name,
+                'email' => $request->email,
+                'password' => bcrypt($request->password),
+                'rol' => $request->rol,
+            ]);
             
             session()->flash('toast', [
                 'type' => 'success',
@@ -388,6 +388,10 @@ class administradorController extends Controller
             ]);
             
         } catch (\Exception $e) {
+            // Log del error para debugging
+            Log::error('Error al crear usuario: ' . $e->getMessage());
+            Log::error('Datos del request: ' . json_encode($request->all()));
+            
             session()->flash('toast', [
                 'type' => 'error',
                 'message' => 'Error al crear el usuario: ' . $e->getMessage()
