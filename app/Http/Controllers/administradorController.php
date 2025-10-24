@@ -270,7 +270,7 @@ class administradorController extends Controller
         $grupo = grupo::find($id);
         $materias = materia::all();
         $usuarios = User::all();
-        $tareas = tarea::where('grupo', $id)->get(); // Cambiado a 'tareas'
+        $tareas = tarea::where('grupo', $id)->select('*')->get(); // Cambiado a 'tareas'
         $anuncios = anuncio::porGrupo($id)->activos()->get();
         $circulares = Circular::porGrupo($id)->activas()->orderBy('created_at', 'desc')->take(3)->get();
         return view("tareasAlumno", compact(['grupo','materias','usuarios', 'tareas', 'anuncios', 'circulares'])); // Cambiado a 'tareasAlumno'

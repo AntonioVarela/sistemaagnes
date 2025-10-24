@@ -353,11 +353,11 @@
                     @if($grupo->seccion == 'Primaria')
                     <small>Tarea del dia</small>
                     @else
-                    <small>¿Cuándo tengo que entregarla?</small>
+                    <small>Información de la tarea</small>
                     @endif
                     <br>
                     <div class="bg-indigo-50 rounded-lg p-4">
-                        <p id="modalDate" class="font-medium"></p>
+                        <div id="modalDate" class="font-medium"></div>
                     </div>
                     
                 </div>
@@ -523,17 +523,37 @@
                     };
                 });
             } else {
+                // Para secundaria, mostrar tareas en el día que fueron asignadas (created_at)
                 eventos = tareasFiltradas.map(function(element) {
+                    // Usar la fecha de creación (asignación) en lugar de la fecha de entrega
+                    let startDate = element.created_at;
+                    if (element.created_at) {
+                        try {
+                            let date = new Date(element.created_at);
+                            if (!isNaN(date.getTime())) {
+                                startDate = date.toISOString().split('T')[0];
+                            }
+                        } catch (error) {
+                            console.error('Error al procesar fecha de asignación para secundaria:', error);
+                            // Fallback a fecha de entrega si hay error
+                            startDate = element.fecha_entrega || new Date().toISOString().split('T')[0];
+                        }
+                    } else {
+                        // Fallback a fecha de entrega si no hay created_at
+                        startDate = element.fecha_entrega || new Date().toISOString().split('T')[0];
+                    }
+
                     return {
                         title: element.titulo || 'Sin título',
-                        start: element.fecha_entrega || new Date().toISOString().split('T')[0],
+                        start: startDate,
                         color: '#4F46E5',
                         allDay: false,
                         extendedProps: {
                             description: element.descripcion || 'Sin descripción',
                             fecha_entrega: element.fecha_entrega || '',
                             hora_entrega: element.hora_entrega || '',
-                            archivo: element.archivo || ''
+                            archivo: element.archivo || '',
+                            fecha_asignacion: element.created_at || ''
                         }
                     };
                 });
@@ -564,12 +584,44 @@
                     $('#modalTitle').text(info.event.title);
                     $('#modalDescription').html(info.event.extendedProps.description);
                     
-                    // Usar la función auxiliar para formatear la fecha de manera segura
-                    const fechaFormateada = formatearFecha(
-                        info.event.extendedProps.fecha_entrega,
-                        info.event.extendedProps.hora_entrega
-                    );
-                    $('#modalDate').text(fechaFormateada);
+                    // Para secundaria, mostrar información diferente
+                    if (grupo.seccion !== 'Primaria') {
+                        // Mostrar fecha de asignación y fecha de entrega por separado
+                        let fechaAsignacion = '';
+                        let fechaEntrega = '';
+                        
+                        if (info.event.extendedProps.fecha_asignacion) {
+                            fechaAsignacion = formatearFecha(info.event.extendedProps.fecha_asignacion);
+                        }
+                        
+                        if (info.event.extendedProps.fecha_entrega) {
+                            fechaEntrega = formatearFecha(
+                                info.event.extendedProps.fecha_entrega,
+                                info.event.extendedProps.hora_entrega
+                            );
+                        }
+                        
+                        let fechaInfo = '';
+                        if (fechaAsignacion && fechaEntrega) {
+                            fechaInfo = `<div class="space-y-2">
+                                <div><strong>Asignada el:</strong> ${fechaAsignacion}</div>
+                                <div><strong>Entregar el:</strong> ${fechaEntrega}</div>
+                            </div>`;
+                        } else if (fechaEntrega) {
+                            fechaInfo = `<div><strong>Entregar el:</strong> ${fechaEntrega}</div>`;
+                        } else {
+                            fechaInfo = 'Fecha no disponible';
+                        }
+                        
+                        $('#modalDate').html(fechaInfo);
+                    } else {
+                        // Para primaria, mantener el comportamiento original
+                        const fechaFormateada = formatearFecha(
+                            info.event.extendedProps.fecha_entrega,
+                            info.event.extendedProps.hora_entrega
+                        );
+                        $('#modalDate').text(fechaFormateada);
+                    }
                     
                     if (info.event.extendedProps.archivo) {
                         // Generar la URL de S3 usando la configuración del servidor
