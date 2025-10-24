@@ -36,7 +36,6 @@ class UsuarioRequest extends FormRequest
                 $userId ? 'nullable' : 'required',
                 'string',
                 'min:8',
-                'regex:/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]/',
             ],
             'rol' => 'required|in:Administrador,Maestro,Coordinador Primaria,Coordinador Secundaria'
         ];

@@ -374,6 +374,9 @@ class administradorController extends Controller
     public function storeUsuario(UsuarioRequest $request)
     {
         try {
+            // Log de los datos recibidos para debugging
+            Log::info('Creando usuario con datos:', $request->all());
+            
             // Crear el usuario usando create() para mejor manejo de errores
             $usuario = User::create([
                 'name' => $request->name,
@@ -382,15 +385,27 @@ class administradorController extends Controller
                 'rol' => $request->rol,
             ]);
             
+            Log::info('Usuario creado exitosamente con ID: ' . $usuario->id);
+            
             session()->flash('toast', [
                 'type' => 'success',
                 'message' => '¡Usuario creado exitosamente!'
             ]);
             
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Manejar errores de validación específicamente
+            Log::error('Error de validación al crear usuario: ' . $e->getMessage());
+            Log::error('Errores de validación: ' . json_encode($e->errors()));
+            
+            session()->flash('toast', [
+                'type' => 'error',
+                'message' => 'Error de validación: ' . implode(', ', array_flatten($e->errors()))
+            ]);
         } catch (\Exception $e) {
             // Log del error para debugging
             Log::error('Error al crear usuario: ' . $e->getMessage());
             Log::error('Datos del request: ' . json_encode($request->all()));
+            Log::error('Stack trace: ' . $e->getTraceAsString());
             
             session()->flash('toast', [
                 'type' => 'error',
@@ -603,16 +618,20 @@ class administradorController extends Controller
         try {
             $usuario = User::findOrFail($id);
             
-            $usuario->name = $request->name;
-            $usuario->email = $request->email;
-            $usuario->rol = $request->rol;
+            // Preparar datos para actualización
+            $updateData = [
+                'name' => $request->name,
+                'email' => $request->email,
+                'rol' => $request->rol,
+            ];
             
             // Solo actualizar la contraseña si se proporciona una nueva
             if (!empty($request->password)) {
-                $usuario->password = bcrypt($request->password);
+                $updateData['password'] = bcrypt($request->password);
             }
             
-            $usuario->save();
+            // Usar update() para mejor manejo de errores
+            $usuario->update($updateData);
             
             \Log::info('Usuario actualizado con ID: ' . $usuario->id);
             
@@ -621,7 +640,22 @@ class administradorController extends Controller
                 'message' => '¡Usuario actualizado exitosamente!'
             ]);
             
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Manejar errores de validación específicamente
+            Log::error('Error de validación al actualizar usuario: ' . $e->getMessage());
+            Log::error('Errores de validación: ' . json_encode($e->errors()));
+            
+            session()->flash('toast', [
+                'type' => 'error',
+                'message' => 'Error de validación: ' . implode(', ', array_flatten($e->errors()))
+            ]);
         } catch (\Exception $e) {
+            // Log del error para debugging
+            Log::error('Error al actualizar usuario: ' . $e->getMessage());
+            Log::error('Datos del request: ' . json_encode($request->all()));
+            Log::error('ID del usuario: ' . $id);
+            Log::error('Stack trace: ' . $e->getTraceAsString());
+            
             session()->flash('toast', [
                 'type' => 'error',
                 'message' => 'Error al actualizar el usuario: ' . $e->getMessage()
