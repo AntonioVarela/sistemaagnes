@@ -373,9 +373,7 @@ class administradorController extends Controller
     }
     public function storeUsuario(UsuarioRequest $request)
     {
-        // Debug temporal
-        \Log::info('Datos recibidos en storeUsuario:', $request->all());
-        
+       
         try {
             $usuario = new User();
             $usuario->name = $request->name;
@@ -383,8 +381,6 @@ class administradorController extends Controller
             $usuario->password = bcrypt($request->password);
             $usuario->rol = $request->rol;
             $usuario->save();
-            
-            \Log::info('Usuario guardado con ID: ' . $usuario->id);
             
             session()->flash('toast', [
                 'type' => 'success',
