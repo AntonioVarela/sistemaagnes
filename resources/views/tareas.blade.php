@@ -62,7 +62,7 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-300 dark:divide-gray-600">
-                    @foreach ($tareas as $tarea)
+                    @forelse ($tareas as $tarea)
                         <tr class="hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
                             <td class="px-3 sm:px-6 py-4">
                                 <div class="flex items-center">
@@ -137,7 +137,22 @@
                                 </div>
                             </td>
                         </tr>
-                    @endforeach
+                    @empty
+                        <tr>
+                            <td colspan="5" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
+                                <div class="flex flex-col items-center justify-center">
+                                    <svg class="w-12 h-12 mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    <p class="text-lg font-medium mb-2">No hay tareas disponibles</p>
+                                    <p class="text-sm">Las tareas aparecerán aquí cuando estén disponibles.</p>
+                                    @if(!request('grupo_filter') && !request('materia_filter'))
+                                        <p class="text-xs mt-2 text-gray-400">Nota: Solo se muestran tareas de las últimas 2 semanas.</p>
+                                    @endif
+                                </div>
+                            </td>
+                        </tr>
+                    @endforelse
                 </tbody>
             </table>
         </div>
