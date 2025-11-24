@@ -356,8 +356,8 @@
         function iniciarComponentes() {
             // Solo evitar duplicación de event listeners, no de inicialización completa
             if (componentesInicializados) {
-                // Reinicializar solo los componentes necesarios sin duplicar event listeners
-                reinicializarComponentes();
+                // No reinicializar automáticamente para evitar alertas
+                // reinicializarComponentes();
                 return;
             }
             componentesInicializados = true;
@@ -517,13 +517,8 @@
                             autoWidth: false,
                             processing: true,
                             stateSave: false,
-                            deferRender: true,
-                            error: function(xhr, error, thrown) {
-                                // Silenciar errores comunes de DOM
-                                if (error && !error.includes('replaceWith') && !error.includes('parentNode')) {
-                                    console.warn('Error en DataTable:', error);
-                                }
-                            }
+                            deferRender: true
+                            // Removido callback error para evitar alertas no deseadas
                         });
                     } catch (e) {
                         // Solo mostrar errores críticos, ignorar errores de DOM comunes
@@ -622,13 +617,8 @@
                         autoWidth: false,
                         processing: true,
                         stateSave: false,
-                        deferRender: true,
-                        error: function(xhr, error, thrown) {
-                            // Silenciar errores comunes de DOM
-                            if (error && !error.includes('replaceWith') && !error.includes('parentNode')) {
-                                console.warn('Error en DataTable:', error);
-                            }
-                        }
+                        deferRender: true
+                        // Removido callback error para evitar alertas no deseadas
                     });
                 } catch (e) {
                     // Solo mostrar errores críticos, ignorar errores de DOM comunes
@@ -734,7 +724,8 @@
         }
 
         document.addEventListener('DOMContentLoaded', iniciarComponentes);
-        document.addEventListener('livewire:navigated', iniciarComponentes);
+        // Comentado para evitar reinicializaciones innecesarias que causan alertas
+        // document.addEventListener('livewire:navigated', iniciarComponentes);
        
     </script>
 </x-layouts.app>
