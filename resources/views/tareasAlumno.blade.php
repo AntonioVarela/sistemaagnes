@@ -561,6 +561,9 @@
             var calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'listWeek',
                 locale: 'es',
+                firstDay: 1, // Lunes como primer día de la semana (0 = Domingo, 1 = Lunes)
+                weekNumbers: false,
+                weekNumberCalculation: 'ISO', // Usa el estándar ISO 8601 (semana comienza en lunes)
                 headerToolbar: {
                     left: 'prev',
                     center: 'title',
