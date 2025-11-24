@@ -419,27 +419,48 @@
             const diaSemana = ahora.getDay(); // 0 = Domingo, 1 = Lunes, ..., 5 = Viernes
             const hora = ahora.getHours();
             
-            // Solo permitir los viernes a las 2 PM o después
+            // Solo permitir los viernes a las 2:00 PM (14:00) o después
             return diaSemana === 5 && hora >= 14;
+        }
+        
+        // Función auxiliar para normalizar fecha a medianoche (UTC)
+        function normalizarFecha(fecha) {
+            const fechaNormalizada = new Date(fecha);
+            fechaNormalizada.setHours(0, 0, 0, 0);
+            return fechaNormalizada;
+        }
+        
+        // Función para obtener el lunes de la semana de una fecha
+        function obtenerLunesSemana(fecha) {
+            const fechaCopia = new Date(fecha);
+            const diaSemana = fechaCopia.getDay();
+            // Si es domingo (0), retroceder 6 días, sino retroceder (diaSemana - 1) días
+            const diasARetroceder = diaSemana === 0 ? 6 : diaSemana - 1;
+            fechaCopia.setDate(fechaCopia.getDate() - diasARetroceder);
+            fechaCopia.setHours(0, 0, 0, 0);
+            return fechaCopia;
         }
         
         // Función para filtrar tareas según la restricción
         function filtrarTareasPorRestriccion(tareas) {
-            const ahora = new Date();
-            const inicioSemanaActual = new Date(ahora);
-            inicioSemanaActual.setDate(ahora.getDate() - ahora.getDay() + 1); // Lunes de esta semana
+            const ahora = normalizarFecha(new Date());
+            const inicioSemanaActual = obtenerLunesSemana(ahora);
             const finSemanaActual = new Date(inicioSemanaActual);
             finSemanaActual.setDate(inicioSemanaActual.getDate() + 6); // Domingo de esta semana
+            finSemanaActual.setHours(23, 59, 59, 999); // Fin del día
             
             const inicioSemanaSiguiente = new Date(finSemanaActual);
             inicioSemanaSiguiente.setDate(finSemanaActual.getDate() + 1); // Lunes de la siguiente semana
+            inicioSemanaSiguiente.setHours(0, 0, 0, 0);
             const finSemanaSiguiente = new Date(inicioSemanaSiguiente);
             finSemanaSiguiente.setDate(inicioSemanaSiguiente.getDate() + 6); // Domingo de la siguiente semana
+            finSemanaSiguiente.setHours(23, 59, 59, 999);
             
             return tareas.filter(function(tarea) {
-                if (!tarea.fecha_entrega) return true;
+                // Si no tiene fecha de entrega, no se muestra (o se puede cambiar a false según requerimiento)
+                if (!tarea.fecha_entrega) return false;
                 
-                const fechaEntrega = new Date(tarea.fecha_entrega);
+                const fechaEntrega = normalizarFecha(tarea.fecha_entrega);
                 
                 // Si la tarea es de esta semana, siempre se muestra
                 if (fechaEntrega >= inicioSemanaActual && fechaEntrega <= finSemanaActual) {
@@ -451,8 +472,8 @@
                     return puedeVerTareasSiguienteSemana();
                 }
                 
-                // Para tareas de otras semanas, siempre se muestran
-                return true;
+                // No mostrar tareas de semanas pasadas o futuras lejanas
+                return false;
             });
         }
 
@@ -472,13 +493,13 @@
             
             if(grupo.seccion == 'Primaria') {
                 eventos = tareasFiltradas.map(function(element) {
-                    // Restar un día a la fecha para primaria
+                    // Usar la fecha de entrega directamente para primaria
                     let startDate = element.fecha_entrega;
                     if (element.fecha_entrega) {
                         try {
                             let date = new Date(element.fecha_entrega);
                             if (!isNaN(date.getTime())) {
-                                date.setDate(date.getDate());
+                                // Normalizar a fecha sin hora para evitar problemas de zona horaria
                                 startDate = date.toISOString().split('T')[0];
                             }
                         } catch (error) {

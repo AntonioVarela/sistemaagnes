@@ -18,6 +18,7 @@ use App\Models\Circular;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 
 class administradorController extends Controller
 {
@@ -168,7 +169,12 @@ class administradorController extends Controller
             $query->where('materia', request('materia_filter'));
         }
         
-        $tareas = $query->get();
+        // Filtrar solo tareas de las últimas 2 semanas (basado en fecha de creación)
+        $fechaDosSemanasAtras = now()->subWeeks(2)->startOfDay();
+        $query->where('created_at', '>=', $fechaDosSemanasAtras);
+        
+        // Obtener solo las 10 tareas más recientes, ordenadas por fecha de creación descendente
+        $tareas = $query->orderBy('created_at', 'desc')->take(10)->get();
 
         return view('tareas',compact('grupos','materias','tareas','horario','seccion')); // Cambiado a 'tareas'
     }
@@ -176,6 +182,29 @@ class administradorController extends Controller
     public function updateTareas(TareaRequest $request, $id)
     {
         $tarea = tarea::findOrFail($id);
+        
+        // Verificar permisos: solo el creador o administrador pueden editar
+        // Nota: Si la tarea no tiene user_id, solo administradores pueden editarla
+        if ($tarea->user_id && Auth::user()->id !== $tarea->user_id && Auth::user()->rol !== 'administrador') {
+            $this->flashToast('error', 'No tienes permiso para editar esta tarea');
+            return redirect()->route('tareas.index');
+        }
+        
+        // Verificar que el usuario tenga acceso al grupo/materia si no es administrador
+        if (Auth::user()->rol !== 'administrador') {
+            $horario = horario::where('maestro_id', Auth::user()->id)->get();
+            $gruposPermitidos = $horario->pluck('grupo_id')->toArray();
+            $materiasPermitidas = $horario->pluck('materia_id')->toArray();
+            
+            $grupoAEditar = $request->has('grupo') ? $request->grupo : $tarea->grupo;
+            $materiaAEditar = $request->has('materia') ? $request->materia : $tarea->materia;
+            
+            if (!in_array($grupoAEditar, $gruposPermitidos) || !in_array($materiaAEditar, $materiasPermitidas)) {
+                $this->flashToast('error', 'No tienes permiso para editar tareas de este grupo o materia');
+                return redirect()->route('tareas.index');
+            }
+        }
+        
         $tarea->descripcion = $request->descripcion;
         $tarea->fecha_entrega = $request->fecha_entrega;
         $tarea->hora_entrega = $request->hora_entrega;
@@ -241,6 +270,28 @@ class administradorController extends Controller
                 return redirect()->route('tareas.index');
             }
         }
+        
+        // Asignar el usuario que crea la tarea (si el campo existe en la BD)
+        // Nota: Esto requiere agregar user_id a la migración de tareas
+        if (Schema::hasColumn('tareas', 'user_id')) {
+            $tarea->user_id = Auth::user()->id;
+        }
+        
+        // Validar que el usuario tenga acceso al grupo/materia seleccionados
+        if (Auth::user()->rol !== 'administrador') {
+            $grupoSeleccionado = count($horario) == 1 ? $horario[0]->grupo_id : request('grupo');
+            $materiaSeleccionada = count($horario) == 1 ? $horario[0]->materia_id : request('materia');
+            
+            $tieneAcceso = $horario->where('grupo_id', $grupoSeleccionado)
+                                  ->where('materia_id', $materiaSeleccionada)
+                                  ->isNotEmpty();
+            
+            if (!$tieneAcceso) {
+                $this->flashToast('error', 'No tienes permiso para crear tareas en este grupo o materia');
+                return redirect()->route('tareas.index');
+            }
+        }
+        
         $tarea->save();
         session()->flash('toast', [
             'type' => 'success',
@@ -252,15 +303,32 @@ class administradorController extends Controller
     public function destroyTarea($id)
     {
         $tarea = tarea::findOrFail($id);
+        
+        // Verificar permisos: solo el creador o administrador pueden eliminar
+        // Nota: Si la tarea no tiene user_id, solo administradores pueden eliminarla
+        if ($tarea->user_id && Auth::user()->id !== $tarea->user_id && Auth::user()->rol !== 'administrador') {
+            $this->flashToast('error', 'No tienes permiso para eliminar esta tarea');
+            return redirect()->route('tareas.index');
+        }
+        
+        // Verificar que el usuario tenga acceso al grupo/materia si no es administrador
+        if (Auth::user()->rol !== 'administrador') {
+            $horario = horario::where('maestro_id', Auth::user()->id)->get();
+            $gruposPermitidos = $horario->pluck('grupo_id')->toArray();
+            $materiasPermitidas = $horario->pluck('materia_id')->toArray();
+            
+            if (!in_array($tarea->grupo, $gruposPermitidos) || !in_array($tarea->materia, $materiasPermitidas)) {
+                $this->flashToast('error', 'No tienes permiso para eliminar tareas de este grupo o materia');
+                return redirect()->route('tareas.index');
+            }
+        }
+        
         // Eliminar el archivo si existe
         if ($tarea->archivo) {
             Storage::disk('s3')->delete($tarea->archivo);
         }
         $tarea->delete();
-        session()->flash('toast', [
-            'type' => 'success',
-            'message' => '¡Tarea eliminada exitosamente!'
-        ]);
+        $this->flashToast('success', '¡Tarea eliminada exitosamente!');
         return redirect()->route('tareas.index');
     }
 
@@ -271,7 +339,14 @@ class administradorController extends Controller
         $materias = materia::all();
         $usuarios = User::all();
         $tareas = tarea::where('grupo', $id)->select('*')->get(); // Cambiado a 'tareas'
-        $anuncios = anuncio::porGrupo($id)->activos()->get();
+        
+        // Filtrar anuncios de las últimas 2 semanas (basado en fecha de creación)
+        $fechaDosSemanasAtras = now()->subWeeks(2)->startOfDay();
+        $anuncios = anuncio::porGrupo($id)
+            ->activos()
+            ->where('created_at', '>=', $fechaDosSemanasAtras)
+            ->get();
+        
         $circulares = Circular::porGrupo($id)->activas()->orderBy('created_at', 'desc')->take(3)->get();
         return view("tareasAlumno", compact(['grupo','materias','usuarios', 'tareas', 'anuncios', 'circulares'])); // Cambiado a 'tareasAlumno'
  
@@ -883,7 +958,7 @@ class administradorController extends Controller
         $anuncio = anuncio::findOrFail($id);
         
         // Verificar si el usuario es el creador o administrador
-        if (Auth::user()->id !== $anuncio->user_id && Auth::user()->rol !== 'administrador') {
+        if (Auth::user()->id !== $anuncio->usuario_id && Auth::user()->rol !== 'administrador') {
             session()->flash('toast', [
                 'type' => 'error',
                 'message' => 'No tienes permiso para editar este anuncio'
