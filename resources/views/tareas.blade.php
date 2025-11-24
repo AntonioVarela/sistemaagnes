@@ -62,7 +62,7 @@
                     </tr>
                 </thead>
                 <tbody class="divide-y divide-gray-300 dark:divide-gray-600">
-                    @forelse ($tareas as $tarea)
+                    @foreach ($tareas as $tarea)
                         <tr class="hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
                             <td class="px-3 sm:px-6 py-4">
                                 <div class="flex items-center">
@@ -137,22 +137,7 @@
                                 </div>
                             </td>
                         </tr>
-                    @empty
-                        <tr>
-                            <td colspan="5" class="px-6 py-8 text-center text-gray-500 dark:text-gray-400">
-                                <div class="flex flex-col items-center justify-center">
-                                    <svg class="w-12 h-12 mb-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
-                                    </svg>
-                                    <p class="text-lg font-medium mb-2">No hay tareas disponibles</p>
-                                    <p class="text-sm">Las tareas aparecerán aquí cuando estén disponibles.</p>
-                                    @if(!request('grupo_filter') && !request('materia_filter'))
-                                        <p class="text-xs mt-2 text-gray-400">Nota: Solo se muestran tareas de las últimas 2 semanas.</p>
-                                    @endif
-                                </div>
-                            </td>
-                        </tr>
-                    @endforelse
+                    @endforeach
                 </tbody>
             </table>
         </div>
@@ -369,81 +354,6 @@
         let componentesInicializados = false;
         
         function iniciarComponentes() {
-            // Inicializar DataTables primero, independientemente del flag
-            if (typeof $ !== 'undefined' && $.fn.DataTable) {
-                // Verificar que el elemento exista antes de manipularlo
-                // Si no existe, simplemente salir (es normal en vistas que no usan tabla)
-                const tableElement = document.getElementById('myTable');
-                if (!tableElement) {
-                    // No mostrar warning, es normal que no exista en otras vistas
-                    return;
-                }
-                
-                // Destruir DataTable si ya existe de forma segura
-                try {
-                    if ($.fn.DataTable.isDataTable('#myTable')) {
-                        $('#myTable').DataTable().destroy();
-                    }
-                } catch (e) {
-                    console.warn('Error al destruir DataTable:', e);
-                }
-                
-                // Inicializar DataTable con un pequeño delay
-                setTimeout(function() {
-                    // Verificar nuevamente que el elemento exista
-                    const table = document.getElementById('myTable');
-                    if (!table) {
-                        // No mostrar warning, simplemente salir
-                        return;
-                    }
-                    
-                    if (!$.fn.DataTable.isDataTable('#myTable')) {
-                        try {
-                            // Verificar que el elemento y su contenedor existan antes de inicializar
-                            const $table = $('#myTable');
-                            if ($table.length === 0 || !$table.parent().length) {
-                                return;
-                            }
-                            
-                            $('#myTable').DataTable({
-                                language: {
-                                    url: 'https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json',
-                                },
-                                responsive: true,
-                                pageLength: 10,
-                                lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
-                                dom: '<"flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4"lf>rt<"flex flex-col sm:flex-row justify-between items-start sm:items-center mt-4 gap-4"ip>',
-                                order: [[1, 'asc']],
-                                columnDefs: [
-                                    { orderable: false, targets: -1 },
-                                    { responsivePriority: 1, targets: 0 },
-                                    { responsivePriority: 2, targets: -1 },
-                                    { responsivePriority: 3, targets: 1 },
-                                    { responsivePriority: 4, targets: 2 },
-                                    { responsivePriority: 5, targets: 3 }
-                                ],
-                                scrollX: true,
-                                autoWidth: false,
-                                processing: true,
-                                stateSave: false,
-                                destroy: true,
-                                // Prevenir errores de DOM manipulation
-                                deferRender: true,
-                                // Manejar errores de forma más segura
-                                error: function(xhr, error, thrown) {
-                                    console.warn('Error en DataTable:', error);
-                                }
-                            });
-                        } catch (e) {
-                            // Solo mostrar errores críticos, ignorar errores de DOM que son comunes
-                            if (e.message && !e.message.includes('replaceWith') && !e.message.includes('parentNode')) {
-                                console.error('Error al inicializar DataTable:', e);
-                            }
-                        }
-                    }
-                }, 150);
-            }
-            
             // Solo evitar duplicación de event listeners, no de inicialización completa
             if (componentesInicializados) {
                 // Reinicializar solo los componentes necesarios sin duplicar event listeners
@@ -568,8 +478,61 @@
                     this.submit();
                 });
             }
-            
-            // DataTables ya se inicializa al principio de iniciarComponentes()
+            // Configuración de DataTable
+            if ($.fn.DataTable) {
+                // Verificar que el elemento exista antes de manipularlo
+                const tableElement = document.getElementById('myTable');
+                if (!tableElement) {
+                    // No mostrar warning, es normal que no exista en otras vistas
+                    return;
+                }
+                
+                // Verificar si la tabla ya está inicializada
+                if (!$.fn.DataTable.isDataTable('#myTable')) {
+                    try {
+                        // Verificar que el elemento y su contenedor existan
+                        const $table = $('#myTable');
+                        if ($table.length === 0 || !$table.parent().length) {
+                            return;
+                        }
+                        
+                        $('#myTable').DataTable({
+                            language: {
+                                url: 'https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json',
+                            },
+                            responsive: true,
+                            pageLength: 10,
+                            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
+                            dom: '<"flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4"lf>rt<"flex flex-col sm:flex-row justify-between items-start sm:items-center mt-4 gap-4"ip>',
+                            order: [[1, 'asc']],
+                            columnDefs: [
+                                { orderable: false, targets: -1 },
+                                { responsivePriority: 1, targets: 0 },
+                                { responsivePriority: 2, targets: -1 },
+                                { responsivePriority: 3, targets: 1 },
+                                { responsivePriority: 4, targets: 2 },
+                                { responsivePriority: 5, targets: 3 }
+                            ],
+                            scrollX: true,
+                            autoWidth: false,
+                            processing: true,
+                            stateSave: false,
+                            deferRender: true,
+                            error: function(xhr, error, thrown) {
+                                // Silenciar errores comunes de DOM
+                                if (error && !error.includes('replaceWith') && !error.includes('parentNode')) {
+                                    console.warn('Error en DataTable:', error);
+                                }
+                            }
+                        });
+                    } catch (e) {
+                        // Solo mostrar errores críticos, ignorar errores de DOM comunes
+                        if (e.message && !e.message.includes('replaceWith') && !e.message.includes('parentNode')) {
+                            console.error('Error al inicializar DataTable:', e);
+                        }
+                    }
+                }
+            }
 
             // Configuración de formularios de eliminación
             const formsEliminar = document.querySelectorAll('.form-eliminar');
@@ -616,75 +579,63 @@
             // sin duplicar event listeners
             
             // Reinicializar DataTable si es necesario
-            if (typeof $ !== 'undefined' && $.fn.DataTable) {
+            if ($.fn.DataTable) {
                 // Verificar que el elemento exista
-                // Si no existe, simplemente salir (es normal en vistas que no usan tabla)
                 const tableElement = document.getElementById('myTable');
                 if (!tableElement) {
                     return;
                 }
                 
-                // Destruir DataTable si ya existe de forma segura
-                try {
-                    if ($.fn.DataTable.isDataTable('#myTable')) {
+                if ($.fn.DataTable.isDataTable('#myTable')) {
+                    try {
                         $('#myTable').DataTable().destroy();
+                    } catch (e) {
+                        // Ignorar errores al destruir
                     }
-                } catch (e) {
-                    console.warn('Error al destruir DataTable en reinicializar:', e);
                 }
                 
-                // Reinicializar con un pequeño delay para asegurar que el DOM esté listo
-                setTimeout(function() {
-                    // Verificar nuevamente que el elemento exista
-                    const table = document.getElementById('myTable');
-                    if (!table) {
-                        // No mostrar warning, simplemente salir
+                try {
+                    // Verificar que el elemento y su contenedor existan
+                    const $table = $('#myTable');
+                    if ($table.length === 0 || !$table.parent().length) {
                         return;
                     }
                     
-                    try {
-                        // Verificar que el elemento y su contenedor existan antes de inicializar
-                        const $table = $('#myTable');
-                        if ($table.length === 0 || !$table.parent().length) {
-                            return;
-                        }
-                        
-                        $('#myTable').DataTable({
-                            language: {
-                                url: 'https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json',
-                            },
-                            responsive: true,
-                            pageLength: 10,
-                            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
-                            dom: '<"flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4"lf>rt<"flex flex-col sm:flex-row justify-between items-start sm:items-center mt-4 gap-4"ip>',
-                            order: [[1, 'asc']],
-                            columnDefs: [
-                                { orderable: false, targets: -1 },
-                                { responsivePriority: 1, targets: 0 },
-                                { responsivePriority: 2, targets: -1 },
-                                { responsivePriority: 3, targets: 1 },
-                                { responsivePriority: 4, targets: 2 },
-                                { responsivePriority: 5, targets: 3 }
-                            ],
-                            scrollX: true,
-                            autoWidth: false,
-                            processing: true,
-                            stateSave: false,
-                            destroy: true,
-                            // Prevenir errores de DOM manipulation
-                            deferRender: true,
-                            // Manejar errores de forma más segura
-                            error: function(xhr, error, thrown) {
+                    $('#myTable').DataTable({
+                        language: {
+                            url: 'https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json',
+                        },
+                        responsive: true,
+                        pageLength: 10,
+                        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
+                        dom: '<"flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4"lf>rt<"flex flex-col sm:flex-row justify-between items-start sm:items-center mt-4 gap-4"ip>',
+                        order: [[1, 'asc']],
+                        columnDefs: [
+                            { orderable: false, targets: -1 },
+                            { responsivePriority: 1, targets: 0 },
+                            { responsivePriority: 2, targets: -1 },
+                            { responsivePriority: 3, targets: 1 },
+                            { responsivePriority: 4, targets: 2 },
+                            { responsivePriority: 5, targets: 3 }
+                        ],
+                        scrollX: true,
+                        autoWidth: false,
+                        processing: true,
+                        stateSave: false,
+                        deferRender: true,
+                        error: function(xhr, error, thrown) {
+                            // Silenciar errores comunes de DOM
+                            if (error && !error.includes('replaceWith') && !error.includes('parentNode')) {
                                 console.warn('Error en DataTable:', error);
                             }
-                        });
-                    } catch (e) {
-                        // Solo mostrar errores críticos, ignorar errores de DOM que son comunes
-                        if (e.message && !e.message.includes('replaceWith') && !e.message.includes('parentNode')) {
-                            console.error('Error al reinicializar DataTable:', e);
                         }
+                    });
+                } catch (e) {
+                    // Solo mostrar errores críticos, ignorar errores de DOM comunes
+                    if (e.message && !e.message.includes('replaceWith') && !e.message.includes('parentNode')) {
+                        console.error('Error al reinicializar DataTable:', e);
                     }
-                }, 150);
+                }
             }
         }
 

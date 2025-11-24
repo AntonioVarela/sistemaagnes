@@ -163,15 +163,9 @@ class administradorController extends Controller
             $materiasPermitidas = $horario->pluck('materia_id')->unique()->toArray();
             $gruposPermitidos = $horario->pluck('grupo_id')->unique()->toArray();
             
-            // Solo filtrar si hay horarios asignados
-            if (!empty($materiasPermitidas) && !empty($gruposPermitidos)) {
-                // Filtrar por materias y grupos del horario del usuario
-                $query->whereIn('materia', $materiasPermitidas)
-                      ->whereIn('grupo', $gruposPermitidos);
-            } else {
-                // Si no hay horarios, no mostrar tareas
-                $query->whereRaw('1 = 0');
-            }
+            // Filtrar por materias y grupos del horario del usuario
+            $query->whereIn('materia', $materiasPermitidas)
+                  ->whereIn('grupo', $gruposPermitidos);
         }
         
         // Filtro por grupo (si se especifica)
