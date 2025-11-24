@@ -156,24 +156,41 @@ class administradorController extends Controller
         $materias = materia::whereIn('id', $horario->pluck('materia_id'))->get();
         
         // Aplicar filtros
-        $query = tarea::whereIn('materia', $horario->pluck('materia_id'))
-                      ->whereIn('grupo', $horario->pluck('grupo_id'));
+        $query = tarea::query();
         
-        // Filtro por grupo
-        if (request('grupo_filter')) {
-            $query->where('grupo', request('grupo_filter'));
+        // Si no es administrador, filtrar por horarios del usuario
+        if (Auth::user()->rol !== 'administrador') {
+            $materiasPermitidas = $horario->pluck('materia_id')->unique()->toArray();
+            $gruposPermitidos = $horario->pluck('grupo_id')->unique()->toArray();
+            
+            // Filtrar por materias y grupos del horario del usuario
+            $query->whereIn('materia', $materiasPermitidas)
+                  ->whereIn('grupo', $gruposPermitidos);
         }
         
-        // Filtro por materia
+        // Filtro por grupo (si se especifica)
+        // NOTA: Si se filtra por grupo específico, se muestran todas las tareas de ese grupo
+        // independientemente de la materia (útil para administradores)
+        $filtroPorGrupoEspecifico = request('grupo_filter');
+        if ($filtroPorGrupoEspecifico) {
+            $query->where('grupo', $filtroPorGrupoEspecifico);
+        }
+        
+        // Filtro por materia (si se especifica)
         if (request('materia_filter')) {
             $query->where('materia', request('materia_filter'));
         }
         
         // Filtrar solo tareas de las últimas 2 semanas (basado en fecha de creación)
-        $fechaDosSemanasAtras = now()->subWeeks(2)->startOfDay();
-        $query->where('created_at', '>=', $fechaDosSemanasAtras);
+        // NOTA: Si se filtra por grupo específico, NO aplicamos el filtro de fecha
+        // para que se puedan ver todas las tareas de ese grupo
+        if (!$filtroPorGrupoEspecifico) {
+            $fechaDosSemanasAtras = now()->subWeeks(2)->startOfDay();
+            $query->where('created_at', '>=', $fechaDosSemanasAtras);
+        }
         
         // Obtener solo las 10 tareas más recientes, ordenadas por fecha de creación descendente
+        // NOTA: Si hay más de 10 tareas que cumplen los filtros, solo se mostrarán las 10 más recientes
         $tareas = $query->orderBy('created_at', 'desc')->take(10)->get();
 
         return view('tareas',compact('grupos','materias','tareas','horario','seccion')); // Cambiado a 'tareas'
