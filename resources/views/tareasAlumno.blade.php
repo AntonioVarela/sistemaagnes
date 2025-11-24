@@ -423,9 +423,20 @@
             return diaSemana === 5 && hora >= 14;
         }
         
-        // Función auxiliar para normalizar fecha a medianoche (UTC)
+        // Función auxiliar para normalizar fecha a medianoche (sin problemas de zona horaria)
         function normalizarFecha(fecha) {
+            if (!fecha) return null;
+            
+            // Si es una cadena de fecha (formato YYYY-MM-DD), parsearla directamente
+            if (typeof fecha === 'string' && fecha.match(/^\d{4}-\d{2}-\d{2}/)) {
+                const partes = fecha.split('T')[0].split('-');
+                return new Date(parseInt(partes[0]), parseInt(partes[1]) - 1, parseInt(partes[2]));
+            }
+            
             const fechaNormalizada = new Date(fecha);
+            if (isNaN(fechaNormalizada.getTime())) return null;
+            
+            // Normalizar a medianoche en hora local (no UTC)
             fechaNormalizada.setHours(0, 0, 0, 0);
             return fechaNormalizada;
         }
@@ -443,7 +454,8 @@
         
         // Función para filtrar tareas según la restricción
         function filtrarTareasPorRestriccion(tareas) {
-            const ahora = normalizarFecha(new Date());
+            const ahora = new Date();
+            ahora.setHours(0, 0, 0, 0);
             const inicioSemanaActual = obtenerLunesSemana(ahora);
             const finSemanaActual = new Date(inicioSemanaActual);
             finSemanaActual.setDate(inicioSemanaActual.getDate() + 6); // Domingo de esta semana
@@ -456,23 +468,41 @@
             finSemanaSiguiente.setDate(inicioSemanaSiguiente.getDate() + 6); // Domingo de la siguiente semana
             finSemanaSiguiente.setHours(23, 59, 59, 999);
             
+            // Debug: Log de las fechas de la semana (solo en desarrollo)
+            console.log('Inicio semana actual (Lunes):', inicioSemanaActual.toISOString().split('T')[0]);
+            console.log('Fin semana actual (Domingo):', finSemanaActual.toISOString().split('T')[0]);
+            
             return tareas.filter(function(tarea) {
-                // Si no tiene fecha de entrega, no se muestra (o se puede cambiar a false según requerimiento)
-                if (!tarea.fecha_entrega) return false;
+                // Si no tiene fecha de entrega, no se muestra
+                if (!tarea.fecha_entrega) {
+                    console.log('Tarea sin fecha de entrega:', tarea.titulo);
+                    return false;
+                }
                 
                 const fechaEntrega = normalizarFecha(tarea.fecha_entrega);
+                if (!fechaEntrega) {
+                    console.log('Error al normalizar fecha:', tarea.fecha_entrega, tarea.titulo);
+                    return false;
+                }
+                
+                const fechaEntregaStr = fechaEntrega.toISOString().split('T')[0];
                 
                 // Si la tarea es de esta semana, siempre se muestra
+                // Comparar solo las fechas (sin hora) para evitar problemas de zona horaria
                 if (fechaEntrega >= inicioSemanaActual && fechaEntrega <= finSemanaActual) {
+                    console.log('Tarea de esta semana:', tarea.titulo, 'Fecha:', fechaEntregaStr);
                     return true;
                 }
                 
                 // Si la tarea es de la siguiente semana, solo se muestra si es viernes 2 PM o después
                 if (fechaEntrega >= inicioSemanaSiguiente && fechaEntrega <= finSemanaSiguiente) {
-                    return puedeVerTareasSiguienteSemana();
+                    const puedeVer = puedeVerTareasSiguienteSemana();
+                    console.log('Tarea de siguiente semana:', tarea.titulo, 'Fecha:', fechaEntregaStr, 'Puede ver:', puedeVer);
+                    return puedeVer;
                 }
                 
                 // No mostrar tareas de semanas pasadas o futuras lejanas
+                console.log('Tarea fuera de rango:', tarea.titulo, 'Fecha:', fechaEntregaStr);
                 return false;
             });
         }
