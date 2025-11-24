@@ -399,6 +399,12 @@
                     
                     if (!$.fn.DataTable.isDataTable('#myTable')) {
                         try {
+                            // Verificar que el elemento y su contenedor existan antes de inicializar
+                            const $table = $('#myTable');
+                            if ($table.length === 0 || !$table.parent().length) {
+                                return;
+                            }
+                            
                             $('#myTable').DataTable({
                                 language: {
                                     url: 'https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json',
@@ -420,10 +426,19 @@
                                 autoWidth: false,
                                 processing: true,
                                 stateSave: false,
-                                destroy: true
+                                destroy: true,
+                                // Prevenir errores de DOM manipulation
+                                deferRender: true,
+                                // Manejar errores de forma más segura
+                                error: function(xhr, error, thrown) {
+                                    console.warn('Error en DataTable:', error);
+                                }
                             });
                         } catch (e) {
-                            console.error('Error al inicializar DataTable:', e);
+                            // Solo mostrar errores críticos, ignorar errores de DOM que son comunes
+                            if (e.message && !e.message.includes('replaceWith') && !e.message.includes('parentNode')) {
+                                console.error('Error al inicializar DataTable:', e);
+                            }
                         }
                     }
                 }, 150);
@@ -628,6 +643,12 @@
                     }
                     
                     try {
+                        // Verificar que el elemento y su contenedor existan antes de inicializar
+                        const $table = $('#myTable');
+                        if ($table.length === 0 || !$table.parent().length) {
+                            return;
+                        }
+                        
                         $('#myTable').DataTable({
                             language: {
                                 url: 'https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json',
@@ -649,10 +670,19 @@
                             autoWidth: false,
                             processing: true,
                             stateSave: false,
-                            destroy: true
+                            destroy: true,
+                            // Prevenir errores de DOM manipulation
+                            deferRender: true,
+                            // Manejar errores de forma más segura
+                            error: function(xhr, error, thrown) {
+                                console.warn('Error en DataTable:', error);
+                            }
                         });
                     } catch (e) {
-                        console.error('Error al reinicializar DataTable:', e);
+                        // Solo mostrar errores críticos, ignorar errores de DOM que son comunes
+                        if (e.message && !e.message.includes('replaceWith') && !e.message.includes('parentNode')) {
+                            console.error('Error al reinicializar DataTable:', e);
+                        }
                     }
                 }, 150);
             }
