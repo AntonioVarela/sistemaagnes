@@ -372,10 +372,10 @@
             // Inicializar DataTables primero, independientemente del flag
             if (typeof $ !== 'undefined' && $.fn.DataTable) {
                 // Verificar que el elemento exista antes de manipularlo
+                // Si no existe, simplemente salir (es normal en vistas que no usan tabla)
                 const tableElement = document.getElementById('myTable');
                 if (!tableElement) {
-                    console.warn('Tabla #myTable no encontrada, esperando...');
-                    setTimeout(iniciarComponentes, 200);
+                    // No mostrar warning, es normal que no exista en otras vistas
                     return;
                 }
                 
@@ -393,7 +393,7 @@
                     // Verificar nuevamente que el elemento exista
                     const table = document.getElementById('myTable');
                     if (!table) {
-                        console.warn('Tabla #myTable no encontrada después del delay');
+                        // No mostrar warning, simplemente salir
                         return;
                     }
                     
@@ -603,9 +603,9 @@
             // Reinicializar DataTable si es necesario
             if (typeof $ !== 'undefined' && $.fn.DataTable) {
                 // Verificar que el elemento exista
+                // Si no existe, simplemente salir (es normal en vistas que no usan tabla)
                 const tableElement = document.getElementById('myTable');
                 if (!tableElement) {
-                    console.warn('Tabla #myTable no encontrada para reinicializar');
                     return;
                 }
                 
@@ -623,7 +623,7 @@
                     // Verificar nuevamente que el elemento exista
                     const table = document.getElementById('myTable');
                     if (!table) {
-                        console.warn('Tabla #myTable no encontrada después del delay en reinicializar');
+                        // No mostrar warning, simplemente salir
                         return;
                     }
                     
