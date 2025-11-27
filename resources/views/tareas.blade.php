@@ -356,8 +356,8 @@
         function iniciarComponentes() {
             // Solo evitar duplicación de event listeners, no de inicialización completa
             if (componentesInicializados) {
-                // No reinicializar automáticamente para evitar alertas
-                // reinicializarComponentes();
+                // Reinicializar solo los componentes necesarios sin duplicar event listeners
+                reinicializarComponentes();
                 return;
             }
             componentesInicializados = true;
@@ -480,52 +480,30 @@
             }
             // Configuración de DataTable
             if ($.fn.DataTable) {
-                // Verificar que el elemento exista antes de manipularlo
-                const tableElement = document.getElementById('myTable');
-                if (!tableElement) {
-                    // No mostrar warning, es normal que no exista en otras vistas
-                    return;
-                }
-                
                 // Verificar si la tabla ya está inicializada
                 if (!$.fn.DataTable.isDataTable('#myTable')) {
-                    try {
-                        // Verificar que el elemento y su contenedor existan
-                        const $table = $('#myTable');
-                        if ($table.length === 0 || !$table.parent().length) {
-                            return;
-                        }
-                        
-                        $('#myTable').DataTable({
-                            language: {
-                                url: 'https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json',
-                            },
-                            responsive: true,
-                            pageLength: 10,
-                            lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
-                            dom: '<"flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4"lf>rt<"flex flex-col sm:flex-row justify-between items-start sm:items-center mt-4 gap-4"ip>',
-                            order: [[1, 'asc']],
-                            columnDefs: [
-                                { orderable: false, targets: -1 },
-                                { responsivePriority: 1, targets: 0 },
-                                { responsivePriority: 2, targets: -1 },
-                                { responsivePriority: 3, targets: 1 },
-                                { responsivePriority: 4, targets: 2 },
-                                { responsivePriority: 5, targets: 3 }
-                            ],
-                            scrollX: true,
-                            autoWidth: false,
-                            processing: true,
-                            stateSave: false,
-                            deferRender: true
-                            // Removido callback error para evitar alertas no deseadas
-                        });
-                    } catch (e) {
-                        // Solo mostrar errores críticos, ignorar errores de DOM comunes
-                        if (e.message && !e.message.includes('replaceWith') && !e.message.includes('parentNode')) {
-                            console.error('Error al inicializar DataTable:', e);
-                        }
-                    }
+                    $('#myTable').DataTable({
+                        language: {
+                            url: 'https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json',
+                        },
+                        responsive: true,
+                        pageLength: 10,
+                        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
+                        dom: '<"flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4"lf>rt<"flex flex-col sm:flex-row justify-between items-start sm:items-center mt-4 gap-4"ip>',
+                        order: [[1, 'asc']],
+                        columnDefs: [
+                            { orderable: false, targets: -1 },
+                            { responsivePriority: 1, targets: 0 },
+                            { responsivePriority: 2, targets: -1 },
+                            { responsivePriority: 3, targets: 1 },
+                            { responsivePriority: 4, targets: 2 },
+                            { responsivePriority: 5, targets: 3 }
+                        ],
+                        scrollX: true,
+                        autoWidth: false,
+                        processing: true,
+                        stateSave: false
+                    });
                 }
             }
 
@@ -574,58 +552,30 @@
             // sin duplicar event listeners
             
             // Reinicializar DataTable si es necesario
-            if ($.fn.DataTable) {
-                // Verificar que el elemento exista
-                const tableElement = document.getElementById('myTable');
-                if (!tableElement) {
-                    return;
-                }
-                
-                if ($.fn.DataTable.isDataTable('#myTable')) {
-                    try {
-                        $('#myTable').DataTable().destroy();
-                    } catch (e) {
-                        // Ignorar errores al destruir
-                    }
-                }
-                
-                try {
-                    // Verificar que el elemento y su contenedor existan
-                    const $table = $('#myTable');
-                    if ($table.length === 0 || !$table.parent().length) {
-                        return;
-                    }
-                    
-                    $('#myTable').DataTable({
-                        language: {
-                            url: 'https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json',
-                        },
-                        responsive: true,
-                        pageLength: 10,
-                        lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
-                        dom: '<"flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4"lf>rt<"flex flex-col sm:flex-row justify-between items-start sm:items-center mt-4 gap-4"ip>',
-                        order: [[1, 'asc']],
-                        columnDefs: [
-                            { orderable: false, targets: -1 },
-                            { responsivePriority: 1, targets: 0 },
-                            { responsivePriority: 2, targets: -1 },
-                            { responsivePriority: 3, targets: 1 },
-                            { responsivePriority: 4, targets: 2 },
-                            { responsivePriority: 5, targets: 3 }
-                        ],
-                        scrollX: true,
-                        autoWidth: false,
-                        processing: true,
-                        stateSave: false,
-                        deferRender: true
-                        // Removido callback error para evitar alertas no deseadas
-                    });
-                } catch (e) {
-                    // Solo mostrar errores críticos, ignorar errores de DOM comunes
-                    if (e.message && !e.message.includes('replaceWith') && !e.message.includes('parentNode')) {
-                        console.error('Error al reinicializar DataTable:', e);
-                    }
-                }
+            if ($.fn.DataTable && $.fn.DataTable.isDataTable('#myTable')) {
+                $('#myTable').DataTable().destroy();
+                $('#myTable').DataTable({
+                    language: {
+                        url: 'https://cdn.datatables.net/plug-ins/2.3.0/i18n/es-ES.json',
+                    },
+                    responsive: true,
+                    pageLength: 10,
+                    lengthMenu: [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
+                    dom: '<"flex flex-col sm:flex-row justify-between items-start sm:items-center mb-4 gap-4"lf>rt<"flex flex-col sm:flex-row justify-between items-start sm:items-center mt-4 gap-4"ip>',
+                    order: [[1, 'asc']],
+                    columnDefs: [
+                        { orderable: false, targets: -1 },
+                        { responsivePriority: 1, targets: 0 },
+                        { responsivePriority: 2, targets: -1 },
+                        { responsivePriority: 3, targets: 1 },
+                        { responsivePriority: 4, targets: 2 },
+                        { responsivePriority: 5, targets: 3 }
+                    ],
+                    scrollX: true,
+                    autoWidth: false,
+                    processing: true,
+                    stateSave: false
+                });
             }
         }
 
@@ -724,8 +674,7 @@
         }
 
         document.addEventListener('DOMContentLoaded', iniciarComponentes);
-        // Comentado para evitar reinicializaciones innecesarias que causan alertas
-        // document.addEventListener('livewire:navigated', iniciarComponentes);
+        document.addEventListener('livewire:navigated', iniciarComponentes);
        
     </script>
 </x-layouts.app>

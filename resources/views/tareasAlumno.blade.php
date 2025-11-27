@@ -9,6 +9,8 @@
     <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.17/locales/es.global.min.js"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Estilos de Quill para renderizar el contenido rich text -->
+    <link href="https://cdn.jsdelivr.net/npm/quill@2.0.3/dist/quill.snow.css" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
@@ -93,6 +95,82 @@
                 font-size: 1rem !important;
                 line-height: 1.3;
             }
+        }
+
+        /* Estilos para el contenido rich text de Quill en el modal */
+        #modalDescription.ql-editor {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #374151;
+        }
+
+        #modalDescription.ql-editor p {
+            margin-bottom: 0.75rem;
+        }
+
+        #modalDescription.ql-editor p:last-child {
+            margin-bottom: 0;
+        }
+
+        #modalDescription.ql-editor ul,
+        #modalDescription.ql-editor ol {
+            margin-left: 1.5rem;
+            margin-bottom: 0.75rem;
+        }
+
+        #modalDescription.ql-editor li {
+            margin-bottom: 0.25rem;
+        }
+
+        #modalDescription.ql-editor strong {
+            font-weight: 600;
+        }
+
+        #modalDescription.ql-editor em {
+            font-style: italic;
+        }
+
+        #modalDescription.ql-editor u {
+            text-decoration: underline;
+        }
+
+        #modalDescription.ql-editor h1,
+        #modalDescription.ql-editor h2,
+        #modalDescription.ql-editor h3,
+        #modalDescription.ql-editor h4,
+        #modalDescription.ql-editor h5,
+        #modalDescription.ql-editor h6 {
+            font-weight: 600;
+            margin-top: 1rem;
+            margin-bottom: 0.5rem;
+        }
+
+        #modalDescription.ql-editor h1 {
+            font-size: 1.875rem;
+        }
+
+        #modalDescription.ql-editor h2 {
+            font-size: 1.5rem;
+        }
+
+        #modalDescription.ql-editor h3 {
+            font-size: 1.25rem;
+        }
+
+        #modalDescription.ql-editor blockquote {
+            border-left: 4px solid #e5e7eb;
+            padding-left: 1rem;
+            margin: 1rem 0;
+            font-style: italic;
+        }
+
+        #modalDescription.ql-editor a {
+            color: #4F46E5;
+            text-decoration: underline;
+        }
+
+        #modalDescription.ql-editor a:hover {
+            color: #4338CA;
         }
     </style>
 </head>
