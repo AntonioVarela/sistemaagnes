@@ -492,12 +492,17 @@
         }
 
         // Función para verificar si se pueden mostrar tareas de la siguiente semana
-        function puedeVerTareasSiguienteSemana() {
+        function puedeVerTareasSiguienteSemana(grupo) {
+            // Si el grupo es de sección secundaria, siempre permitir ver las tareas
+            if (grupo && grupo.seccion === 'Secundaria') {
+                return true;
+            }
+            
             const ahora = new Date();
             const diaSemana = ahora.getDay(); // 0 = Domingo, 1 = Lunes, ..., 5 = Viernes
             const hora = ahora.getHours();
             
-            // Solo permitir los viernes a las 2:00 PM (14:00) o después
+            // Solo permitir los viernes a las 2:00 PM (14:00) o después (solo para primaria)
             return diaSemana === 5 && hora >= 14;
         }
         
@@ -531,7 +536,7 @@
         }
         
         // Función para filtrar tareas según la restricción
-        function filtrarTareasPorRestriccion(tareas) {
+        function filtrarTareasPorRestriccion(tareas, grupo) {
             const ahora = new Date();
             ahora.setHours(0, 0, 0, 0);
             const inicioSemanaActual = obtenerLunesSemana(ahora);
@@ -572,9 +577,9 @@
                     return true;
                 }
                 
-                // Si la tarea es de la siguiente semana, solo se muestra si es viernes 2 PM o después
+                // Si la tarea es de la siguiente semana, verificar restricción según la sección del grupo
                 if (fechaEntrega >= inicioSemanaSiguiente && fechaEntrega <= finSemanaSiguiente) {
-                    const puedeVer = puedeVerTareasSiguienteSemana();
+                    const puedeVer = puedeVerTareasSiguienteSemana(grupo);
                     console.log('Tarea de siguiente semana:', tarea.titulo, 'Fecha:', fechaEntregaStr, 'Puede ver:', puedeVer);
                     return puedeVer;
                 }
@@ -592,10 +597,11 @@
             var eventos;
             
             // Filtrar tareas según la restricción
-            var tareasFiltradas = filtrarTareasPorRestriccion(tareas);
+            var tareasFiltradas = filtrarTareasPorRestriccion(tareas, grupo);
             
             // Mostrar mensaje informativo si no se pueden ver tareas de la siguiente semana
-            if (!puedeVerTareasSiguienteSemana()) {
+            // Solo mostrar el mensaje para grupos de primaria
+            if (grupo.seccion !== 'Secundaria' && !puedeVerTareasSiguienteSemana(grupo)) {
                 document.getElementById('restrictionMessage').classList.remove('hidden');
             }
             
