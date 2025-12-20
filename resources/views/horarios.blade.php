@@ -1,121 +1,225 @@
 <x-layouts.app :title="__('Horarios')">
-    <div class="flex h-full w-full flex-1 flex-col gap-6 rounded-xl p-6 shadow-sm">
+    <div class="flex h-full w-full flex-1 flex-col gap-6 rounded-xl p-6 shadow-sm bg-gray-50 dark:bg-gray-900 min-h-screen">
+        <!-- Header -->
         <div class="flex items-center justify-between">
             <div>
-                <h1 class="text-2xl font-bold text-gray-900 dark:text-white">{{ __('Horarios') }}</h1>
+                <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ __('Horarios') }}</h1>
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Gestiona los horarios de las materias</p>
             </div>
             <flux:modal.trigger name="edit-profile">
-                <flux:button icon='plus' variant="primary" class="flex items-center gap-2">
+                <flux:button icon='plus' variant="filled" class="flex items-center gap-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700">
                     <span>Nuevo Horario</span>
                 </flux:button>
             </flux:modal.trigger>
         </div>
 
+        <!-- Search and Filters -->
         <form action="{{ route('horarios.index') }}" method="GET" class="mb-6">
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                <flux:input 
-                    name="search" 
-                    type="text" 
-                    placeholder="Buscar por nombre..." 
-                    value="{{ request('search') }}"
-                    class="w-full"
-                />
-                <flux:select name="grupo_filter" class="w-full">
-                    <option value="">Todos los grupos</option>
-                    @foreach ($grupos as $grupo)
-                        <option value="{{ $grupo->id }}" {{ request('grupo_filter') == $grupo->id ? 'selected' : '' }}>
-                            {{ $grupo->nombre }} {{ $grupo->seccion }}
-                        </option>
-                    @endforeach
-                </flux:select>
-                <flux:select name="materia_filter" class="w-full">
-                    <option value="">Todas las materias</option>
-                    @foreach ($materias as $materia)
-                        <option value="{{ $materia->id }}" {{ request('materia_filter') == $materia->id ? 'selected' : '' }}>
-                            {{ $materia->nombre }}
-                        </option>
-                    @endforeach
-                </flux:select>
-                <div class="flex gap-2">
-                    <flux:button type="submit" variant="primary" class="flex-1">
-                        Filtrar
-                    </flux:button>
-                    <a href="{{ route('horarios.index') }}" class="flex-1">
-                        <flux:button type="button" variant="filled" class="w-full">
+            <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+                    <div class="relative">
+                        <input 
+                            type="text" 
+                            name="search" 
+                            placeholder="Buscar por nombre..." 
+                            value="{{ request('search') }}"
+                            class="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <svg class="w-5 h-5 absolute left-3 top-2.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </div>
+                    <select name="grupo_filter" class="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Todos los grupos</option>
+                        @foreach ($grupos as $grupo)
+                            <option value="{{ $grupo->id }}" {{ request('grupo_filter') == $grupo->id ? 'selected' : '' }}>
+                                {{ $grupo->nombre }} {{ $grupo->seccion }}
+                            </option>
+                        @endforeach
+                    </select>
+                    <select name="materia_filter" class="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        <option value="">Todas las materias</option>
+                        @foreach ($materias as $materia)
+                            <option value="{{ $materia->id }}" {{ request('materia_filter') == $materia->id ? 'selected' : '' }}>
+                                {{ $materia->nombre }}
+                            </option>
+                        @endforeach
+                    </select>
+                </div>
+                
+                <!-- Filter Buttons -->
+                <div class="flex flex-wrap items-center gap-3">
+                    <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-blue-700 transition-colors">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"></path>
+                        </svg>
+                        Primaria
+                    </button>
+                    <button type="button" class="px-4 py-2 bg-yellow-600 text-white rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-yellow-700 transition-colors">
+                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
+                        </svg>
+                        Secundaria
+                    </button>
+                    <button type="button" class="px-4 py-2 bg-gray-700 dark:bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-800 dark:hover:bg-gray-500 transition-colors">
+                        Con docente
+                    </button>
+                    <button type="button" class="px-4 py-2 bg-gray-700 dark:bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-800 dark:hover:bg-gray-500 transition-colors">
+                        Mañana
+                    </button>
+                    <button type="button" class="px-4 py-2 bg-gray-700 dark:bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-800 dark:hover:bg-gray-500 transition-colors">
+                        Tarde
+                    </button>
+                    <div class="ml-auto flex gap-2">
+                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+                            Filtrar
+                        </button>
+                        <a href="{{ route('horarios.index') }}" class="px-4 py-2 bg-gray-700 dark:bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-800 dark:hover:bg-gray-500 transition-colors">
                             Limpiar
-                        </flux:button>
-                    </a>
+                        </a>
+                    </div>
                 </div>
             </div>
         </form>
 
-        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
-            @foreach ($horarios as $horario)
-                <div class="bg-white dark:bg-gray-700 rounded-xl shadow-sm p-4 hover:shadow-md transition-shadow relative">
-                    <div class="flex items-start justify-between mb-3">
-                        <div class="flex-1 min-w-0">
-                            <h3 class="text-sm font-semibold text-gray-900 dark:text-white truncate">
-                                {{ $horario->materia->nombre ?? 'Materia no asignada' }}
-                            </h3>
-                            <p class="text-xs text-gray-500 dark:text-gray-200 truncate">{{ $horario->grupo->nombre ?? 'Grupo no asignado' }} {{ $horario->grupo->seccion ?? '' }}</p>
-                        </div>
-                        <div class="relative ml-2">
-                            <button type="button" 
-                                onclick="toggleDropdown({{ $horario->id }})"
-                                class="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors">
-                                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                                    <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path>
-                                </svg>
-                            </button>
-                            
-                            <!-- Dropdown menu -->
-                            <div id="dropdown-{{ $horario->id }}" class="hidden absolute right-0 mt-2 w-32 bg-white dark:bg-gray-800 rounded-md shadow-lg z-10 border border-gray-200 dark:border-gray-700">
-                                <div class="py-1">
-                                    <flux:modal.trigger name="edit-task">
-                                        <button type="button" 
-                                            onclick="prepareEditModal({{ $horario->id }}, '{{ $horario->materia_id }}', '{{ $horario->grupo_id }}', '{{ $horario->maestro_id }}', '{{ $horario->dias }}', '{{ $horario->hora_inicio }}', '{{ $horario->hora_fin }}')"
-                                            class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
-                                            <flux:icon name="pencil" class="w-3 h-3" />
-                                            Editar
-                                        </button>
-                                    </flux:modal.trigger>
-                                    <form action="{{ route('horarios.destroy', $horario->id) }}" method="POST" class="form-eliminar">
-                                        @csrf
-                                        @method('DELETE')
-                                        <button type="submit" 
-                                            class="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
-                                            <flux:icon name="trash" class="w-3 h-3" />
-                                            Eliminar
-                                        </button>
-                                    </form>
+        <!-- Main Content - Vertical Layout -->
+        <div class="flex-1">
+            @php
+                // Agrupar horarios por materia
+                $horariosPorMateria = $horarios->groupBy('materia_id');
+                
+                // Colores temáticos para cada materia (ciclo de colores)
+                $colores = [
+                    'bg-green-500', 'bg-purple-500', 'bg-blue-500', 'bg-teal-500', 
+                    'bg-pink-500', 'bg-orange-500', 'bg-indigo-500', 'bg-red-500',
+                    'bg-yellow-500', 'bg-cyan-500', 'bg-lime-500', 'bg-amber-500'
+                ];
+                $coloresCards = [
+                    'bg-green-50 dark:bg-green-900/20 border-green-200 dark:border-green-800',
+                    'bg-purple-50 dark:bg-purple-900/20 border-purple-200 dark:border-purple-800',
+                    'bg-blue-50 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800',
+                    'bg-teal-50 dark:bg-teal-900/20 border-teal-200 dark:border-teal-800',
+                    'bg-pink-50 dark:bg-pink-900/20 border-pink-200 dark:border-pink-800',
+                    'bg-orange-50 dark:bg-orange-900/20 border-orange-200 dark:border-orange-800',
+                    'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800',
+                    'bg-red-50 dark:bg-red-900/20 border-red-200 dark:border-red-800',
+                    'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800',
+                    'bg-cyan-50 dark:bg-cyan-900/20 border-cyan-200 dark:border-cyan-800',
+                    'bg-lime-50 dark:bg-lime-900/20 border-lime-200 dark:border-lime-800',
+                    'bg-amber-50 dark:bg-amber-900/20 border-amber-200 dark:border-amber-800'
+                ];
+                // Usar solo iconos básicos confirmados que existen en Flux
+                // Basado en uso en otros archivos del proyecto
+                $iconos = [
+                    'cog', 'document-text', 'device-tablet', 'book-open',
+                    'academic-cap', 'book-open-text', 'home', 'calendar-days',
+                    'user', 'pencil', 'trash', 'plus'
+                ];
+            @endphp
+            
+            <div class="space-y-6">
+                @foreach($horariosPorMateria as $materiaId => $horariosMateria)
+                    @php
+                        $materia = $materias->firstWhere('id', $materiaId);
+                        if (!$materia) continue;
+                        
+                        $indiceColor = ($loop->index) % count($colores);
+                        $color = $colores[$indiceColor];
+                        $colorCard = $coloresCards[$indiceColor];
+                        $icono = $iconos[$indiceColor % count($iconos)];
+                        $totalHorarios = $horariosMateria->count();
+                    @endphp
+                    
+                    <div>
+                        <!-- Materia Header -->
+                        <div class="mb-4">
+                            <div class="{{ $color }} text-white rounded-lg p-4 shadow-md flex items-center justify-between">
+                                <div class="flex items-center gap-3">
+                                    {{-- Usar solo iconos que sabemos que existen en Flux --}}
+                                    <flux:icon name="{{ $icono }}" class="w-6 h-6" />
+                                    <div>
+                                        <h2 class="text-lg font-bold">{{ $materia->nombre }}</h2>
+                                        <p class="text-sm opacity-90">({{ $totalHorarios }})</p>
+                                    </div>
                                 </div>
                             </div>
                         </div>
+                        
+                        <!-- Cards Grid -->
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+                            @foreach($horariosMateria as $horario)
+                                <div class="{{ $colorCard }} rounded-lg p-4 shadow-sm border relative hover:shadow-md transition-shadow">
+                                    <!-- Menu Button -->
+                                    <button type="button" 
+                                        onclick="toggleDropdown({{ $horario->id }})"
+                                        class="absolute top-3 right-3 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 p-1 rounded-full hover:bg-gray-200 dark:hover:bg-gray-700 transition-colors">
+                                        <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"></path>
+                                        </svg>
+                                    </button>
+                                    
+                                    <!-- Dropdown menu -->
+                                    <div id="dropdown-{{ $horario->id }}" class="hidden absolute right-3 top-10 mt-2 w-32 bg-white dark:bg-gray-800 rounded-md shadow-lg z-10 border border-gray-200 dark:border-gray-700">
+                                        <div class="py-1">
+                                            <flux:modal.trigger name="edit-task">
+                                                <button type="button" 
+                                                    onclick="prepareEditModal({{ $horario->id }}, '{{ $horario->materia_id }}', '{{ $horario->grupo_id }}', '{{ $horario->maestro_id }}', '{{ $horario->dias }}', '{{ $horario->hora_inicio }}', '{{ $horario->hora_fin }}')"
+                                                    class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                                                    <flux:icon name="pencil" class="w-3 h-3" />
+                                                    Editar
+                                                </button>
+                                            </flux:modal.trigger>
+                                            <form action="{{ route('horarios.destroy', $horario->id) }}" method="POST" class="form-eliminar">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" 
+                                                    class="w-full text-left px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
+                                                    <flux:icon name="trash" class="w-3 h-3" />
+                                                    Eliminar
+                                                </button>
+                                            </form>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Card Content -->
+                                    <div class="pr-8">
+                                        @if($horario->maestro_id)
+                                            @php
+                                                $maestro = $usuarios->firstWhere('id', $horario->maestro_id);
+                                            @endphp
+                                            @if($maestro)
+                                                <div class="mb-2">
+                                                    <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ $maestro->name }}</p>
+                                                </div>
+                                            @endif
+                                        @endif
+                                        
+                                        <div class="mb-2">
+                                            <span class="inline-block px-2.5 py-1 text-xs font-medium bg-gray-800 dark:bg-gray-700 text-white rounded">
+                                                {{ $horario->grupo->nombre ?? 'N/A' }} {{ $horario->grupo->seccion ?? '' }}
+                                            </span>
+                                        </div>
+                                        
+                                        <div class="flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300 mb-2">
+                                            <svg class="w-4 h-4 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                                            </svg>
+                                            <span>{{ $horario->hora_inicio }} – {{ $horario->hora_fin }}</span>
+                                        </div>
+                                        
+                                        <div class="flex items-start gap-2 text-sm text-gray-700 dark:text-gray-300">
+                                            <svg class="w-4 h-4 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"></path>
+                                            </svg>
+                                            <span>{{ str_replace(',', ', ', $horario->dias) }}</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            @endforeach
+                        </div>
                     </div>
-                    
-                    <div class="space-y-2">
-                        <div class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-200">
-                            <flux:icon name="user" class="w-3 h-3 flex-shrink-0" />
-                            <span class="truncate">
-                                @foreach ($usuarios as $usuario)    
-                                    @if ($usuario->id == $horario->maestro_id)
-                                        {{ $usuario->name }}
-                                    @endif
-                                @endforeach
-                            </span>
-                        </div>
-                        <div class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-200">
-                            <flux:icon name="clock" class="w-3 h-3 flex-shrink-0" />
-                            <span>{{ $horario->hora_inicio }} - {{ $horario->hora_fin }}</span>
-                        </div>
-                        <div class="flex items-center gap-2 text-xs text-gray-600 dark:text-gray-200">
-                            <flux:icon name="calendar" class="w-3 h-3 flex-shrink-0" />
-                            <span class="truncate">{{ str_replace(',', ', ', $horario->dias) }}</span>
-                        </div>
-                    </div>
-                </div>
-            @endforeach
+                @endforeach
+            </div>
         </div>
     </div>
 
@@ -268,7 +372,7 @@
                     e.preventDefault();
                     Swal.fire({
                         title: '¿Estás seguro de eliminar este horario?',
-                        text: "Esta acción eliminará el horario de {{ $horario->materia->nombre ?? 'la materia' }} para {{ $horario->grupo->nombre ?? 'el grupo' }} {{ $horario->grupo->seccion ?? '' }}",
+                        text: "Esta acción no se puede deshacer",
                         icon: 'warning',
                         showCancelButton: true,
                         confirmButtonColor: '#ef4444',

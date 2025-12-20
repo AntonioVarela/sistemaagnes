@@ -809,7 +809,7 @@ class administradorController extends Controller
             $query->where('materia_id', request('materia_filter'));
         }
 
-        $horarios = $query->get();
+        $horarios = $query->with(['grupo', 'materia'])->get();
         $grupos = grupo::all();
         $materias = materia::all();
         $usuarios = User::where('rol', 'Maestro')->get();
