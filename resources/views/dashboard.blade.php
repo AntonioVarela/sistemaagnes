@@ -41,8 +41,8 @@
                         @php
                             $horariosGrupo = $horarios->where('grupo_id', $grupo->id);
                         @endphp
-                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
-                            <div class="p-5 sm:p-6">
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 flex flex-col h-full">
+                            <div class="p-5 sm:p-6 flex flex-col flex-1">
                                 <div class="flex items-center justify-between mb-5">
                                     <h3 class="text-xl font-bold text-gray-900 dark:text-white">
                                         {{ $grupo->nombre }}
@@ -52,7 +52,7 @@
                                     </span>
                                 </div>
                                 
-                                <div class="space-y-4 mb-6">
+                                <div class="space-y-4 flex-1 mb-6">
                                     @foreach($horariosGrupo as $horario)
                                         <div class="border-t border-gray-200 dark:border-gray-700 pt-4 first:border-t-0 first:pt-0">
                                             <div class="flex items-start justify-between mb-3">
@@ -92,7 +92,7 @@
                                     @endforeach
                                 </div>
 
-                                <div class="flex flex-col gap-2.5 pt-4 border-t border-gray-200 dark:border-gray-700">
+                                <div class="flex flex-col gap-2.5 pt-4 border-t border-gray-200 dark:border-gray-700 mt-auto">
                                     <a href="{{ route('tareas.index', ['grupo' => $grupo->id]) }}" 
                                        class="w-full px-4 py-2.5 bg-gray-900 dark:bg-gray-700 hover:bg-gray-800 dark:hover:bg-gray-600 text-white text-sm font-medium rounded-lg text-center transition-colors duration-200">
                                         Agregar tarea
@@ -129,8 +129,8 @@
                         @php
                             $horariosGrupo = $horarios->where('grupo_id', $grupo->id);
                         @endphp
-                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
-                            <div class="p-5 sm:p-6">
+                        <div class="bg-white dark:bg-gray-800 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700 flex flex-col h-full">
+                            <div class="p-5 sm:p-6 flex flex-col flex-1">
                                 <div class="flex items-center justify-between mb-5">
                                     <h3 class="text-xl font-bold text-gray-900 dark:text-white">
                                         {{ $grupo->nombre }}
@@ -140,7 +140,7 @@
                                     </span>
                                 </div>
                                 
-                                <div class="space-y-4 mb-6">
+                                <div class="space-y-4 flex-1 mb-6">
                                     @foreach($horariosGrupo as $horario)
                                         <div class="border-t border-gray-200 dark:border-gray-700 pt-4 first:border-t-0 first:pt-0">
                                             <div class="flex items-start justify-between mb-3">
@@ -180,7 +180,7 @@
                                     @endforeach
                                 </div>
 
-                                <div class="flex flex-col gap-2.5 pt-4 border-t border-gray-200 dark:border-gray-700">
+                                <div class="flex flex-col gap-2.5 pt-4 border-t border-gray-200 dark:border-gray-700 mt-auto">
                                     <a href="{{ route('tareas.index', ['grupo' => $grupo->id]) }}" 
                                        class="w-full px-4 py-2.5 bg-gray-900 dark:bg-gray-700 hover:bg-gray-800 dark:hover:bg-gray-600 text-white text-sm font-medium rounded-lg text-center transition-colors duration-200">
                                         Agregar tarea
