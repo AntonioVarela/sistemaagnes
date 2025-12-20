@@ -17,5 +17,9 @@ class horario extends Model
     public function materia()
     {
         return $this->belongsTo(materia::class, 'materia_id');
+    }
+    public function maestro()
+    {
+        return $this->belongsTo(User::class, 'maestro_id');
     }  
 }

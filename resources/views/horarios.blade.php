@@ -15,66 +15,61 @@
 
         <!-- Search and Filters -->
         <form action="{{ route('horarios.index') }}" method="GET" class="mb-6">
-            <div class="bg-white dark:bg-gray-800 rounded-lg p-4 shadow-sm">
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
-                    <div class="relative">
+            <div class="bg-white dark:bg-gray-800 rounded-xl p-6 shadow-lg border border-gray-200 dark:border-gray-700">
+                <!-- Search Bar and Dropdowns Row -->
+                <div class="flex flex-col md:flex-row gap-4">
+                    <!-- Search Bar -->
+                    <div class="flex-1 relative">
                         <input 
                             type="text" 
                             name="search" 
+                            id="searchInput"
                             placeholder="Buscar por nombre..." 
                             value="{{ request('search') }}"
-                            class="w-full pl-10 pr-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            class="w-full pl-12 pr-4 py-3 bg-gray-50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white placeholder-gray-400 dark:placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
                         />
-                        <svg class="w-5 h-5 absolute left-3 top-2.5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-5 h-5 absolute left-4 top-3.5 text-gray-400 dark:text-gray-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
                         </svg>
                     </div>
-                    <select name="grupo_filter" class="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="">Todos los grupos</option>
-                        @foreach ($grupos as $grupo)
-                            <option value="{{ $grupo->id }}" {{ request('grupo_filter') == $grupo->id ? 'selected' : '' }}>
-                                {{ $grupo->nombre }} {{ $grupo->seccion }}
-                            </option>
-                        @endforeach
-                    </select>
-                    <select name="materia_filter" class="w-full px-4 py-2 bg-gray-100 dark:bg-gray-700 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500">
-                        <option value="">Todas las materias</option>
-                        @foreach ($materias as $materia)
-                            <option value="{{ $materia->id }}" {{ request('materia_filter') == $materia->id ? 'selected' : '' }}>
-                                {{ $materia->nombre }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                
-                <!-- Filter Buttons -->
-                <div class="flex flex-wrap items-center gap-3">
-                    <button type="button" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-blue-700 transition-colors">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z"></path>
-                        </svg>
-                        Primaria
-                    </button>
-                    <button type="button" class="px-4 py-2 bg-yellow-600 text-white rounded-lg text-sm font-medium flex items-center gap-2 hover:bg-yellow-700 transition-colors">
-                        <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"></path>
-                        </svg>
-                        Secundaria
-                    </button>
-                    <button type="button" class="px-4 py-2 bg-gray-700 dark:bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-800 dark:hover:bg-gray-500 transition-colors">
-                        Con docente
-                    </button>
-                    <button type="button" class="px-4 py-2 bg-gray-700 dark:bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-800 dark:hover:bg-gray-500 transition-colors">
-                        Mañana
-                    </button>
-                    <button type="button" class="px-4 py-2 bg-gray-700 dark:bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-800 dark:hover:bg-gray-500 transition-colors">
-                        Tarde
-                    </button>
-                    <div class="ml-auto flex gap-2">
-                        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 transition-colors">
+                    
+                    <!-- Dropdowns -->
+                    <div class="flex flex-col md:flex-row gap-4 md:w-auto">
+                        <div class="relative md:w-64">
+                            <select name="grupo_filter" id="grupoFilter" class="w-full px-4 py-3 pr-10 bg-gray-50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none cursor-pointer transition-all">
+                                <option value="">Todos los grupos</option>
+                                @foreach ($grupos as $grupo)
+                                    <option value="{{ $grupo->id }}" {{ request('grupo_filter') == $grupo->id ? 'selected' : '' }}>
+                                        {{ $grupo->nombre }} {{ $grupo->seccion }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <svg class="w-5 h-5 absolute right-3 top-3.5 text-gray-400 dark:text-gray-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </div>
+                        
+                        <div class="relative md:w-64">
+                            <select name="materia_filter" id="materiaFilter" class="w-full px-4 py-3 pr-10 bg-gray-50 dark:bg-gray-700/50 border border-gray-300 dark:border-gray-600 rounded-lg text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent appearance-none cursor-pointer transition-all">
+                                <option value="">Todas las materias</option>
+                                @foreach ($materias as $materia)
+                                    <option value="{{ $materia->id }}" {{ request('materia_filter') == $materia->id ? 'selected' : '' }}>
+                                        {{ $materia->nombre }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            <svg class="w-5 h-5 absolute right-3 top-3.5 text-gray-400 dark:text-gray-500 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                            </svg>
+                        </div>
+                    </div>
+                    
+                    <!-- Action Buttons -->
+                    <div class="flex gap-2 md:items-start">
+                        <button type="submit" class="px-5 py-3 bg-blue-600 text-white rounded-lg text-sm font-medium hover:bg-blue-700 shadow-md hover:shadow-lg transition-all whitespace-nowrap">
                             Filtrar
                         </button>
-                        <a href="{{ route('horarios.index') }}" class="px-4 py-2 bg-gray-700 dark:bg-gray-600 text-white rounded-lg text-sm font-medium hover:bg-gray-800 dark:hover:bg-gray-500 transition-colors">
+                        <a href="{{ route('horarios.index') }}" class="px-5 py-3 bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-lg text-sm font-medium hover:bg-gray-300 dark:hover:bg-gray-600 transition-all whitespace-nowrap">
                             Limpiar
                         </a>
                     </div>
@@ -459,5 +454,6 @@
                 }
             });
         }
+
     </script>
 </x-layouts.app>

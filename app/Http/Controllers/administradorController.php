@@ -793,11 +793,16 @@ class administradorController extends Controller
 
         // Aplicar filtros si existen
         if (request('search')) {
-            $query->whereHas('materia', function($q) {
-                $q->where('nombre', 'like', '%' . request('search') . '%');
-            })->orWhereHas('grupo', function($q) {
-                $q->where('nombre', 'like', '%' . request('search') . '%')
-                  ->orWhere('seccion', 'like', '%' . request('search') . '%');
+            $searchTerm = '%' . request('search') . '%';
+            $query->where(function($q) use ($searchTerm) {
+                $q->whereHas('materia', function($subQ) use ($searchTerm) {
+                    $subQ->where('nombre', 'like', $searchTerm);
+                })->orWhereHas('grupo', function($subQ) use ($searchTerm) {
+                    $subQ->where('nombre', 'like', $searchTerm)
+                          ->orWhere('seccion', 'like', $searchTerm);
+                })->orWhereHas('maestro', function($subQ) use ($searchTerm) {
+                    $subQ->where('name', 'like', $searchTerm);
+                });
             });
         }
 
@@ -809,7 +814,8 @@ class administradorController extends Controller
             $query->where('materia_id', request('materia_filter'));
         }
 
-        $horarios = $query->with(['grupo', 'materia'])->get();
+
+        $horarios = $query->with(['grupo', 'materia', 'maestro'])->get();
         $grupos = grupo::all();
         $materias = materia::all();
         $usuarios = User::where('rol', 'Maestro')->get();
