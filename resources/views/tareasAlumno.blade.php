@@ -605,7 +605,7 @@
                 document.getElementById('restrictionMessage').classList.remove('hidden');
             }
             
-            if(grupo.seccion == 'Primaria') {
+            if(grupo.seccion === 'Primaria') {
                 eventos = tareasFiltradas.map(function(element) {
                     // Usar la fecha de entrega directamente para primaria
                     let startDate = element.fecha_entrega;

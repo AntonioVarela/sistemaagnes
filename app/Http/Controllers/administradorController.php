@@ -95,30 +95,24 @@ class administradorController extends Controller
     public function indexDashboard()
     {
         if(Auth::user()->rol == 'Coordinador Primaria'){
-            // Buscar grupos de sección A (primaria)
-            $gruposPrimaria = grupo::where('seccion', 'A')->get();
+            // Buscar todos los grupos de sección Primaria
+            $grupos = grupo::where('seccion', 'Primaria')->orderBy('nombre')->get();
             
-            // Luego obtenemos los horarios para estos grupos
+            // Obtener todos los horarios de estos grupos
             $horarios = horario::with(['grupo', 'materia'])
-                ->whereIn('grupo_id', $gruposPrimaria->pluck('id'))
+                ->whereIn('grupo_id', $grupos->pluck('id'))
                 ->orderBy('grupo_id')
                 ->get();
-            
-            $grupos = $gruposPrimaria->whereIn('id', $horarios->pluck('grupo_id')->unique())
-                ->sortBy('nombre');
 
         } else if(Auth::user()->rol == 'Coordinador Secundaria'){
-            // Buscar grupos de sección B (secundaria)
-            $gruposSecundaria = grupo::where('seccion', 'B')->get();
+            // Buscar todos los grupos de sección Secundaria
+            $grupos = grupo::where('seccion', 'Secundaria')->orderBy('nombre')->get();
             
-            // Luego obtenemos los horarios para estos grupos
+            // Obtener todos los horarios de estos grupos
             $horarios = horario::with(['grupo', 'materia'])
-                ->whereIn('grupo_id', $gruposSecundaria->pluck('id'))
+                ->whereIn('grupo_id', $grupos->pluck('id'))
                 ->orderBy('grupo_id')
                 ->get();
-            
-            $grupos = $gruposSecundaria->whereIn('id', $horarios->pluck('grupo_id')->unique())
-                ->sortBy('nombre');
         }
         if(Auth::user()->rol == 'administrador'){
             $horarios = horario::with(['grupo', 'materia'])
@@ -147,25 +141,39 @@ class administradorController extends Controller
         if(Auth::user()->rol == 'administrador'){
             $horario = horario::all();
             $grupos = grupo::all(); 
+        } else if(Auth::user()->rol == 'Coordinador Primaria'){
+            // Coordinador Primaria ve todos los grupos de su sección
+            $grupos = grupo::where('seccion', 'Primaria')->get();
+            $horario = horario::whereIn('grupo_id', $grupos->pluck('id'))->get();
+        } else if(Auth::user()->rol == 'Coordinador Secundaria'){
+            // Coordinador Secundaria ve todos los grupos de su sección
+            $grupos = grupo::where('seccion', 'Secundaria')->get();
+            $horario = horario::whereIn('grupo_id', $grupos->pluck('id'))->get();
         } else{
             $horario = horario::where('maestro_id', Auth::user()->id)->get();
             $grupos = grupo::whereIn('id', $horario->pluck('grupo_id'))->get();
         }
-        $seccion = grupo::select('seccion')->whereIn('id', $horario->pluck('grupo_id'))->groupBy('seccion')->get();
+        $seccion = grupo::select('seccion')->whereIn('id', $grupos->pluck('id'))->groupBy('seccion')->get();
         
         $materias = materia::whereIn('id', $horario->pluck('materia_id'))->get();
         
         // Aplicar filtros
         $query = tarea::query();
         
-        // Si no es administrador, filtrar por horarios del usuario
-        if (Auth::user()->rol !== 'administrador') {
+        // Si no es administrador ni coordinador, filtrar por horarios del usuario
+        if (Auth::user()->rol !== 'administrador' && Auth::user()->rol !== 'Coordinador Primaria' && Auth::user()->rol !== 'Coordinador Secundaria') {
             $materiasPermitidas = $horario->pluck('materia_id')->unique()->toArray();
             $gruposPermitidos = $horario->pluck('grupo_id')->unique()->toArray();
             
             // Filtrar por materias y grupos del horario del usuario
             $query->whereIn('materia', $materiasPermitidas)
                   ->whereIn('grupo', $gruposPermitidos);
+        } else if (Auth::user()->rol == 'Coordinador Primaria') {
+            // Coordinador Primaria ve todas las tareas de su sección
+            $query->whereIn('grupo', $grupos->pluck('id'));
+        } else if (Auth::user()->rol == 'Coordinador Secundaria') {
+            // Coordinador Secundaria ve todas las tareas de su sección
+            $query->whereIn('grupo', $grupos->pluck('id'));
         }
         
         // Filtro por grupo (si se especifica)
@@ -352,7 +360,29 @@ class administradorController extends Controller
     //Alumnos
     public function showAlumnos($id)
     {
-        $grupo = grupo::find($id);
+        $grupo = grupo::findOrFail($id);
+        
+        // Validar permisos de acceso según el rol
+        if (Auth::user()->rol == 'Coordinador Primaria') {
+            // Coordinador Primaria solo puede acceder a grupos de su sección
+            if ($grupo->seccion !== 'Primaria') {
+                abort(403, 'No tienes permisos para acceder a este grupo.');
+            }
+        } else if (Auth::user()->rol == 'Coordinador Secundaria') {
+            // Coordinador Secundaria solo puede acceder a grupos de su sección
+            if ($grupo->seccion !== 'Secundaria') {
+                abort(403, 'No tienes permisos para acceder a este grupo.');
+            }
+        } else if (Auth::user()->rol == 'Maestro') {
+            // Maestros solo pueden acceder a grupos de sus horarios
+            $horario = horario::where('maestro_id', Auth::user()->id)->get();
+            $gruposPermitidos = $horario->pluck('grupo_id')->toArray();
+            if (!in_array($id, $gruposPermitidos)) {
+                abort(403, 'No tienes permisos para acceder a este grupo.');
+            }
+        }
+        // Los administradores tienen acceso a todos los grupos
+        
         $materias = materia::all();
         $usuarios = User::all();
         $tareas = tarea::where('grupo', $id)->select('*')->get(); // Cambiado a 'tareas'
