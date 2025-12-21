@@ -27,15 +27,19 @@ class HorariosCsvImport
         }
         
         // Remover BOM UTF-8 si existe
+        $hasBOM = false;
         if (substr($content, 0, 3) === "\xEF\xBB\xBF") {
             $content = substr($content, 3);
-            // Reescribir el archivo sin BOM temporalmente
-            @file_put_contents($filePath, $content);
+            $hasBOM = true;
         }
         
         // Detectar delimitador automáticamente
         $delimiter = ',';
         $firstLine = strtok($content, "\n");
+        
+        if ($firstLine === false) {
+            throw new \Exception('El archivo CSV está vacío.');
+        }
         
         // Contar comas y punto y comas en la primera línea
         $commaCount = substr_count($firstLine, ',');
@@ -46,7 +50,14 @@ class HorariosCsvImport
             $delimiter = ';';
         }
         
-        $handle = fopen($filePath, 'r');
+        // Si se removió el BOM, crear un archivo temporal limpio
+        $tempFilePath = $filePath;
+        if ($hasBOM) {
+            $tempFilePath = sys_get_temp_dir() . '/' . uniqid('csv_import_') . '.csv';
+            file_put_contents($tempFilePath, $content);
+        }
+        
+        $handle = fopen($tempFilePath, 'r');
         
         if (!$handle) {
             throw new \Exception('No se pudo abrir el archivo CSV.');
@@ -119,9 +130,71 @@ class HorariosCsvImport
         
         $rowNumber = 0;
         
-        // Procesar cada fila de datos CON EL DELIMITADOR DETECTADO
-        while (($row = fgetcsv($handle, 0, $delimiter)) !== false) {
-            $rowNumber++;
+        // Leer todas las líneas primero para manejar mejor el formato
+        $lines = [];
+        while (($line = fgets($handle)) !== false) {
+            $lines[] = trim($line);
+        }
+        fclose($handle);
+        
+        // Si no hay líneas de datos, lanzar error
+        if (empty($lines)) {
+            throw new \Exception('El archivo CSV no contiene datos para importar.');
+        }
+        
+        // Procesar cada línea
+        foreach ($lines as $lineIndex => $line) {
+            $rowNumber = $lineIndex + 1;
+            
+            // Saltar línea vacía
+            if (empty(trim($line))) {
+                $this->skippedRows++;
+                continue;
+            }
+            
+            // Remover comillas que envuelven toda la línea si existen
+            $line = trim($line);
+            $originalLine = $line;
+            
+            // Detectar si toda la línea está entre comillas (formato incorrecto de Excel)
+            if (substr($line, 0, 1) === '"' && substr($line, -1) === '"') {
+                // Contar comillas dobles escapadas ("" dentro de campos)
+                $escapedQuotes = substr_count($line, '""');
+                $totalQuotes = substr_count($line, '"');
+                
+                // Si hay muchas comillas y la línea empieza y termina con comillas,
+                // probablemente toda la línea está mal formateada
+                if ($totalQuotes > 6) {
+                    // Remover comillas iniciales y finales
+                    $line = substr($line, 1, -1);
+                    // Reemplazar comillas dobles escapadas por comillas simples temporales
+                    $line = str_replace('""', '___TEMP_QUOTE___', $line);
+                    // Ahora parsear normalmente
+                    $row = str_getcsv($line, $delimiter, '"');
+                    // Restaurar comillas dobles escapadas
+                    $row = array_map(function($field) {
+                        return str_replace('___TEMP_QUOTE___', '"', $field);
+                    }, $row);
+                } else {
+                    // Parsear normalmente
+                    $row = str_getcsv($line, $delimiter, '"');
+                }
+            } else {
+                // Parsear normalmente
+                $row = str_getcsv($line, $delimiter, '"');
+            }
+            
+            // Si después de parsear solo tenemos un elemento pero debería haber más, intentar dividir manualmente
+            if (count($row) == 1 && count($headers) > 1) {
+                // La línea está mal formateada, intentar dividir por el delimitador directamente
+                $row = explode($delimiter, $line);
+                // Limpiar comillas de cada campo
+                $row = array_map(function($field) {
+                    $field = trim($field);
+                    $field = trim($field, '"');
+                    return str_replace('""', '"', $field);
+                }, $row);
+            }
             
             // Verificar que la fila no esté completamente vacía
             $rowValues = array_filter(array_map('trim', $row));
@@ -132,7 +205,26 @@ class HorariosCsvImport
             
             // Guardar primera fila para debug
             if ($rowNumber == 1) {
-                $this->debugInfo['first_row_data'] = array_combine($headers, $row);
+                // Asegurar que row tenga el mismo número de elementos que headers
+                $paddedRow = array_pad($row, count($headers), '');
+                // Si row tiene más elementos, truncar
+                if (count($paddedRow) > count($headers)) {
+                    $paddedRow = array_slice($paddedRow, 0, count($headers));
+                }
+                // Combinar solo si tienen el mismo número de elementos
+                if (count($headers) === count($paddedRow)) {
+                    $this->debugInfo['first_row_data'] = array_combine($headers, $paddedRow);
+                } else {
+                    // Si aún no coinciden, crear un array asociativo manualmente
+                    $this->debugInfo['first_row_data'] = [];
+                    foreach ($headers as $index => $header) {
+                        $this->debugInfo['first_row_data'][$header] = $paddedRow[$index] ?? '';
+                    }
+                }
+                $this->debugInfo['first_row_raw'] = $row;
+                $this->debugInfo['first_row_count'] = count($row);
+                $this->debugInfo['headers_count'] = count($headers);
+                $this->debugInfo['first_row_line'] = $line;
             }
             
             try {
@@ -249,7 +341,10 @@ class HorariosCsvImport
             }
         }
         
-        fclose($handle);
+        // Limpiar archivo temporal si se creó
+        if ($hasBOM && $tempFilePath !== $filePath && file_exists($tempFilePath)) {
+            @unlink($tempFilePath);
+        }
     }
 
     /**
