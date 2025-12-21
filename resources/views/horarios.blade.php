@@ -6,11 +6,28 @@
                 <h1 class="text-3xl font-bold text-gray-900 dark:text-white">{{ __('Horarios') }}</h1>
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Gestiona los horarios de las materias</p>
             </div>
-            <flux:modal.trigger name="edit-profile">
-                <flux:button icon='plus' variant="filled" class="flex items-center gap-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700">
-                    <span>Nuevo Horario</span>
-                </flux:button>
-            </flux:modal.trigger>
+            <div class="flex gap-3">
+                <a href="{{ route('horarios.plantilla') }}" 
+                   class="inline-flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm font-medium transition-colors shadow-sm hover:shadow-md">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                    </svg>
+                    Descargar Plantilla
+                </a>
+                <flux:modal.trigger name="import-modal">
+                    <flux:button variant="filled" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
+                        </svg>
+                        <span>Importar Excel</span>
+                    </flux:button>
+                </flux:modal.trigger>
+                <flux:modal.trigger name="edit-profile">
+                    <flux:button icon='plus' variant="filled" class="flex items-center gap-2 bg-white dark:bg-gray-800 text-gray-900 dark:text-white hover:bg-gray-50 dark:hover:bg-gray-700">
+                        <span>Nuevo Horario</span>
+                    </flux:button>
+                </flux:modal.trigger>
+            </div>
         </div>
 
         <!-- Search and Filters -->
@@ -349,6 +366,72 @@
                     <flux:button type="submit" variant="primary">Actualizar horario</flux:button>
                 </flux:footer>
             </form>
+        </flux:container>
+    </flux:modal>
+
+    <!-- Modal de importación -->
+    <flux:modal name="import-modal" class="md:w-[500px] p-6">
+        <flux:container class="space-y-6">
+            <div class="flex items-center justify-between">
+                <flux:heading size="xl">Importar Horarios desde Excel</flux:heading>
+            </div>
+            <flux:separator />
+
+            <div class="space-y-4">
+                <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
+                    <h3 class="text-sm font-semibold text-blue-900 dark:text-blue-200 mb-2">Instrucciones:</h3>
+                    <ul class="text-sm text-blue-800 dark:text-blue-300 space-y-1 list-disc list-inside">
+                        <li>Descarga la plantilla de Excel haciendo clic en "Descargar Plantilla"</li>
+                        <li>Completa la plantilla con los datos de los horarios</li>
+                        <li>Las columnas requeridas son: Grupo, Seccion, Materia, Maestro, Dias, Hora Inicio, Hora Fin</li>
+                        <li>Los días deben estar separados por comas (ej: Lunes,Martes,Miércoles)</li>
+                        <li>Las horas deben estar en formato HH:MM (ej: 08:00)</li>
+                    </ul>
+                </div>
+
+                <form action="{{ route('horarios.import') }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                    @csrf
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Seleccionar archivo Excel (.xlsx o .xls)
+                        </label>
+                        <input 
+                            type="file" 
+                            name="archivo_excel" 
+                            accept=".xlsx,.xls"
+                            required
+                            class="block w-full text-sm text-gray-500 dark:text-gray-400
+                                   file:mr-4 file:py-2 file:px-4
+                                   file:rounded-lg file:border-0
+                                   file:text-sm file:font-semibold
+                                   file:bg-blue-50 file:text-blue-700
+                                   hover:file:bg-blue-100
+                                   dark:file:bg-blue-900 dark:file:text-blue-300
+                                   dark:hover:file:bg-blue-800
+                                   cursor-pointer"
+                        />
+                        @error('archivo_excel')
+                            <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
+                        @enderror
+                    </div>
+
+                    @if(session('import_errors'))
+                        <div class="bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg p-4 max-h-40 overflow-y-auto">
+                            <h4 class="text-sm font-semibold text-red-900 dark:text-red-200 mb-2">Errores encontrados:</h4>
+                            <ul class="text-xs text-red-800 dark:text-red-300 space-y-1">
+                                @foreach(session('import_errors') as $error)
+                                    <li>{{ $error }}</li>
+                                @endforeach
+                            </ul>
+                        </div>
+                    @endif
+
+                    <flux:footer class="flex justify-end gap-3">
+                        <flux:button type="button" variant="filled" onclick="closeModal('import-modal')">Cancelar</flux:button>
+                        <flux:button type="submit" variant="primary">Importar</flux:button>
+                    </flux:footer>
+                </form>
+            </div>
         </flux:container>
     </flux:modal>
 

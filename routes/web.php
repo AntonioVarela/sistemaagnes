@@ -42,6 +42,8 @@ Route::put('/usuarios/{id}', [administradorController::class,'updateUsuario'])->
 
 Route::get('/horarios',[administradorController::class,'showHorarios'])->name('horarios.index');
 Route::post('/horariosguardar', [administradorController::class,'storeHorario'])->name('horarios.store');
+Route::post('/horarios/importar', [administradorController::class,'importHorarios'])->name('horarios.import');
+Route::get('/horarios/plantilla', [administradorController::class,'downloadPlantillaHorarios'])->name('horarios.plantilla');
 Route::delete('/horarios/{id}', [administradorController::class,'destroyHorario'])->name('horarios.destroy');
 Route::post('/horarios/{id}/update', [administradorController::class,'updateHorario'])->name('horarios.update');
 

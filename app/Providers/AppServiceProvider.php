@@ -11,7 +11,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Registrar Excel si no está disponible automáticamente
+        if (class_exists('Maatwebsite\Excel\ExcelServiceProvider')) {
+            $this->app->register('Maatwebsite\Excel\ExcelServiceProvider');
+        }
     }
 
     /**
