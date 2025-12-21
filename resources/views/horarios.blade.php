@@ -12,14 +12,14 @@
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
                     </svg>
-                    Descargar Plantilla
+                    Descargar Plantilla CSV
                 </a>
                 <flux:modal.trigger name="import-modal">
                     <flux:button variant="filled" class="flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path>
                         </svg>
-                        <span>Importar Excel</span>
+                        <span>Importar CSV</span>
                     </flux:button>
                 </flux:modal.trigger>
                 <flux:modal.trigger name="edit-profile">
@@ -373,7 +373,7 @@
     <flux:modal name="import-modal" class="md:w-[500px] p-6">
         <flux:container class="space-y-6">
             <div class="flex items-center justify-between">
-                <flux:heading size="xl">Importar Horarios desde Excel</flux:heading>
+                <flux:heading size="xl">Importar Horarios desde CSV</flux:heading>
             </div>
             <flux:separator />
 
@@ -381,11 +381,13 @@
                 <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
                     <h3 class="text-sm font-semibold text-blue-900 dark:text-blue-200 mb-2">Instrucciones:</h3>
                     <ul class="text-sm text-blue-800 dark:text-blue-300 space-y-1 list-disc list-inside">
-                        <li>Descarga la plantilla de Excel haciendo clic en "Descargar Plantilla"</li>
+                        <li>Descarga la plantilla CSV haciendo clic en "Descargar Plantilla CSV"</li>
+                        <li>Abre el archivo CSV con Excel, Google Sheets o cualquier editor de texto</li>
                         <li>Completa la plantilla con los datos de los horarios</li>
                         <li>Las columnas requeridas son: Grupo, Seccion, Materia, Maestro, Dias, Hora Inicio, Hora Fin</li>
                         <li>Los días deben estar separados por comas (ej: Lunes,Martes,Miércoles)</li>
                         <li>Las horas deben estar en formato HH:MM (ej: 08:00)</li>
+                        <li>Guarda el archivo como CSV (delimitado por comas) y súbelo aquí</li>
                     </ul>
                 </div>
 
@@ -393,12 +395,12 @@
                     @csrf
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Seleccionar archivo Excel (.xlsx o .xls)
+                            Seleccionar archivo CSV (.csv)
                         </label>
                         <input 
                             type="file" 
-                            name="archivo_excel" 
-                            accept=".xlsx,.xls"
+                            name="archivo_csv" 
+                            accept=".csv,.txt"
                             required
                             class="block w-full text-sm text-gray-500 dark:text-gray-400
                                    file:mr-4 file:py-2 file:px-4
@@ -410,7 +412,7 @@
                                    dark:hover:file:bg-blue-800
                                    cursor-pointer"
                         />
-                        @error('archivo_excel')
+                        @error('archivo_csv')
                             <p class="mt-1 text-sm text-red-600 dark:text-red-400">{{ $message }}</p>
                         @enderror
                     </div>

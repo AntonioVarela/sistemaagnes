@@ -19,8 +19,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
-use App\Imports\HorariosImport;
-use App\Exports\PlantillaHorariosExport;
+use App\Imports\HorariosCsvImport;
 
 class administradorController extends Controller
 {
@@ -890,17 +889,17 @@ class administradorController extends Controller
     public function importHorarios(Request $request)
     {
         try {
-            // Validar archivo
+            // Validar archivo CSV
             $request->validate([
-                'archivo_excel' => 'required|mimes:xlsx,xls|max:10240', // 10MB máximo
+                'archivo_csv' => 'required|mimes:csv,txt|max:10240', // 10MB máximo
             ], [
-                'archivo_excel.required' => 'Debes seleccionar un archivo Excel.',
-                'archivo_excel.mimes' => 'El archivo debe ser de tipo Excel (.xlsx o .xls).',
-                'archivo_excel.max' => 'El archivo no puede ser mayor a 10MB.',
+                'archivo_csv.required' => 'Debes seleccionar un archivo CSV.',
+                'archivo_csv.mimes' => 'El archivo debe ser de tipo CSV (.csv o .txt).',
+                'archivo_csv.max' => 'El archivo no puede ser mayor a 10MB.',
             ]);
 
             // Verificar que el archivo existe
-            if (!$request->hasFile('archivo_excel')) {
+            if (!$request->hasFile('archivo_csv')) {
                 session()->flash('toast', [
                     'type' => 'error',
                     'message' => 'No se recibió ningún archivo.'
@@ -908,7 +907,7 @@ class administradorController extends Controller
                 return redirect()->route('horarios.index');
             }
 
-            $archivo = $request->file('archivo_excel');
+            $archivo = $request->file('archivo_csv');
             
             // Verificar que el archivo es válido
             if (!$archivo->isValid()) {
@@ -919,25 +918,11 @@ class administradorController extends Controller
                 return redirect()->route('horarios.index');
             }
 
-            $import = new HorariosImport();
+            // Guardar archivo temporalmente
+            $filePath = $archivo->getRealPath();
             
-            // Intentar múltiples formas de acceder al servicio Excel
-            try {
-                // Método 1: Usar facade si está disponible
-                if (class_exists('Maatwebsite\Excel\Facades\Excel')) {
-                    \Maatwebsite\Excel\Facades\Excel::import($import, $archivo);
-                } else {
-                    // Método 2: Usar servicio desde container
-                    $excel = app()->make('excel');
-                    if (!$excel) {
-                        throw new \Exception('No se pudo resolver el servicio Excel desde el container.');
-                    }
-                    $excel->import($import, $archivo);
-                }
-            } catch (\Exception $excelError) {
-                Log::error('Error al acceder al servicio Excel: ' . $excelError->getMessage());
-                throw new \Exception('Error al procesar el archivo Excel. Verifica que el paquete maatwebsite/excel esté instalado correctamente: ' . $excelError->getMessage());
-            }
+            $import = new HorariosCsvImport();
+            $import->import($filePath);
 
             $successCount = $import->getSuccessCount();
             $errors = $import->getErrors();
@@ -973,7 +958,7 @@ class administradorController extends Controller
                     }
                 }
                 
-                $message .= 'Verifica que el archivo tenga los encabezados correctos: Grupo, Seccion, Materia, Maestro, Dias, Hora Inicio, Hora Fin';
+                $message .= 'Verifica que el archivo CSV tenga los encabezados correctos: Grupo, Seccion, Materia, Maestro, Dias, Hora Inicio, Hora Fin';
                 
                 if ($skippedRows > 0) {
                     $message .= " (Se saltaron {$skippedRows} fila(s) vacías)";
@@ -1042,17 +1027,52 @@ class administradorController extends Controller
     public function downloadPlantillaHorarios()
     {
         try {
-            $filename = 'plantilla_importacion_horarios_' . date('Y-m-d') . '.xlsx';
+            $filename = 'plantilla_importacion_horarios_' . date('Y-m-d') . '.csv';
             
-            // Usar el servicio Excel desde el container de Laravel
-            $excel = app()->make('excel');
-            return $excel->download(new PlantillaHorariosExport(), $filename);
+            // Crear contenido CSV
+            $headers = [
+                'Grupo',
+                'Seccion',
+                'Materia',
+                'Maestro',
+                'Dias',
+                'Hora Inicio',
+                'Hora Fin'
+            ];
+            
+            $ejemplos = [
+                ['1 A', 'Primaria', 'Matemáticas', 'Juan Pérez', 'Lunes,Martes,Miércoles', '08:00', '09:00'],
+                ['1 B', 'Primaria', 'Español', 'María García', 'Jueves,Viernes', '10:00', '11:00'],
+                ['2 A', 'Secundaria', 'Inglés', 'Carlos López', 'Lunes,Martes', '14:00', '15:00'],
+            ];
+            
+            // Crear contenido CSV
+            $output = fopen('php://temp', 'r+');
+            
+            // Escribir BOM para UTF-8 (ayuda con Excel)
+            fwrite($output, "\xEF\xBB\xBF");
+            
+            // Escribir encabezados
+            fputcsv($output, $headers);
+            
+            // Escribir ejemplos
+            foreach ($ejemplos as $ejemplo) {
+                fputcsv($output, $ejemplo);
+            }
+            
+            rewind($output);
+            $csvContent = stream_get_contents($output);
+            fclose($output);
+            
+            return response($csvContent)
+                ->header('Content-Type', 'text/csv; charset=UTF-8')
+                ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
             
         } catch (\Exception $e) {
-            Log::error('Error al generar plantilla: ' . $e->getMessage() . ' - Trace: ' . $e->getTraceAsString());
+            Log::error('Error al generar plantilla CSV: ' . $e->getMessage());
             session()->flash('toast', [
                 'type' => 'error',
-                'message' => 'Error al generar la plantilla: ' . $e->getMessage() . '. Verifica que el paquete maatwebsite/excel esté instalado correctamente.'
+                'message' => 'Error al generar la plantilla: ' . $e->getMessage()
             ]);
             return redirect()->route('horarios.index');
         }
