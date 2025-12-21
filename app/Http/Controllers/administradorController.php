@@ -908,10 +908,17 @@ class administradorController extends Controller
 
     public function importHorarios(Request $request)
     {
-        // Verificar autenticación al inicio
+        // Verificar autenticación al inicio y guardar el ID de usuario
         if (!Auth::check()) {
             return redirect()->route('login')->with('error', 'Debes iniciar sesión para importar horarios.');
         }
+        
+        // Guardar información del usuario antes de procesar
+        $userId = Auth::id();
+        $userRol = Auth::user()->rol;
+        
+        // Aumentar tiempo de ejecución para archivos grandes
+        set_time_limit(300); // 5 minutos
         
         try {
             // Validar archivo CSV
@@ -946,14 +953,20 @@ class administradorController extends Controller
             // Guardar archivo temporalmente
             $filePath = $archivo->getRealPath();
             
-            // Refrescar sesión antes de procesar para mantenerla activa
-            $request->session()->regenerate();
+            // Guardar sesión antes de procesar (sin regenerar)
+            session()->save();
             
             $import = new HorariosCsvImport();
             $import->import($filePath);
             
-            // Refrescar sesión después de procesar
-            $request->session()->regenerate();
+            // Verificar que el usuario sigue autenticado después del procesamiento
+            // Si no, re-autenticar usando el ID guardado
+            if (!Auth::check()) {
+                Auth::loginUsingId($userId);
+            }
+            
+            // Guardar sesión después de procesar
+            session()->save();
 
             $successCount = $import->getSuccessCount();
             $errors = $import->getErrors();
@@ -1025,8 +1038,9 @@ class administradorController extends Controller
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             // Errores de validación
-            if (!Auth::check()) {
-                return redirect()->route('login')->with('error', 'Sesión expirada. Por favor, inicia sesión nuevamente.');
+            // Re-autenticar si es necesario
+            if (!Auth::check() && isset($userId)) {
+                Auth::loginUsingId($userId);
             }
             
             session()->flash('toast', [
@@ -1036,9 +1050,9 @@ class administradorController extends Controller
         } catch (\Exception $e) {
             Log::error('Error al importar horarios: ' . $e->getMessage() . ' - Trace: ' . $e->getTraceAsString());
             
-            // Verificar autenticación antes de redirigir
-            if (!Auth::check()) {
-                return redirect()->route('login')->with('error', 'Sesión expirada durante la importación. Por favor, inicia sesión nuevamente.');
+            // Re-autenticar si es necesario
+            if (!Auth::check() && isset($userId)) {
+                Auth::loginUsingId($userId);
             }
             
             $errorMessage = 'Error al importar el archivo: ' . $e->getMessage();
@@ -1062,10 +1076,13 @@ class administradorController extends Controller
             }
         }
 
-        // Verificar autenticación antes de redirigir
-        if (!Auth::check()) {
-            return redirect()->route('login')->with('error', 'Sesión expirada. Por favor, inicia sesión nuevamente.');
+        // Re-autenticar si es necesario antes de redirigir
+        if (!Auth::check() && isset($userId)) {
+            Auth::loginUsingId($userId);
         }
+        
+        // Guardar sesión antes de redirigir
+        session()->save();
 
         return redirect()->route('horarios.index');
     }
