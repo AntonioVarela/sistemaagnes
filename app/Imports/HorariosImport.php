@@ -98,21 +98,56 @@ class HorariosImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
                 return null;
             }
 
-            // Buscar maestro por nombre o email
-            $maestroNombre = $row['maestro'] ?? '';
+            // Buscar maestro por ID, nombre o email
+            $maestroNombre = trim($row['maestro'] ?? '');
             
             if (empty($maestroNombre)) {
                 $this->errors[] = "Fila " . ($this->rowNumber + 1) . ": Maestro vacío";
                 return null;
             }
             
-            $maestro = User::where(function($query) use ($maestroNombre) {
-                $query->where('name', 'like', '%' . $maestroNombre . '%')
-                      ->orWhere('email', 'like', '%' . $maestroNombre . '%');
-            })->where('rol', 'Maestro')->first();
+            $maestro = null;
+            
+            // Primero intentar buscar por ID si es numérico
+            if (is_numeric($maestroNombre)) {
+                $maestro = User::where('id', $maestroNombre)
+                    ->where('rol', 'Maestro')
+                    ->first();
+            }
+            
+            // Si no se encontró por ID, buscar por nombre o email (case-insensitive y parcial)
+            if (!$maestro) {
+                $maestroNombreLower = strtolower($maestroNombre);
+                
+                $maestro = User::where('rol', 'Maestro')
+                    ->where(function($query) use ($maestroNombre, $maestroNombreLower) {
+                        // Búsqueda exacta case-insensitive
+                        $query->whereRaw('LOWER(TRIM(name)) = ?', [$maestroNombreLower])
+                              // Búsqueda parcial en nombre
+                              ->orWhereRaw('LOWER(TRIM(name)) LIKE ?', ['%' . $maestroNombreLower . '%'])
+                              // Búsqueda exacta en email
+                              ->orWhereRaw('LOWER(TRIM(email)) = ?', [$maestroNombreLower])
+                              // Búsqueda parcial en email
+                              ->orWhereRaw('LOWER(TRIM(email)) LIKE ?', ['%' . $maestroNombreLower . '%']);
+                    })
+                    ->first();
+            }
             
             if (!$maestro) {
-                $this->errors[] = "Fila " . ($this->rowNumber + 1) . ": Maestro '{$maestroNombre}' no encontrado";
+                // Mostrar información de debug: listar maestros disponibles similares
+                $maestrosSimilares = User::where('rol', 'Maestro')
+                    ->where(function($query) use ($maestroNombre) {
+                        $query->whereRaw('LOWER(TRIM(name)) LIKE ?', ['%' . strtolower(trim($maestroNombre)) . '%'])
+                              ->orWhereRaw('LOWER(TRIM(email)) LIKE ?', ['%' . strtolower(trim($maestroNombre)) . '%']);
+                    })
+                    ->get(['id', 'name', 'email'])
+                    ->take(5);
+                
+                $maestrosInfo = $maestrosSimilares->map(function($m) {
+                    return "ID: {$m->id} - {$m->name} ({$m->email})";
+                })->implode(', ');
+                
+                $this->errors[] = "Fila " . ($this->rowNumber + 1) . ": Maestro '{$maestroNombre}' no encontrado. Maestros disponibles similares: " . ($maestrosInfo ?: 'Ninguno');
                 return null;
             }
 
