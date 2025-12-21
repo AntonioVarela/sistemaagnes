@@ -20,6 +20,7 @@ class HorariosImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
     protected $errors = [];
     protected $successCount = 0;
     protected $rowNumber = 0;
+    protected $totalRows = 0;
 
     /**
      * @param array $row
@@ -29,11 +30,19 @@ class HorariosImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
     public function model(array $row)
     {
         $this->rowNumber++;
+        $this->totalRows++;
         
         try {
             // Normalizar nombres de columnas (case-insensitive y sin espacios)
             $row = array_change_key_case($row, CASE_LOWER);
             $row = array_map('trim', $row);
+            
+            // Verificar que la fila no esté completamente vacía
+            $rowValues = array_filter($row);
+            if (empty($rowValues)) {
+                // Fila vacía, saltarla sin error
+                return null;
+            }
             
             // Buscar grupo por nombre y sección
             $grupoNombre = trim($row['grupo'] ?? '');

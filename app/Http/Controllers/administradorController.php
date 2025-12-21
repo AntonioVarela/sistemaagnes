@@ -889,23 +889,71 @@ class administradorController extends Controller
 
     public function importHorarios(Request $request)
     {
-        $request->validate([
-            'archivo_excel' => 'required|mimes:xlsx,xls|max:10240', // 10MB máximo
-        ]);
-
         try {
+            // Validar archivo
+            $request->validate([
+                'archivo_excel' => 'required|mimes:xlsx,xls|max:10240', // 10MB máximo
+            ], [
+                'archivo_excel.required' => 'Debes seleccionar un archivo Excel.',
+                'archivo_excel.mimes' => 'El archivo debe ser de tipo Excel (.xlsx o .xls).',
+                'archivo_excel.max' => 'El archivo no puede ser mayor a 10MB.',
+            ]);
+
+            // Verificar que el archivo existe
+            if (!$request->hasFile('archivo_excel')) {
+                session()->flash('toast', [
+                    'type' => 'error',
+                    'message' => 'No se recibió ningún archivo.'
+                ]);
+                return redirect()->route('horarios.index');
+            }
+
+            $archivo = $request->file('archivo_excel');
+            
+            // Verificar que el archivo es válido
+            if (!$archivo->isValid()) {
+                session()->flash('toast', [
+                    'type' => 'error',
+                    'message' => 'El archivo no es válido o está corrupto.'
+                ]);
+                return redirect()->route('horarios.index');
+            }
+
             $import = new HorariosImport();
             
-            // Usar el servicio Excel desde el container de Laravel
-            $excel = app()->make('excel');
-            $excel->import($import, $request->file('archivo_excel'));
+            // Intentar múltiples formas de acceder al servicio Excel
+            try {
+                // Método 1: Usar facade si está disponible
+                if (class_exists('Maatwebsite\Excel\Facades\Excel')) {
+                    \Maatwebsite\Excel\Facades\Excel::import($import, $archivo);
+                } else {
+                    // Método 2: Usar servicio desde container
+                    $excel = app()->make('excel');
+                    if (!$excel) {
+                        throw new \Exception('No se pudo resolver el servicio Excel desde el container.');
+                    }
+                    $excel->import($import, $archivo);
+                }
+            } catch (\Exception $excelError) {
+                Log::error('Error al acceder al servicio Excel: ' . $excelError->getMessage());
+                throw new \Exception('Error al procesar el archivo Excel. Verifica que el paquete maatwebsite/excel esté instalado correctamente: ' . $excelError->getMessage());
+            }
 
             $successCount = $import->getSuccessCount();
             $errors = $import->getErrors();
 
+            // Si no se importó nada y no hay errores, puede ser que el archivo esté vacío
+            if ($successCount == 0 && empty($errors)) {
+                session()->flash('toast', [
+                    'type' => 'warning',
+                    'message' => 'El archivo se procesó pero no se encontraron datos válidos para importar. Verifica que el archivo tenga datos y los encabezados correctos.'
+                ]);
+                return redirect()->route('horarios.index');
+            }
+
             $message = "Se importaron {$successCount} horario(s) exitosamente.";
             if (!empty($errors)) {
-                $message .= " Errores: " . implode('; ', array_slice($errors, 0, 5));
+                $message .= " Errores encontrados: " . implode('; ', array_slice($errors, 0, 5));
                 if (count($errors) > 5) {
                     $message .= " y " . (count($errors) - 5) . " más.";
                 }
@@ -920,6 +968,12 @@ class administradorController extends Controller
                 session()->flash('import_errors', $errors);
             }
 
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            // Errores de validación
+            session()->flash('toast', [
+                'type' => 'error',
+                'message' => 'Error de validación: ' . implode(', ', $e->validator->errors()->all())
+            ]);
         } catch (\Exception $e) {
             Log::error('Error al importar horarios: ' . $e->getMessage() . ' - Trace: ' . $e->getTraceAsString());
             
