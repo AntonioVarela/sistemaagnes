@@ -19,25 +19,57 @@ class HorariosCsvImport
      */
     public function import($filePath)
     {
+        // Leer el contenido del archivo para detectar BOM y delimitador
+        $content = file_get_contents($filePath);
+        
+        // Remover BOM UTF-8 si existe
+        if (substr($content, 0, 3) === "\xEF\xBB\xBF") {
+            $content = substr($content, 3);
+            // Reescribir el archivo sin BOM temporalmente
+            file_put_contents($filePath, $content);
+        }
+        
+        // Detectar delimitador automáticamente
+        $delimiter = ',';
+        $firstLine = strtok($content, "\n");
+        
+        // Contar comas y punto y comas en la primera línea
+        $commaCount = substr_count($firstLine, ',');
+        $semicolonCount = substr_count($firstLine, ';');
+        
+        // Si hay más punto y comas que comas, usar punto y coma
+        if ($semicolonCount > $commaCount) {
+            $delimiter = ';';
+        }
+        
         $handle = fopen($filePath, 'r');
         
         if (!$handle) {
             throw new \Exception('No se pudo abrir el archivo CSV.');
         }
 
-        // Leer encabezados (primera línea)
-        $headers = fgetcsv($handle);
+        // Leer encabezados con el delimitador detectado
+        $headers = fgetcsv($handle, 0, $delimiter);
         
         if (!$headers) {
             fclose($handle);
             throw new \Exception('El archivo CSV está vacío o no tiene encabezados.');
         }
 
+        // Limpiar BOM del primer encabezado si aún existe
+        if (!empty($headers[0])) {
+            $headers[0] = preg_replace('/^\xEF\xBB\xBF/', '', $headers[0]);
+            $headers[0] = trim($headers[0], "\xEF\xBB\xBF");
+        }
+
         // Guardar encabezados para debug
         $this->debugInfo['headers'] = $headers;
+        $this->debugInfo['delimiter'] = $delimiter;
         
-        // Normalizar encabezados (case-insensitive)
+        // Normalizar encabezados (case-insensitive y limpiar BOM)
         $normalizedHeaders = array_map(function($h) {
+            // Remover BOM y espacios
+            $h = preg_replace('/^\xEF\xBB\xBF/', '', $h);
             return strtolower(trim($h));
         }, $headers);
         
@@ -83,8 +115,8 @@ class HorariosCsvImport
         
         $rowNumber = 0;
         
-        // Procesar cada fila de datos
-        while (($row = fgetcsv($handle)) !== false) {
+        // Procesar cada fila de datos CON EL DELIMITADOR DETECTADO
+        while (($row = fgetcsv($handle, 0, $delimiter)) !== false) {
             $rowNumber++;
             
             // Verificar que la fila no esté completamente vacía
