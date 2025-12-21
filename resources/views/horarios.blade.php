@@ -175,7 +175,7 @@
                                         <div class="py-1">
                                             <flux:modal.trigger name="edit-task">
                                                 <button type="button" 
-                                                    onclick="prepareEditModal({{ $horario->id }}, '{{ $horario->materia_id }}', '{{ $horario->grupo_id }}', '{{ $horario->maestro_id }}', '{{ $horario->dias }}', '{{ $horario->hora_inicio }}', '{{ $horario->hora_fin }}')"
+                                                    onclick="prepareEditModal({{ $horario->id }}, {{ $horario->materia_id }}, {{ $horario->grupo_id }}, {{ $horario->maestro_id }}, {!! json_encode($horario->dias, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) !!}, {!! json_encode($horario->hora_inicio, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) !!}, {!! json_encode($horario->hora_fin, JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP) !!})"
                                                     class="w-full text-left px-4 py-2 text-sm text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-700 flex items-center gap-2">
                                                     <flux:icon name="pencil" class="w-3 h-3" />
                                                     Editar
@@ -484,7 +484,7 @@
                                 @if(isset($debug['first_row_data']))
                                     <div>
                                         <strong>📄 Primera fila de datos (valores):</strong>
-                                        <pre class="bg-yellow-100 dark:bg-yellow-900 p-2 rounded mt-1 text-xs overflow-x-auto whitespace-pre-wrap">{{ json_encode($debug['first_row_data'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                                        <pre class="bg-yellow-100 dark:bg-yellow-900 p-2 rounded mt-1 text-xs overflow-x-auto whitespace-pre-wrap">{!! htmlspecialchars(json_encode($debug['first_row_data'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE), ENT_QUOTES, 'UTF-8') !!}</pre>
                                     </div>
                                 @endif
                                 
@@ -550,7 +550,7 @@
             // Mostrar toast si existe mensaje
             @if(session('toast'))
                 Toastify({
-                    text: "{{ session('toast.message') }}",
+                    text: {!! json_encode(session('toast.message'), JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE) !!},
                     duration: 3500,
                     gravity: "top",
                     position: "right",
