@@ -896,13 +896,9 @@ class administradorController extends Controller
         try {
             $import = new HorariosImport();
             
-            // Intentar usar el facade, si no está disponible usar el servicio directamente
-            if (class_exists('Maatwebsite\Excel\Facades\Excel')) {
-                \Maatwebsite\Excel\Facades\Excel::import($import, $request->file('archivo_excel'));
-            } else {
-                $excel = app('excel');
-                $excel->import($import, $request->file('archivo_excel'));
-            }
+            // Usar el servicio Excel desde el container de Laravel
+            $excel = app()->make('excel');
+            $excel->import($import, $request->file('archivo_excel'));
 
             $successCount = $import->getSuccessCount();
             $errors = $import->getErrors();
@@ -925,11 +921,26 @@ class administradorController extends Controller
             }
 
         } catch (\Exception $e) {
-            Log::error('Error al importar horarios: ' . $e->getMessage());
+            Log::error('Error al importar horarios: ' . $e->getMessage() . ' - Trace: ' . $e->getTraceAsString());
+            
+            $errorMessage = 'Error al importar el archivo: ' . $e->getMessage();
+            
+            // Si hay errores específicos de la importación, mostrarlos
+            if (isset($import)) {
+                $importErrors = $import->getErrors();
+                if (!empty($importErrors)) {
+                    $errorMessage .= '. Errores: ' . implode('; ', array_slice($importErrors, 0, 3));
+                }
+            }
+            
             session()->flash('toast', [
                 'type' => 'error',
-                'message' => 'Error al importar el archivo: ' . $e->getMessage()
+                'message' => $errorMessage
             ]);
+            
+            if (isset($import)) {
+                session()->flash('import_errors', $import->getErrors());
+            }
         }
 
         return redirect()->route('horarios.index');

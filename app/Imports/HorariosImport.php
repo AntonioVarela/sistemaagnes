@@ -31,21 +31,66 @@ class HorariosImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
         $this->rowNumber++;
         
         try {
+            // Normalizar nombres de columnas (case-insensitive y sin espacios)
+            $row = array_change_key_case($row, CASE_LOWER);
+            $row = array_map('trim', $row);
+            
             // Buscar grupo por nombre y sección
             $grupoNombre = trim($row['grupo'] ?? '');
             $grupoSeccion = trim($row['seccion'] ?? '');
             
-            $grupo = grupo::where('nombre', $grupoNombre)
-                ->where('seccion', $grupoSeccion)
+            if (empty($grupoNombre) || empty($grupoSeccion)) {
+                $this->errors[] = "Fila " . ($this->rowNumber + 1) . ": Grupo o Sección vacío";
+                return null;
+            }
+            
+            // Normalizar sección: convertir primera letra a mayúscula (Primaria/Secundaria)
+            $grupoSeccionNormalizada = ucfirst(strtolower($grupoSeccion));
+            
+            // Buscar grupo con búsqueda case-insensitive para nombre y sección
+            $grupo = grupo::whereRaw('LOWER(TRIM(nombre)) = ?', [strtolower(trim($grupoNombre))])
+                ->where(function($query) use ($grupoSeccionNormalizada, $grupoSeccion) {
+                    // Intentar con la sección normalizada (Primaria/Secundaria)
+                    $query->whereRaw('LOWER(TRIM(seccion)) = ?', [strtolower($grupoSeccionNormalizada)])
+                          // O con la sección original
+                          ->orWhereRaw('LOWER(TRIM(seccion)) = ?', [strtolower(trim($grupoSeccion))]);
+                })
                 ->first();
             
+            // Si aún no se encuentra, buscar solo por nombre (último intento)
             if (!$grupo) {
-                $this->errors[] = "Fila " . ($this->rowNumber + 1) . ": Grupo '{$grupoNombre}' con sección '{$grupoSeccion}' no encontrado";
+                $grupo = grupo::whereRaw('LOWER(TRIM(nombre)) = ?', [strtolower(trim($grupoNombre))])
+                    ->first();
+                
+                // Si encontramos por nombre pero la sección no coincide, advertir
+                if ($grupo && strtolower(trim($grupo->seccion)) !== strtolower($grupoSeccionNormalizada) && strtolower(trim($grupo->seccion)) !== strtolower(trim($grupoSeccion))) {
+                    $this->errors[] = "Fila " . ($this->rowNumber + 1) . ": Grupo '{$grupoNombre}' encontrado pero con sección '{$grupo->seccion}' (esperada: '{$grupoSeccion}')";
+                    return null;
+                }
+            }
+            
+            if (!$grupo) {
+                // Mostrar información de debug: listar grupos disponibles similares
+                $gruposSimilares = grupo::whereRaw('LOWER(TRIM(nombre)) LIKE ?', ['%' . strtolower(trim($grupoNombre)) . '%'])
+                    ->get(['nombre', 'seccion'])
+                    ->take(5);
+                
+                $gruposInfo = $gruposSimilares->map(function($g) {
+                    return "{$g->nombre} ({$g->seccion})";
+                })->implode(', ');
+                
+                $this->errors[] = "Fila " . ($this->rowNumber + 1) . ": Grupo '{$grupoNombre}' con sección '{$grupoSeccion}' no encontrado. Grupos disponibles similares: " . ($gruposInfo ?: 'Ninguno');
                 return null;
             }
 
             // Buscar materia por nombre
-            $materiaNombre = trim($row['materia'] ?? '');
+            $materiaNombre = $row['materia'] ?? '';
+            
+            if (empty($materiaNombre)) {
+                $this->errors[] = "Fila " . ($this->rowNumber + 1) . ": Materia vacía";
+                return null;
+            }
+            
             $materia = materia::where('nombre', $materiaNombre)->first();
             
             if (!$materia) {
@@ -54,7 +99,13 @@ class HorariosImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
             }
 
             // Buscar maestro por nombre o email
-            $maestroNombre = trim($row['maestro'] ?? '');
+            $maestroNombre = $row['maestro'] ?? '';
+            
+            if (empty($maestroNombre)) {
+                $this->errors[] = "Fila " . ($this->rowNumber + 1) . ": Maestro vacío";
+                return null;
+            }
+            
             $maestro = User::where(function($query) use ($maestroNombre) {
                 $query->where('name', 'like', '%' . $maestroNombre . '%')
                       ->orWhere('email', 'like', '%' . $maestroNombre . '%');
@@ -66,16 +117,22 @@ class HorariosImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
             }
 
             // Procesar días (puede venir como "Lunes,Martes" o "Lunes, Martes")
-            $dias = trim($row['dias'] ?? '');
+            $dias = $row['dias'] ?? '';
+            
+            if (empty($dias)) {
+                $this->errors[] = "Fila " . ($this->rowNumber + 1) . ": Días vacío";
+                return null;
+            }
+            
             $diasArray = array_map('trim', explode(',', $dias));
             $diasString = implode(',', $diasArray);
 
             // Procesar horas (formato puede ser "08:00" o "8:00")
-            $horaInicio = $this->normalizeTime($row['hora_inicio'] ?? '');
-            $horaFin = $this->normalizeTime($row['hora_fin'] ?? '');
+            $horaInicio = $this->normalizeTime($row['hora_inicio'] ?? $row['hora inicio'] ?? '');
+            $horaFin = $this->normalizeTime($row['hora_fin'] ?? $row['hora fin'] ?? '');
 
             if (!$horaInicio || !$horaFin) {
-                $this->errors[] = "Fila " . ($this->rowNumber + 1) . ": Formato de hora inválido";
+                $this->errors[] = "Fila " . ($this->rowNumber + 1) . ": Formato de hora inválido (Inicio: " . ($row['hora_inicio'] ?? $row['hora inicio'] ?? 'N/A') . ", Fin: " . ($row['hora_fin'] ?? $row['hora fin'] ?? 'N/A') . ")";
                 return null;
             }
 
