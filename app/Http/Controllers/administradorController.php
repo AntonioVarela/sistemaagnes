@@ -95,6 +95,11 @@ class administradorController extends Controller
     }
     public function indexDashboard()
     {
+        // Verificar autenticación primero
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+        
         if(Auth::user()->rol == 'Coordinador Primaria'){
             // Buscar todos los grupos de sección Primaria
             $grupos = grupo::where('seccion', 'Primaria')->orderBy('nombre')->get();
@@ -139,6 +144,11 @@ class administradorController extends Controller
     //Tareas   
     public function index()
     {
+        // Verificar autenticación primero
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+        
         if(Auth::user()->rol == 'administrador'){
             $horario = horario::all();
             $grupos = grupo::all(); 
@@ -790,6 +800,11 @@ class administradorController extends Controller
     //Horarios
     public function showHorarios()
     {
+        // Verificar autenticación primero
+        if (!Auth::check()) {
+            return redirect()->route('login');
+        }
+        
         $query = horario::query();
 
         // Aplicar filtros si existen
@@ -842,6 +857,11 @@ class administradorController extends Controller
     public function destroyHorario($id)
     {
         try {
+            // Verificar autenticación primero
+            if (!Auth::check()) {
+                return redirect()->route('login')->with('error', 'Debes iniciar sesión para eliminar horarios.');
+            }
+            
             $horario = horario::findOrFail($id);
             
             // Verificar si el usuario tiene permiso para eliminar el horario
