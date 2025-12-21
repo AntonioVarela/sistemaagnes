@@ -426,6 +426,53 @@
                         </div>
                     @endif
 
+                    @if(session('import_debug'))
+                        @php
+                            $debug = session('import_debug');
+                        @endphp
+                        <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 max-h-60 overflow-y-auto">
+                            <h4 class="text-sm font-semibold text-yellow-900 dark:text-yellow-200 mb-2">Información de depuración:</h4>
+                            <div class="text-xs text-yellow-800 dark:text-yellow-300 space-y-2">
+                                @if(isset($debug['headers']))
+                                    <div>
+                                        <strong>Encabezados encontrados:</strong> 
+                                        <code class="bg-yellow-100 dark:bg-yellow-900 px-1 rounded">{{ implode(', ', $debug['headers']) }}</code>
+                                    </div>
+                                @endif
+                                @if(isset($debug['normalized_headers']))
+                                    <div>
+                                        <strong>Encabezados normalizados:</strong> 
+                                        <code class="bg-yellow-100 dark:bg-yellow-900 px-1 rounded">{{ implode(', ', $debug['normalized_headers']) }}</code>
+                                    </div>
+                                @endif
+                                @if(isset($debug['first_row_data']))
+                                    <div>
+                                        <strong>Primera fila (datos originales):</strong>
+                                        <pre class="bg-yellow-100 dark:bg-yellow-900 p-2 rounded mt-1 text-xs overflow-x-auto">{{ json_encode($debug['first_row_data'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                                    </div>
+                                @endif
+                                @if(isset($debug['first_row_normalized']))
+                                    <div>
+                                        <strong>Primera fila (normalizada):</strong>
+                                        <pre class="bg-yellow-100 dark:bg-yellow-900 p-2 rounded mt-1 text-xs overflow-x-auto">{{ json_encode($debug['first_row_normalized'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                                    </div>
+                                @endif
+                                @if(isset($debug['missing_columns_row_1']))
+                                    <div>
+                                        <strong>Columnas faltantes:</strong> 
+                                        <span class="text-red-600 dark:text-red-400">{{ implode(', ', $debug['missing_columns_row_1']) }}</span>
+                                    </div>
+                                @endif
+                                @if(isset($debug['available_columns_row_1']))
+                                    <div>
+                                        <strong>Columnas disponibles:</strong> 
+                                        <code class="bg-yellow-100 dark:bg-yellow-900 px-1 rounded">{{ implode(', ', $debug['available_columns_row_1']) }}</code>
+                                    </div>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+
                     <flux:footer class="flex justify-end gap-3">
                         <flux:button type="button" variant="filled" onclick="closeModal('import-modal')">Cancelar</flux:button>
                         <flux:button type="submit" variant="primary">Importar</flux:button>

@@ -21,6 +21,8 @@ class HorariosImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
     protected $successCount = 0;
     protected $rowNumber = 0;
     protected $totalRows = 0;
+    protected $skippedRows = 0;
+    protected $debugInfo = [];
 
     /**
      * @param array $row
@@ -33,15 +35,58 @@ class HorariosImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
         $this->totalRows++;
         
         try {
+            // Guardar encabezados originales para debug (solo en la primera fila)
+            if ($this->rowNumber == 1) {
+                $this->debugInfo['headers'] = array_keys($row);
+                $this->debugInfo['first_row_data'] = $row;
+            }
+            
             // Normalizar nombres de columnas (case-insensitive y sin espacios)
+            $rowOriginal = $row;
             $row = array_change_key_case($row, CASE_LOWER);
             $row = array_map('trim', $row);
+            
+            // Guardar claves normalizadas para debug
+            if ($this->rowNumber == 1) {
+                $this->debugInfo['normalized_headers'] = array_keys($row);
+                $this->debugInfo['first_row_normalized'] = $row;
+            }
+            
+            // Guardar datos de las primeras 3 filas para debug
+            if ($this->rowNumber <= 3) {
+                $this->debugInfo['row_' . $this->rowNumber . '_original'] = $rowOriginal;
+                $this->debugInfo['row_' . $this->rowNumber . '_normalized'] = $row;
+            }
             
             // Verificar que la fila no esté completamente vacía
             $rowValues = array_filter($row);
             if (empty($rowValues)) {
                 // Fila vacía, saltarla sin error
+                $this->skippedRows++;
                 return null;
+            }
+            
+            // Debug: verificar que tenemos las columnas necesarias
+            $requiredColumns = ['grupo', 'seccion', 'materia', 'maestro', 'dias', 'hora_inicio', 'hora_fin'];
+            $missingColumns = [];
+            foreach ($requiredColumns as $col) {
+                // Verificar variaciones comunes
+                $found = false;
+                $variations = [$col, str_replace('_', ' ', $col), str_replace('_', '', $col)];
+                foreach ($variations as $variation) {
+                    if (isset($row[$variation]) && !empty(trim($row[$variation]))) {
+                        $found = true;
+                        break;
+                    }
+                }
+                if (!$found) {
+                    $missingColumns[] = $col;
+                }
+            }
+            
+            if (!empty($missingColumns) && $this->rowNumber <= 3) {
+                $this->debugInfo['missing_columns_row_' . $this->rowNumber] = $missingColumns;
+                $this->debugInfo['available_columns_row_' . $this->rowNumber] = array_keys($row);
             }
             
             // Buscar grupo por nombre y sección
@@ -262,6 +307,22 @@ class HorariosImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
     public function getSuccessCount()
     {
         return $this->successCount;
+    }
+
+    /**
+     * Obtener información de debug
+     */
+    public function getDebugInfo()
+    {
+        return $this->debugInfo;
+    }
+
+    /**
+     * Obtener filas saltadas
+     */
+    public function getSkippedRows()
+    {
+        return $this->skippedRows;
     }
 }
 

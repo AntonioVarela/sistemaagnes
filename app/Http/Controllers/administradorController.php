@@ -941,13 +941,43 @@ class administradorController extends Controller
 
             $successCount = $import->getSuccessCount();
             $errors = $import->getErrors();
+            $skippedRows = $import->getSkippedRows();
+            $debugInfo = $import->getDebugInfo();
 
-            // Si no se importó nada y no hay errores, puede ser que el archivo esté vacío
+            // Si no se importó nada y no hay errores, puede ser que el archivo esté vacío o los encabezados no coincidan
             if ($successCount == 0 && empty($errors)) {
+                $message = 'El archivo se procesó pero no se encontraron datos válidos para importar. ';
+                
+                // Agregar información de debug si está disponible
+                if (!empty($debugInfo)) {
+                    if (isset($debugInfo['headers'])) {
+                        $message .= 'Encabezados encontrados: ' . implode(', ', $debugInfo['headers']) . '. ';
+                    }
+                    if (isset($debugInfo['normalized_headers'])) {
+                        $message .= 'Encabezados normalizados: ' . implode(', ', $debugInfo['normalized_headers']) . '. ';
+                    }
+                    if (isset($debugInfo['missing_columns_row_1'])) {
+                        $message .= 'Columnas faltantes en la primera fila: ' . implode(', ', $debugInfo['missing_columns_row_1']) . '. ';
+                    }
+                    if (isset($debugInfo['available_columns_row_1'])) {
+                        $message .= 'Columnas disponibles: ' . implode(', ', $debugInfo['available_columns_row_1']) . '. ';
+                    }
+                }
+                
+                $message .= 'Verifica que el archivo tenga los encabezados correctos: Grupo, Seccion, Materia, Maestro, Dias, Hora Inicio, Hora Fin';
+                
+                if ($skippedRows > 0) {
+                    $message .= " (Se saltaron {$skippedRows} fila(s) vacías).";
+                }
+                
                 session()->flash('toast', [
                     'type' => 'warning',
-                    'message' => 'El archivo se procesó pero no se encontraron datos válidos para importar. Verifica que el archivo tenga datos y los encabezados correctos.'
+                    'message' => $message
                 ]);
+                
+                // Guardar información de debug en sesión para mostrar en el modal
+                session()->flash('import_debug', $debugInfo);
+                
                 return redirect()->route('horarios.index');
             }
 
