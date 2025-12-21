@@ -951,23 +951,35 @@ class administradorController extends Controller
                 // Agregar información de debug si está disponible
                 if (!empty($debugInfo)) {
                     if (isset($debugInfo['headers'])) {
-                        $message .= 'Encabezados encontrados: ' . implode(', ', $debugInfo['headers']) . '. ';
+                        $message .= "\n\nEncabezados encontrados en el archivo: " . implode(', ', $debugInfo['headers']);
                     }
                     if (isset($debugInfo['normalized_headers'])) {
-                        $message .= 'Encabezados normalizados: ' . implode(', ', $debugInfo['normalized_headers']) . '. ';
+                        $message .= "\nEncabezados normalizados: " . implode(', ', $debugInfo['normalized_headers']);
                     }
                     if (isset($debugInfo['missing_columns_row_1'])) {
-                        $message .= 'Columnas faltantes en la primera fila: ' . implode(', ', $debugInfo['missing_columns_row_1']) . '. ';
+                        $message .= "\n\n❌ Columnas FALTANTES: " . implode(', ', $debugInfo['missing_columns_row_1']);
+                    }
+                    if (isset($debugInfo['found_columns_row_1'])) {
+                        $foundCols = [];
+                        foreach ($debugInfo['found_columns_row_1'] as $req => $found) {
+                            $foundCols[] = "$req (encontrada como: $found)";
+                        }
+                        if (!empty($foundCols)) {
+                            $message .= "\n✅ Columnas encontradas: " . implode(', ', $foundCols);
+                        }
                     }
                     if (isset($debugInfo['available_columns_row_1'])) {
-                        $message .= 'Columnas disponibles: ' . implode(', ', $debugInfo['available_columns_row_1']) . '. ';
+                        $message .= "\n\nTodas las columnas disponibles en el archivo: " . implode(', ', $debugInfo['available_columns_row_1']);
+                    }
+                    if (isset($debugInfo['first_row_data'])) {
+                        $message .= "\n\nPrimera fila de datos (valores): " . json_encode($debugInfo['first_row_data'], JSON_UNESCAPED_UNICODE | JSON_PRETTY_PRINT);
                     }
                 }
                 
-                $message .= 'Verifica que el archivo tenga los encabezados correctos: Grupo, Seccion, Materia, Maestro, Dias, Hora Inicio, Hora Fin';
+                $message .= "\n\n📋 Encabezados REQUERIDOS: Grupo, Seccion, Materia, Maestro, Dias, Hora Inicio (o Hora_Inicio), Hora Fin (o Hora_Fin)";
                 
                 if ($skippedRows > 0) {
-                    $message .= " (Se saltaron {$skippedRows} fila(s) vacías).";
+                    $message .= "\n\n(Se saltaron {$skippedRows} fila(s) vacías)";
                 }
                 
                 session()->flash('toast', [

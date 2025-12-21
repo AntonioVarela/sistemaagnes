@@ -34,11 +34,15 @@ class HorariosImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
         $this->rowNumber++;
         $this->totalRows++;
         
+        // Guardar todas las filas raw para debug
+        $this->rawRows[] = $row;
+        
         try {
-            // Guardar encabezados originales para debug (solo en la primera fila)
+            // Guardar encabezados originales para debug (solo en la primera fila de datos)
             if ($this->rowNumber == 1) {
                 $this->debugInfo['headers'] = array_keys($row);
                 $this->debugInfo['first_row_data'] = $row;
+                $this->debugInfo['first_row_count'] = count($row);
             }
             
             // Normalizar nombres de columnas (case-insensitive y sin espacios)
@@ -56,6 +60,7 @@ class HorariosImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
             if ($this->rowNumber <= 3) {
                 $this->debugInfo['row_' . $this->rowNumber . '_original'] = $rowOriginal;
                 $this->debugInfo['row_' . $this->rowNumber . '_normalized'] = $row;
+                $this->debugInfo['row_' . $this->rowNumber . '_values'] = array_values($row);
             }
             
             // Verificar que la fila no esté completamente vacía
@@ -63,30 +68,58 @@ class HorariosImport implements ToModel, WithHeadingRow, WithValidation, SkipsOn
             if (empty($rowValues)) {
                 // Fila vacía, saltarla sin error
                 $this->skippedRows++;
+                if ($this->rowNumber <= 3) {
+                    $this->debugInfo['row_' . $this->rowNumber . '_empty'] = true;
+                }
                 return null;
             }
             
             // Debug: verificar que tenemos las columnas necesarias
             $requiredColumns = ['grupo', 'seccion', 'materia', 'maestro', 'dias', 'hora_inicio', 'hora_fin'];
             $missingColumns = [];
+            $foundColumns = [];
+            
             foreach ($requiredColumns as $col) {
                 // Verificar variaciones comunes
                 $found = false;
-                $variations = [$col, str_replace('_', ' ', $col), str_replace('_', '', $col)];
+                $foundVariation = null;
+                $variations = [
+                    $col, 
+                    str_replace('_', ' ', $col), 
+                    str_replace('_', '', $col),
+                    ucfirst($col),
+                    ucwords(str_replace('_', ' ', $col))
+                ];
+                
                 foreach ($variations as $variation) {
-                    if (isset($row[$variation]) && !empty(trim($row[$variation]))) {
-                        $found = true;
-                        break;
+                    if (isset($row[$variation])) {
+                        $value = trim($row[$variation]);
+                        // Para la primera fila, solo verificar que existe la clave (puede estar vacía si es encabezado)
+                        if ($this->rowNumber == 1 || !empty($value)) {
+                            $found = true;
+                            $foundVariation = $variation;
+                            break;
+                        }
                     }
                 }
-                if (!$found) {
+                
+                if ($found) {
+                    $foundColumns[$col] = $foundVariation;
+                } else {
                     $missingColumns[] = $col;
                 }
             }
             
-            if (!empty($missingColumns) && $this->rowNumber <= 3) {
+            // Guardar información de debug para las primeras filas
+            if ($this->rowNumber <= 3) {
                 $this->debugInfo['missing_columns_row_' . $this->rowNumber] = $missingColumns;
+                $this->debugInfo['found_columns_row_' . $this->rowNumber] = $foundColumns;
                 $this->debugInfo['available_columns_row_' . $this->rowNumber] = array_keys($row);
+            }
+            
+            // Si faltan columnas críticas en la primera fila, agregar error detallado
+            if (!empty($missingColumns) && $this->rowNumber == 1) {
+                $this->errors[] = "Fila " . ($this->rowNumber + 1) . ": Columnas faltantes: " . implode(', ', $missingColumns) . ". Columnas disponibles en el archivo: " . implode(', ', array_keys($row));
             }
             
             // Buscar grupo por nombre y sección

@@ -430,45 +430,79 @@
                         @php
                             $debug = session('import_debug');
                         @endphp
-                        <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 max-h-60 overflow-y-auto">
-                            <h4 class="text-sm font-semibold text-yellow-900 dark:text-yellow-200 mb-2">Información de depuración:</h4>
-                            <div class="text-xs text-yellow-800 dark:text-yellow-300 space-y-2">
+                        <div class="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 max-h-80 overflow-y-auto">
+                            <h4 class="text-sm font-semibold text-yellow-900 dark:text-yellow-200 mb-3">🔍 Información de depuración:</h4>
+                            <div class="text-xs text-yellow-800 dark:text-yellow-300 space-y-3">
                                 @if(isset($debug['headers']))
                                     <div>
-                                        <strong>Encabezados encontrados:</strong> 
-                                        <code class="bg-yellow-100 dark:bg-yellow-900 px-1 rounded">{{ implode(', ', $debug['headers']) }}</code>
+                                        <strong>📋 Encabezados encontrados en tu archivo:</strong> 
+                                        <div class="mt-1 flex flex-wrap gap-1">
+                                            @foreach($debug['headers'] as $header)
+                                                <code class="bg-yellow-100 dark:bg-yellow-900 px-2 py-1 rounded text-xs">{{ $header }}</code>
+                                            @endforeach
+                                        </div>
                                     </div>
                                 @endif
+                                
                                 @if(isset($debug['normalized_headers']))
                                     <div>
-                                        <strong>Encabezados normalizados:</strong> 
-                                        <code class="bg-yellow-100 dark:bg-yellow-900 px-1 rounded">{{ implode(', ', $debug['normalized_headers']) }}</code>
+                                        <strong>🔄 Encabezados normalizados (minúsculas):</strong> 
+                                        <div class="mt-1 flex flex-wrap gap-1">
+                                            @foreach($debug['normalized_headers'] as $header)
+                                                <code class="bg-yellow-100 dark:bg-yellow-900 px-2 py-1 rounded text-xs">{{ $header }}</code>
+                                            @endforeach
+                                        </div>
                                     </div>
                                 @endif
+                                
+                                @if(isset($debug['missing_columns_row_1']) && !empty($debug['missing_columns_row_1']))
+                                    <div>
+                                        <strong class="text-red-600 dark:text-red-400">❌ Columnas FALTANTES (requeridas pero no encontradas):</strong> 
+                                        <div class="mt-1 flex flex-wrap gap-1">
+                                            @foreach($debug['missing_columns_row_1'] as $col)
+                                                <code class="bg-red-100 dark:bg-red-900/30 px-2 py-1 rounded text-xs text-red-700 dark:text-red-300">{{ $col }}</code>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+                                
+                                @if(isset($debug['found_columns_row_1']) && !empty($debug['found_columns_row_1']))
+                                    <div>
+                                        <strong class="text-green-600 dark:text-green-400">✅ Columnas encontradas:</strong> 
+                                        <div class="mt-1 space-y-1">
+                                            @foreach($debug['found_columns_row_1'] as $req => $found)
+                                                <div class="text-xs">
+                                                    <code class="bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded">{{ $req }}</code> 
+                                                    → encontrada como: 
+                                                    <code class="bg-yellow-100 dark:bg-yellow-900 px-2 py-1 rounded">{{ $found }}</code>
+                                                </div>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                @endif
+                                
                                 @if(isset($debug['first_row_data']))
                                     <div>
-                                        <strong>Primera fila (datos originales):</strong>
-                                        <pre class="bg-yellow-100 dark:bg-yellow-900 p-2 rounded mt-1 text-xs overflow-x-auto">{{ json_encode($debug['first_row_data'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                                        <strong>📄 Primera fila de datos (valores):</strong>
+                                        <pre class="bg-yellow-100 dark:bg-yellow-900 p-2 rounded mt-1 text-xs overflow-x-auto whitespace-pre-wrap">{{ json_encode($debug['first_row_data'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
                                     </div>
                                 @endif
-                                @if(isset($debug['first_row_normalized']))
-                                    <div>
-                                        <strong>Primera fila (normalizada):</strong>
-                                        <pre class="bg-yellow-100 dark:bg-yellow-900 p-2 rounded mt-1 text-xs overflow-x-auto">{{ json_encode($debug['first_row_normalized'], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE) }}</pre>
+                                
+                                <div class="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded p-2 mt-3">
+                                    <strong class="text-blue-900 dark:text-blue-200">📝 Encabezados REQUERIDOS:</strong>
+                                    <div class="mt-1 flex flex-wrap gap-1">
+                                        <code class="bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded text-xs">Grupo</code>
+                                        <code class="bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded text-xs">Seccion</code>
+                                        <code class="bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded text-xs">Materia</code>
+                                        <code class="bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded text-xs">Maestro</code>
+                                        <code class="bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded text-xs">Dias</code>
+                                        <code class="bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded text-xs">Hora Inicio</code>
+                                        <code class="bg-blue-100 dark:bg-blue-900 px-2 py-1 rounded text-xs">Hora Fin</code>
                                     </div>
-                                @endif
-                                @if(isset($debug['missing_columns_row_1']))
-                                    <div>
-                                        <strong>Columnas faltantes:</strong> 
-                                        <span class="text-red-600 dark:text-red-400">{{ implode(', ', $debug['missing_columns_row_1']) }}</span>
-                                    </div>
-                                @endif
-                                @if(isset($debug['available_columns_row_1']))
-                                    <div>
-                                        <strong>Columnas disponibles:</strong> 
-                                        <code class="bg-yellow-100 dark:bg-yellow-900 px-1 rounded">{{ implode(', ', $debug['available_columns_row_1']) }}</code>
-                                    </div>
-                                @endif
+                                    <p class="text-xs mt-2 text-blue-800 dark:text-blue-300">
+                                        Nota: Los encabezados pueden tener espacios (ej: "Hora Inicio") o guiones bajos (ej: "Hora_Inicio"). No importan mayúsculas/minúsculas.
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     @endif
