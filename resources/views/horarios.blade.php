@@ -384,9 +384,10 @@
                         <li>Descarga la plantilla CSV haciendo clic en "Descargar Plantilla CSV"</li>
                         <li>Abre el archivo CSV con Excel, Google Sheets o cualquier editor de texto</li>
                         <li>Completa la plantilla con los datos de los horarios</li>
-                        <li>Las columnas requeridas son: Grupo, Seccion, Materia, Maestro, Dias, Hora Inicio, Hora Fin</li>
+                        <li><strong>Orden de columnas (por posición):</strong> Grupo, Seccion, Materia, Maestro, Dias, Hora Inicio, Hora Fin</li>
                         <li>Los días deben estar separados por comas (ej: Lunes,Martes,Miércoles)</li>
                         <li>Las horas deben estar en formato HH:MM (ej: 08:00)</li>
+                        <li>El archivo puede tener encabezados (serán detectados y saltados automáticamente) o no tenerlos</li>
                         <li>Guarda el archivo como CSV (delimitado por comas) y súbelo aquí</li>
                     </ul>
                 </div>

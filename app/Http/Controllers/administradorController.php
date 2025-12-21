@@ -1075,17 +1075,8 @@ class administradorController extends Controller
         try {
             $filename = 'plantilla_importacion_horarios_' . date('Y-m-d') . '.csv';
             
-            // Crear contenido CSV
-            $headers = [
-                'Grupo',
-                'Seccion',
-                'Materia',
-                'Maestro',
-                'Dias',
-                'Hora Inicio',
-                'Hora Fin'
-            ];
-            
+            // Crear contenido CSV sin encabezados - las columnas se manejan por posición fija
+            // Orden de columnas: Grupo, Seccion, Materia, Maestro, Dias, Hora Inicio, Hora Fin
             $ejemplos = [
                 ['1 A', 'Primaria', 'Matemáticas', 'Juan Pérez', 'Lunes,Martes,Miércoles', '08:00', '09:00'],
                 ['1 B', 'Primaria', 'Español', 'María García', 'Jueves,Viernes', '10:00', '11:00'],
@@ -1098,10 +1089,11 @@ class administradorController extends Controller
             // Escribir BOM para UTF-8 (ayuda con Excel)
             fwrite($output, "\xEF\xBB\xBF");
             
-            // Escribir encabezados
-            fputcsv($output, $headers);
+            // Opcional: escribir encabezados como comentario o primera línea (será detectado y saltado)
+            // Pero mejor sin encabezados para simplificar
+            // fputcsv($output, ['Grupo', 'Seccion', 'Materia', 'Maestro', 'Dias', 'Hora Inicio', 'Hora Fin']);
             
-            // Escribir ejemplos
+            // Escribir ejemplos directamente (sin encabezados)
             foreach ($ejemplos as $ejemplo) {
                 fputcsv($output, $ejemplo);
             }

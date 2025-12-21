@@ -63,137 +63,84 @@ class HorariosCsvImport
             throw new \Exception('No se pudo abrir el archivo CSV.');
         }
 
-        // Leer encabezados con el delimitador detectado
-        $headers = fgetcsv($handle, 0, $delimiter);
+        // Leer primera línea para verificar si tiene encabezados o es directamente datos
+        $firstLine = fgetcsv($handle, 0, $delimiter);
         
-        if (!$headers) {
+        if (!$firstLine) {
             fclose($handle);
-            throw new \Exception('El archivo CSV está vacío o no tiene encabezados.');
+            throw new \Exception('El archivo CSV está vacío.');
         }
 
-        // Limpiar BOM del primer encabezado si aún existe
-        if (!empty($headers[0])) {
-            $headers[0] = preg_replace('/^\xEF\xBB\xBF/', '', $headers[0]);
-            $headers[0] = trim($headers[0], "\xEF\xBB\xBF");
+        // Limpiar BOM del primer campo si existe
+        if (!empty($firstLine[0])) {
+            $firstLine[0] = preg_replace('/^\xEF\xBB\xBF/', '', $firstLine[0]);
+            $firstLine[0] = trim($firstLine[0], "\xEF\xBB\xBF");
         }
 
-        // Guardar encabezados para debug
-        $this->debugInfo['headers'] = $headers;
+        // Detectar si la primera línea es encabezado o datos
+        // Si parece ser encabezado (texto sin números en las columnas de hora), saltarlo
+        $isHeader = false;
+        if (count($firstLine) >= 7) {
+            // Verificar si la columna 5 (hora_inicio) y 6 (hora_fin) parecen ser encabezados
+            $horaInicio = strtolower(trim($firstLine[5] ?? ''));
+            $horaFin = strtolower(trim($firstLine[6] ?? ''));
+            
+            // Si contienen palabras como "hora", "inicio", "fin" pero no formato de hora, es encabezado
+            if ((strpos($horaInicio, 'hora') !== false || strpos($horaInicio, 'inicio') !== false) && 
+                !preg_match('/^\d{1,2}:\d{2}/', $horaInicio)) {
+                $isHeader = true;
+            }
+        }
+
+        // Guardar información para debug
         $this->debugInfo['delimiter'] = $delimiter;
+        $this->debugInfo['first_line_is_header'] = $isHeader;
         
-        // Normalizar encabezados (case-insensitive y limpiar BOM)
-        $normalizedHeaders = array_map(function($h) {
-            // Remover BOM y espacios
-            $h = preg_replace('/^\xEF\xBB\xBF/', '', $h);
-            return strtolower(trim($h));
-        }, $headers);
-        
-        $this->debugInfo['normalized_headers'] = $normalizedHeaders;
-        
-        // Crear mapa de índices de columnas requeridas
-        $requiredColumns = ['grupo', 'seccion', 'materia', 'maestro', 'dias', 'hora_inicio', 'hora_fin'];
-        $columnMap = [];
-        $missingColumns = [];
-        
-        foreach ($requiredColumns as $col) {
-            $found = false;
-            $variations = [
-                $col,
-                str_replace('_', ' ', $col),
-                str_replace('_', '', $col),
-                ucfirst($col),
-                ucwords(str_replace('_', ' ', $col))
-            ];
-            
-            foreach ($variations as $variation) {
-                $index = array_search(strtolower(trim($variation)), $normalizedHeaders);
-                if ($index !== false) {
-                    $columnMap[$col] = $index;
-                    $found = true;
-                    break;
-                }
-            }
-            
-            if (!$found) {
-                $missingColumns[] = $col;
-            }
-        }
+        // Mapa de columnas por posición fija (índice 0-based)
+        // Orden: Grupo, Seccion, Materia, Maestro, Dias, Hora Inicio, Hora Fin
+        $columnMap = [
+            'grupo' => 0,
+            'seccion' => 1,
+            'materia' => 2,
+            'maestro' => 3,
+            'dias' => 4,
+            'hora_inicio' => 5,
+            'hora_fin' => 6
+        ];
         
         $this->debugInfo['column_map'] = $columnMap;
-        $this->debugInfo['missing_columns'] = $missingColumns;
-        
-        // Si faltan columnas críticas, lanzar error
-        if (!empty($missingColumns)) {
-            fclose($handle);
-            throw new \Exception('Columnas faltantes: ' . implode(', ', $missingColumns) . '. Columnas disponibles: ' . implode(', ', $headers));
-        }
         
         $rowNumber = 0;
+        $rows = [];
         
-        // Leer todas las líneas primero para manejar mejor el formato
-        $lines = [];
-        while (($line = fgets($handle)) !== false) {
-            $lines[] = trim($line);
+        // Si la primera línea es encabezado, guardarla para debug y continuar leyendo
+        if ($isHeader) {
+            $this->debugInfo['headers'] = $firstLine;
+            // Continuar leyendo desde la siguiente línea
+        } else {
+            // La primera línea es datos, agregarla al array
+            $rows[] = $firstLine;
+        }
+        
+        // Leer el resto de las líneas usando fgetcsv para parsear correctamente
+        while (($row = fgetcsv($handle, 0, $delimiter)) !== false) {
+            $rows[] = $row;
         }
         fclose($handle);
         
         // Si no hay líneas de datos, lanzar error
-        if (empty($lines)) {
+        if (empty($rows)) {
             throw new \Exception('El archivo CSV no contiene datos para importar.');
         }
         
-        // Procesar cada línea
-        foreach ($lines as $lineIndex => $line) {
-            $rowNumber = $lineIndex + 1;
+        // Procesar cada fila
+        foreach ($rows as $rowIndex => $row) {
+            $rowNumber = $rowIndex + 1;
             
-            // Saltar línea vacía
-            if (empty(trim($line))) {
-                $this->skippedRows++;
+            // Verificar que la fila tenga al menos 7 columnas
+            if (count($row) < 7) {
+                $this->errors[] = "Fila " . ($rowNumber) . ": La fila debe tener 7 columnas (Grupo, Seccion, Materia, Maestro, Dias, Hora Inicio, Hora Fin). Columnas encontradas: " . count($row);
                 continue;
-            }
-            
-            // Remover comillas que envuelven toda la línea si existen
-            $line = trim($line);
-            $originalLine = $line;
-            
-            // Detectar si toda la línea está entre comillas (formato incorrecto de Excel)
-            if (substr($line, 0, 1) === '"' && substr($line, -1) === '"') {
-                // Contar comillas dobles escapadas ("" dentro de campos)
-                $escapedQuotes = substr_count($line, '""');
-                $totalQuotes = substr_count($line, '"');
-                
-                // Si hay muchas comillas y la línea empieza y termina con comillas,
-                // probablemente toda la línea está mal formateada
-                if ($totalQuotes > 6) {
-                    // Remover comillas iniciales y finales
-                    $line = substr($line, 1, -1);
-                    // Reemplazar comillas dobles escapadas por comillas simples temporales
-                    $line = str_replace('""', '___TEMP_QUOTE___', $line);
-                    // Ahora parsear normalmente
-                    $row = str_getcsv($line, $delimiter, '"');
-                    // Restaurar comillas dobles escapadas
-                    $row = array_map(function($field) {
-                        return str_replace('___TEMP_QUOTE___', '"', $field);
-                    }, $row);
-                } else {
-                    // Parsear normalmente
-                    $row = str_getcsv($line, $delimiter, '"');
-                }
-            } else {
-                // Parsear normalmente
-                $row = str_getcsv($line, $delimiter, '"');
-            }
-            
-            // Si después de parsear solo tenemos un elemento pero debería haber más, intentar dividir manualmente
-            if (count($row) == 1 && count($headers) > 1) {
-                // La línea está mal formateada, intentar dividir por el delimitador directamente
-                $row = explode($delimiter, $line);
-                // Limpiar comillas de cada campo
-                $row = array_map(function($field) {
-                    $field = trim($field);
-                    $field = trim($field, '"');
-                    return str_replace('""', '"', $field);
-                }, $row);
             }
             
             // Verificar que la fila no esté completamente vacía
@@ -205,37 +152,28 @@ class HorariosCsvImport
             
             // Guardar primera fila para debug
             if ($rowNumber == 1) {
-                // Asegurar que row tenga el mismo número de elementos que headers
-                $paddedRow = array_pad($row, count($headers), '');
-                // Si row tiene más elementos, truncar
-                if (count($paddedRow) > count($headers)) {
-                    $paddedRow = array_slice($paddedRow, 0, count($headers));
-                }
-                // Combinar solo si tienen el mismo número de elementos
-                if (count($headers) === count($paddedRow)) {
-                    $this->debugInfo['first_row_data'] = array_combine($headers, $paddedRow);
-                } else {
-                    // Si aún no coinciden, crear un array asociativo manualmente
-                    $this->debugInfo['first_row_data'] = [];
-                    foreach ($headers as $index => $header) {
-                        $this->debugInfo['first_row_data'][$header] = $paddedRow[$index] ?? '';
-                    }
-                }
+                $this->debugInfo['first_row_data'] = [
+                    'grupo' => $row[0] ?? '',
+                    'seccion' => $row[1] ?? '',
+                    'materia' => $row[2] ?? '',
+                    'maestro' => $row[3] ?? '',
+                    'dias' => $row[4] ?? '',
+                    'hora_inicio' => $row[5] ?? '',
+                    'hora_fin' => $row[6] ?? ''
+                ];
                 $this->debugInfo['first_row_raw'] = $row;
                 $this->debugInfo['first_row_count'] = count($row);
-                $this->debugInfo['headers_count'] = count($headers);
-                $this->debugInfo['first_row_line'] = $line;
             }
             
             try {
-                // Extraer valores usando el mapa de columnas
-                $grupoNombre = trim($row[$columnMap['grupo']] ?? '');
-                $grupoSeccion = trim($row[$columnMap['seccion']] ?? '');
-                $materiaNombre = trim($row[$columnMap['materia']] ?? '');
-                $maestroNombre = trim($row[$columnMap['maestro']] ?? '');
-                $dias = trim($row[$columnMap['dias']] ?? '');
-                $horaInicio = trim($row[$columnMap['hora_inicio']] ?? '');
-                $horaFin = trim($row[$columnMap['hora_fin']] ?? '');
+                // Extraer valores por posición fija (columna 0-6)
+                $grupoNombre = trim($row[0] ?? '');
+                $grupoSeccion = trim($row[1] ?? '');
+                $materiaNombre = trim($row[2] ?? '');
+                $maestroNombre = trim($row[3] ?? '');
+                $dias = trim($row[4] ?? '');
+                $horaInicio = trim($row[5] ?? '');
+                $horaFin = trim($row[6] ?? '');
                 
                 // Validar campos requeridos
                 if (empty($grupoNombre) || empty($grupoSeccion)) {
