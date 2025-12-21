@@ -225,27 +225,76 @@ class HorariosCsvImport
                 
                 // Buscar maestro
                 $maestro = null;
+                $maestroNombre = trim($maestroNombre);
                 
+                // Primero intentar buscar por ID si es numérico
                 if (is_numeric($maestroNombre)) {
-                    $maestro = User::where('id', $maestroNombre)
-                        ->where('rol', 'Maestro')
+                    $maestro = User::where('id', intval($maestroNombre))
+                        ->where(function($query) {
+                            $query->where('rol', 'Maestro')
+                                  ->orWhere('rol', 'maestro')
+                                  ->orWhereRaw('LOWER(rol) = ?', ['maestro']);
+                        })
                         ->first();
                 }
                 
-                if (!$maestro) {
-                    $maestroNombreLower = strtolower($maestroNombre);
-                    $maestro = User::where('rol', 'Maestro')
-                        ->where(function($query) use ($maestroNombre, $maestroNombreLower) {
+                // Si no se encontró por ID, buscar por nombre o email
+                if (!$maestro && !empty($maestroNombre)) {
+                    $maestroNombreLower = strtolower(trim($maestroNombre));
+                    $maestroNombreSinEspacios = str_replace(' ', '', $maestroNombreLower);
+                    
+                    // Buscar con diferentes variaciones del rol (case-insensitive)
+                    $maestro = User::where(function($query) {
+                            $query->where('rol', 'Maestro')
+                                  ->orWhere('rol', 'maestro')
+                                  ->orWhereRaw('LOWER(TRIM(rol)) = ?', ['maestro']);
+                        })
+                        ->where(function($query) use ($maestroNombre, $maestroNombreLower, $maestroNombreSinEspacios) {
+                            // Búsqueda exacta en nombre (case-insensitive, sin espacios)
                             $query->whereRaw('LOWER(TRIM(name)) = ?', [$maestroNombreLower])
+                                  // Búsqueda parcial en nombre
                                   ->orWhereRaw('LOWER(TRIM(name)) LIKE ?', ['%' . $maestroNombreLower . '%'])
+                                  // Búsqueda exacta en email (case-insensitive, sin espacios)
                                   ->orWhereRaw('LOWER(TRIM(email)) = ?', [$maestroNombreLower])
-                                  ->orWhereRaw('LOWER(TRIM(email)) LIKE ?', ['%' . $maestroNombreLower . '%']);
+                                  // Búsqueda parcial en email
+                                  ->orWhereRaw('LOWER(TRIM(email)) LIKE ?', ['%' . $maestroNombreLower . '%'])
+                                  // Búsqueda por nombre sin espacios (para nombres con espacios)
+                                  ->orWhereRaw('REPLACE(LOWER(TRIM(name)), \' \', \'\') = ?', [$maestroNombreSinEspacios])
+                                  ->orWhereRaw('REPLACE(LOWER(TRIM(name)), \' \', \'\') LIKE ?', ['%' . $maestroNombreSinEspacios . '%'])
+                                  // Búsqueda por email sin espacios
+                                  ->orWhereRaw('REPLACE(LOWER(TRIM(email)), \' \', \'\') = ?', [$maestroNombreSinEspacios])
+                                  ->orWhereRaw('REPLACE(LOWER(TRIM(email)), \' \', \'\') LIKE ?', ['%' . $maestroNombreSinEspacios . '%']);
                         })
                         ->first();
                 }
                 
                 if (!$maestro) {
-                    $this->errors[] = "Fila " . ($rowNumber + 1) . ": Maestro '{$maestroNombre}' no encontrado";
+                    // Obtener lista de maestros disponibles para ayudar al usuario
+                    $maestrosDisponibles = User::where(function($query) {
+                            $query->where('rol', 'Maestro')
+                                  ->orWhere('rol', 'maestro')
+                                  ->orWhereRaw('LOWER(rol) = ?', ['maestro']);
+                        })
+                        ->select('id', 'name', 'email', 'rol')
+                        ->get();
+                    
+                    $maestrosList = [];
+                    foreach ($maestrosDisponibles as $m) {
+                        $maestrosList[] = "ID: {$m->id}, Nombre: {$m->name}, Email: {$m->email}, Rol: {$m->rol}";
+                    }
+                    
+                    $errorMsg = "Fila {$rowNumber}: Maestro '{$maestroNombre}' no encontrado.";
+                    if (!empty($maestrosList)) {
+                        $errorMsg .= " Formatos válidos: ID (ej: 55), Nombre completo (ej: Mariam), Email (ej: mariam.rodriguez@colegioagnes.edu.mx). ";
+                        $errorMsg .= "Disponibles: " . implode(' | ', array_slice($maestrosList, 0, 3));
+                        if (count($maestrosList) > 3) {
+                            $errorMsg .= " y " . (count($maestrosList) - 3) . " más";
+                        }
+                    } else {
+                        $errorMsg .= " No hay maestros registrados en el sistema.";
+                    }
+                    
+                    $this->errors[] = $errorMsg;
                     continue;
                 }
                 
