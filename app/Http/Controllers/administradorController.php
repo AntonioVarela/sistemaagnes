@@ -888,6 +888,11 @@ class administradorController extends Controller
 
     public function importHorarios(Request $request)
     {
+        // Verificar autenticación al inicio
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'Debes iniciar sesión para importar horarios.');
+        }
+        
         try {
             // Validar archivo CSV
             $request->validate([
@@ -921,8 +926,14 @@ class administradorController extends Controller
             // Guardar archivo temporalmente
             $filePath = $archivo->getRealPath();
             
+            // Refrescar sesión antes de procesar para mantenerla activa
+            $request->session()->regenerate();
+            
             $import = new HorariosCsvImport();
             $import->import($filePath);
+            
+            // Refrescar sesión después de procesar
+            $request->session()->regenerate();
 
             $successCount = $import->getSuccessCount();
             $errors = $import->getErrors();
@@ -994,12 +1005,21 @@ class administradorController extends Controller
 
         } catch (\Illuminate\Validation\ValidationException $e) {
             // Errores de validación
+            if (!Auth::check()) {
+                return redirect()->route('login')->with('error', 'Sesión expirada. Por favor, inicia sesión nuevamente.');
+            }
+            
             session()->flash('toast', [
                 'type' => 'error',
                 'message' => 'Error de validación: ' . implode(', ', $e->validator->errors()->all())
             ]);
         } catch (\Exception $e) {
             Log::error('Error al importar horarios: ' . $e->getMessage() . ' - Trace: ' . $e->getTraceAsString());
+            
+            // Verificar autenticación antes de redirigir
+            if (!Auth::check()) {
+                return redirect()->route('login')->with('error', 'Sesión expirada durante la importación. Por favor, inicia sesión nuevamente.');
+            }
             
             $errorMessage = 'Error al importar el archivo: ' . $e->getMessage();
             
@@ -1017,8 +1037,14 @@ class administradorController extends Controller
             ]);
             
             if (isset($import)) {
+                session()->flash('import_debug', $import->getDebugInfo());
                 session()->flash('import_errors', $import->getErrors());
             }
+        }
+
+        // Verificar autenticación antes de redirigir
+        if (!Auth::check()) {
+            return redirect()->route('login')->with('error', 'Sesión expirada. Por favor, inicia sesión nuevamente.');
         }
 
         return redirect()->route('horarios.index');

@@ -20,13 +20,17 @@ class HorariosCsvImport
     public function import($filePath)
     {
         // Leer el contenido del archivo para detectar BOM y delimitador
-        $content = file_get_contents($filePath);
+        $content = @file_get_contents($filePath);
+        
+        if ($content === false) {
+            throw new \Exception('No se pudo leer el archivo CSV.');
+        }
         
         // Remover BOM UTF-8 si existe
         if (substr($content, 0, 3) === "\xEF\xBB\xBF") {
             $content = substr($content, 3);
             // Reescribir el archivo sin BOM temporalmente
-            file_put_contents($filePath, $content);
+            @file_put_contents($filePath, $content);
         }
         
         // Detectar delimitador automáticamente
