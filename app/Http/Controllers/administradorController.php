@@ -373,26 +373,31 @@ class administradorController extends Controller
     {
         $grupo = grupo::findOrFail($id);
         
-        // Validar permisos de acceso según el rol
-        if (Auth::user()->rol == 'Coordinador Primaria') {
-            // Coordinador Primaria solo puede acceder a grupos de su sección
-            if ($grupo->seccion !== 'Primaria') {
-                abort(403, 'No tienes permisos para acceder a este grupo.');
+        // Validar permisos de acceso según el rol (solo si el usuario está autenticado y tiene rol)
+        if (Auth::check() && !empty(Auth::user()->rol)) {
+            $rol = Auth::user()->rol;
+            
+            if ($rol == 'Coordinador Primaria') {
+                // Coordinador Primaria solo puede acceder a grupos de su sección
+                if ($grupo->seccion !== 'Primaria') {
+                    abort(403, 'No tienes permisos para acceder a este grupo.');
+                }
+            } else if ($rol == 'Coordinador Secundaria') {
+                // Coordinador Secundaria solo puede acceder a grupos de su sección
+                if ($grupo->seccion !== 'Secundaria') {
+                    abort(403, 'No tienes permisos para acceder a este grupo.');
+                }
+            } else if ($rol == 'Maestro') {
+                // Maestros solo pueden acceder a grupos de sus horarios
+                $horario = horario::where('maestro_id', Auth::user()->id)->get();
+                $gruposPermitidos = $horario->pluck('grupo_id')->toArray();
+                if (!in_array($id, $gruposPermitidos)) {
+                    abort(403, 'No tienes permisos para acceder a este grupo.');
+                }
             }
-        } else if (Auth::user()->rol == 'Coordinador Secundaria') {
-            // Coordinador Secundaria solo puede acceder a grupos de su sección
-            if ($grupo->seccion !== 'Secundaria') {
-                abort(403, 'No tienes permisos para acceder a este grupo.');
-            }
-        } else if (Auth::user()->rol == 'Maestro') {
-            // Maestros solo pueden acceder a grupos de sus horarios
-            $horario = horario::where('maestro_id', Auth::user()->id)->get();
-            $gruposPermitidos = $horario->pluck('grupo_id')->toArray();
-            if (!in_array($id, $gruposPermitidos)) {
-                abort(403, 'No tienes permisos para acceder a este grupo.');
-            }
+            // Los administradores tienen acceso a todos los grupos
         }
-        // Los administradores tienen acceso a todos los grupos
+        // Los usuarios sin rol o no autenticados pueden acceder a cualquier grupo
         
         $materias = materia::all();
         $usuarios = User::all();
