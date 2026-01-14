@@ -67,7 +67,6 @@
                                                     </div>
                                                     <!-- Información adicional para móviles -->
                                                     <div class="sm:hidden text-xs text-gray-500 dark:text-gray-400 mt-1">
-                                                        <div>{{ Str::limit($circular->descripcion, 100) ?: 'Sin descripción' }}</div>
                                                         @if($circular->archivo)
                                                             <div class="mt-1">
                                                                 <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full bg-indigo-100 dark:bg-indigo-900 text-indigo-800 dark:text-indigo-200">
@@ -91,11 +90,6 @@
                                                         <div>{{ $circular->created_at->format('d/m/Y H:i') }}</div>
                                                     </div>
                                                 </div>
-                                            </div>
-                                        </td>
-                                        <td class="px-3 sm:px-6 py-4 hidden sm:table-cell">
-                                            <div class="text-sm text-gray-900 dark:text-white">
-                                                {{ Str::limit($circular->descripcion, 200) ?: 'Sin descripción' }}
                                             </div>
                                         </td>
                                         <td class="px-3 sm:px-6 py-4 whitespace-nowrap hidden md:table-cell">
@@ -155,7 +149,7 @@
                                                 @if(auth()->user()->id === $circular->usuario_id || auth()->user()->rol === 'administrador')
                                                     <flux:modal.trigger name="edit-circular">
                                                         <button type="button"
-                                                            onclick="prepareEditCircular({{ $circular->id }}, '{{ addslashes($circular->titulo) }}', '{{ addslashes($circular->descripcion) }}', '{{ $circular->grupo_id }}', '{{ $circular->seccion }}', '{{ $circular->fecha_expiracion ? $circular->fecha_expiracion->format('Y-m-d') : 'null' }}', {{ $circular->es_global ? 'true' : 'false' }})"
+                                                            onclick="prepareEditCircular({{ $circular->id }}, '{{ addslashes($circular->titulo) }}', '{{ $circular->grupo_id }}', '{{ $circular->seccion }}', '{{ $circular->fecha_expiracion ? $circular->fecha_expiracion->format('Y-m-d') : 'null' }}', {{ $circular->es_global ? 'true' : 'false' }})"
                                                             class="text-indigo-600 dark:text-indigo-400 hover:text-indigo-900 dark:hover:text-indigo-300 transition-colors p-1">
                                                             <flux:icon name="pencil" class="w-4 h-4" />
                                                     </button>
@@ -176,7 +170,7 @@
                                 @endforeach
                             @else
                                 <tr>
-                                    <td colspan="7" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
+                                    <td colspan="6" class="px-6 py-4 text-center text-gray-500 dark:text-gray-400">
                                         No hay circulares disponibles
                                     </td>
                                 </tr>
@@ -200,8 +194,6 @@
                 <div class="grid gap-4">
                     <flux:input name="titulo" id="titulo" label="Título de la Circular" type="text"
                         placeholder="Ej: Circular Semanal del 1-5 de Septiembre" required />
-                    <flux:textarea name="descripcion" id="descripcion" label="Descripción (opcional)"
-                        placeholder="Breve descripción del contenido de la circular..." />
                     <flux:input name="archivo" id="archivo" label="Archivo de la Circular" type="file" 
                         accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" required />
                     
@@ -257,7 +249,6 @@
                 @method('PUT')
                 <div class="grid gap-4">
                     <flux:input name="titulo" id="edit_titulo" label="Título de la Circular" type="text" required />
-                    <flux:textarea name="descripcion" id="edit_descripcion" label="Descripción (opcional)" />
                     <flux:input name="archivo" id="edit_archivo" label="Archivo de la Circular" type="file" 
                         accept=".pdf,.doc,.docx,.jpg,.jpeg,.png" />
                     
@@ -377,13 +368,12 @@
         }
 
         // Función para preparar el modal de edición
-        function prepareEditCircular(id, titulo, descripcion, grupoId, seccion, fechaExpiracion, esGlobal) {
+        function prepareEditCircular(id, titulo, grupoId, seccion, fechaExpiracion, esGlobal) {
             console.log('Preparando edición de circular:', {
-                id, titulo, descripcion, grupoId, seccion, fechaExpiracion, esGlobal
+                id, titulo, grupoId, seccion, fechaExpiracion, esGlobal
             });
             
             document.getElementById('edit_titulo').value = titulo;
-            document.getElementById('edit_descripcion').value = descripcion;
             document.getElementById('edit_es_global').checked = esGlobal === 'true';
             document.getElementById('edit_grupo_id').value = grupoId;
             document.getElementById('edit_seccion').value = seccion;

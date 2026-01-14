@@ -15,7 +15,6 @@ class Circular extends Model
 
     protected $fillable = [
         'titulo',
-        'descripcion',
         'archivo',
         'nombre_archivo_original',
         'tipo_archivo',

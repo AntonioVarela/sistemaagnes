@@ -147,7 +147,6 @@ class AdministradorControllerTest extends TestCase
 
         $circularData = [
             'titulo' => 'Circular de Prueba',
-            'descripcion' => 'Descripción de prueba',
             'archivo' => $file,
             'grupo_id' => $grupo->id,
             'seccion' => 'Primaria',
@@ -171,7 +170,6 @@ class AdministradorControllerTest extends TestCase
 
         $circular = Circular::create([
             'titulo' => 'Circular Original',
-            'descripcion' => 'Descripción original',
             'archivo' => 'original.pdf',
             'nombre_archivo_original' => 'original.pdf',
             'tipo_archivo' => 'application/pdf',
@@ -182,7 +180,6 @@ class AdministradorControllerTest extends TestCase
 
         $updateData = [
             'titulo' => 'Circular Actualizada',
-            'descripcion' => 'Descripción actualizada',
             'grupo_id' => $grupo->id,
             'seccion' => 'Primaria'
         ];
@@ -204,7 +201,6 @@ class AdministradorControllerTest extends TestCase
 
         $circular = Circular::create([
             'titulo' => 'Circular a Eliminar',
-            'descripcion' => 'Descripción',
             'archivo' => 'test.pdf',
             'nombre_archivo_original' => 'test.pdf',
             'tipo_archivo' => 'application/pdf',
@@ -230,7 +226,6 @@ class AdministradorControllerTest extends TestCase
 
         $circular = Circular::create([
             'titulo' => 'Circular de Otro Usuario',
-            'descripcion' => 'Descripción',
             'archivo' => 'test.pdf',
             'nombre_archivo_original' => 'test.pdf',
             'tipo_archivo' => 'application/pdf',

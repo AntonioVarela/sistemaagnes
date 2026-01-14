@@ -62,7 +62,6 @@ class DatabaseTest extends TestCase
 
         $circular = Circular::create([
             'titulo' => 'Circular de Prueba',
-            'descripcion' => 'Descripción de prueba',
             'archivo' => 'test.pdf',
             'nombre_archivo_original' => 'test.pdf',
             'tipo_archivo' => 'application/pdf',
@@ -104,7 +103,6 @@ class DatabaseTest extends TestCase
         // Crear circular con relaciones válidas
         $circular = Circular::create([
             'titulo' => 'Test Circular',
-            'descripcion' => 'Test',
             'archivo' => 'test.pdf',
             'nombre_archivo_original' => 'test.pdf',
             'tipo_archivo' => 'application/pdf',
@@ -126,7 +124,6 @@ class DatabaseTest extends TestCase
 
         $circular = Circular::create([
             'titulo' => 'Test Circular',
-            'descripcion' => 'Test',
             'archivo' => 'test.pdf',
             'nombre_archivo_original' => 'test.pdf',
             'tipo_archivo' => 'application/pdf',

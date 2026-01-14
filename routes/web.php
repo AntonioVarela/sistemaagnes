@@ -63,7 +63,6 @@ Route::get('/test-circular-global', function() {
     try {
         $circular = new \App\Models\Circular();
         $circular->titulo = 'Circular Global de Prueba';
-        $circular->descripcion = 'Esta es una circular global de prueba';
         $circular->archivo = 'test/test.pdf';
         $circular->nombre_archivo_original = 'test.pdf';
         $circular->tipo_archivo = 'application/pdf';

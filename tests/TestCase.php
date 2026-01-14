@@ -72,7 +72,6 @@ abstract class TestCase extends BaseTestCase
 
         return \App\Models\Circular::create([
             'titulo' => 'Circular de Prueba',
-            'descripcion' => 'Descripción de prueba',
             'archivo' => 'test.pdf',
             'nombre_archivo_original' => 'test.pdf',
             'tipo_archivo' => 'application/pdf',

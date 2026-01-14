@@ -310,9 +310,6 @@
                                             @endif
                                             </div>
                                             <h4 class="text-lg font-semibold text-blue-900 mt-2">{{ $circular->titulo }}</h4>
-                                            @if($circular->descripcion)
-                                                <p class="text-sm text-blue-700 mt-2">{{ Str::limit($circular->descripcion, 120) }}</p>
-                                            @endif
                                         </div>
                                         <div class="flex flex-col items-end ml-2">
                                             <span class="text-xs text-blue-600 bg-blue-100 px-2 py-1 rounded-full mb-1">

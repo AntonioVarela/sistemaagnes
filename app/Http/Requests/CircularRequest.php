@@ -23,7 +23,6 @@ class CircularRequest extends FormRequest
     {
         $rules = [
             'titulo' => 'required|string|max:255',
-            'descripcion' => 'nullable|string|max:1000',
             'archivo' => 'nullable|file|mimes:pdf,doc,docx,jpg,jpeg,png|max:10240', // 10MB máximo
             'fecha_expiracion' => 'nullable|date|after_or_equal:today',
             'es_global' => 'nullable|boolean'
@@ -54,7 +53,6 @@ class CircularRequest extends FormRequest
         return [
             'titulo.required' => 'El título de la circular es obligatorio.',
             'titulo.max' => 'El título no puede tener más de 255 caracteres.',
-            'descripcion.max' => 'La descripción no puede tener más de 1000 caracteres.',
             'archivo.required' => 'Debe seleccionar un archivo para la circular.',
             'archivo.file' => 'El archivo seleccionado no es válido.',
             'archivo.mimes' => 'El archivo debe ser de tipo: PDF, DOC, DOCX, JPG, JPEG o PNG.',

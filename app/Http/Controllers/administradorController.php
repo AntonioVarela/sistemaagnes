@@ -1369,7 +1369,6 @@ class administradorController extends Controller
 
             $circular = new Circular();
             $circular->titulo = $request->titulo;
-            $circular->descripcion = $request->descripcion;
             $circular->archivo = $rutaArchivo;
             $circular->nombre_archivo_original = $archivo->getClientOriginalName();
             $circular->tipo_archivo = $archivo->getClientMimeType();
@@ -1419,7 +1418,6 @@ class administradorController extends Controller
         }
 
         $circular->titulo = $request->titulo;
-        $circular->descripcion = $request->descripcion;
         
         // Si es global, asignar grupo 1A pero marcar como global
         if ($request->es_global) {

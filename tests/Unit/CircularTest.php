@@ -19,7 +19,6 @@ class CircularTest extends TestCase
 
         $circular = Circular::create([
             'titulo' => 'Circular de Prueba',
-            'descripcion' => 'Descripción de prueba',
             'archivo' => 'test.pdf',
             'nombre_archivo_original' => 'test.pdf',
             'tipo_archivo' => 'application/pdf',
@@ -43,7 +42,6 @@ class CircularTest extends TestCase
 
         $circular = Circular::create([
             'titulo' => 'Test Circular',
-            'descripcion' => 'Test',
             'archivo' => 'test.pdf',
             'nombre_archivo_original' => 'test.pdf',
             'tipo_archivo' => 'application/pdf',
@@ -66,7 +64,6 @@ class CircularTest extends TestCase
 
         $circular = Circular::create([
             'titulo' => 'Test Circular',
-            'descripcion' => 'Test',
             'archivo' => 'test.pdf',
             'nombre_archivo_original' => 'test.pdf',
             'tipo_archivo' => 'application/pdf',
@@ -86,7 +83,6 @@ class CircularTest extends TestCase
 
         $circular = Circular::create([
             'titulo' => 'Test Circular',
-            'descripcion' => 'Test',
             'archivo' => 'test.pdf',
             'nombre_archivo_original' => 'test.pdf',
             'tipo_archivo' => 'application/pdf',
@@ -107,7 +103,6 @@ class CircularTest extends TestCase
         // Circular sin expiración
         $circular1 = Circular::create([
             'titulo' => 'Circular Sin Expiración',
-            'descripcion' => 'Test',
             'archivo' => 'test.pdf',
             'nombre_archivo_original' => 'test.pdf',
             'tipo_archivo' => 'application/pdf',
@@ -120,7 +115,6 @@ class CircularTest extends TestCase
         // Circular con expiración futura
         $circular2 = Circular::create([
             'titulo' => 'Circular Futura',
-            'descripcion' => 'Test',
             'archivo' => 'test.pdf',
             'nombre_archivo_original' => 'test.pdf',
             'tipo_archivo' => 'application/pdf',
@@ -133,7 +127,6 @@ class CircularTest extends TestCase
         // Circular expirada
         $circular3 = Circular::create([
             'titulo' => 'Circular Expirada',
-            'descripcion' => 'Test',
             'archivo' => 'test.pdf',
             'nombre_archivo_original' => 'test.pdf',
             'tipo_archivo' => 'application/pdf',

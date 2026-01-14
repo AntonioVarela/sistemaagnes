@@ -108,7 +108,6 @@ class SecurityTest extends TestCase
 
         $circularData = [
             'titulo' => 'Circular Maliciosa',
-            'descripcion' => 'Descripción',
             'archivo' => $maliciousFile,
             'grupo_id' => $grupo->id,
             'seccion' => 'Primaria'
@@ -129,7 +128,6 @@ class SecurityTest extends TestCase
         // Crear circular como administrador
         $circular = Circular::create([
             'titulo' => 'Circular de Admin',
-            'descripcion' => 'Descripción',
             'archivo' => 'admin.pdf',
             'nombre_archivo_original' => 'admin.pdf',
             'tipo_archivo' => 'application/pdf',

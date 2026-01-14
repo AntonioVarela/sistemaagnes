@@ -20,7 +20,6 @@ class CircularFactory extends Factory
     {
         return [
             'titulo' => $this->faker->sentence(4),
-            'descripcion' => $this->faker->paragraph(3),
             'archivo' => 'circulares/' . $this->faker->uuid() . '.pdf',
             'nombre_archivo_original' => $this->faker->word() . '.pdf',
             'tipo_archivo' => 'application/pdf',
