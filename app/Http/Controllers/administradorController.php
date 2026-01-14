@@ -130,7 +130,7 @@ class administradorController extends Controller
             $horarios = horario::with(['grupo', 'materia'])
                 ->orderBy('grupo_id')
                 ->get();
-            $grupos = grupo::all()->orderByRaw('CAST(SUBSTRING_INDEX(nombre, " ", 1) AS UNSIGNED) ASC, SUBSTRING_INDEX(nombre, " ", -1) ASC')->get();
+            $grupos = grupo::orderByRaw('CAST(SUBSTRING_INDEX(nombre, " ", 1) AS UNSIGNED) ASC, SUBSTRING_INDEX(nombre, " ", -1) ASC')->get();
         }
         if(Auth::user()->rol == 'Maestro'){
             $horarios = horario::with(['grupo', 'materia'])
