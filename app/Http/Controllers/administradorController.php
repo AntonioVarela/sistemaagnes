@@ -104,7 +104,7 @@ class administradorController extends Controller
             // Buscar todos los grupos de sección Primaria
             // Ordenar por número (numéricamente) y luego por letra
             $grupos = grupo::where('seccion', 'Primaria')
-                ->orderByRaw('CAST(SUBSTRING_INDEX(nombre, " ", 1) AS UNSIGNED) ASC, SUBSTRING_INDEX(nombre, " ", -1) ASC')
+                ->orderByRaw('CAST(SPLIT_PART(nombre, \' \', 1) AS INTEGER) ASC, SPLIT_PART(nombre, \' \', 2) ASC')
                 ->get();
             
             // Obtener todos los horarios de estos grupos
@@ -117,7 +117,7 @@ class administradorController extends Controller
             // Buscar todos los grupos de sección Secundaria
             // Ordenar por número (numéricamente) y luego por letra
             $grupos = grupo::where('seccion', 'Secundaria')
-                ->orderByRaw('CAST(SUBSTRING_INDEX(nombre, " ", 1) AS UNSIGNED) ASC, SUBSTRING_INDEX(nombre, " ", -1) ASC')
+                ->orderByRaw('CAST(SPLIT_PART(nombre, \' \', 1) AS INTEGER) ASC, SPLIT_PART(nombre, \' \', 2) ASC')
                 ->get();
             
             // Obtener todos los horarios de estos grupos
@@ -130,14 +130,14 @@ class administradorController extends Controller
             $horarios = horario::with(['grupo', 'materia'])
                 ->orderBy('grupo_id')
                 ->get();
-            $grupos = grupo::orderByRaw('CAST(SUBSTRING_INDEX(nombre, " ", 1) AS UNSIGNED) ASC, SUBSTRING_INDEX(nombre, " ", -1) ASC')->get();
+            $grupos = grupo::orderByRaw('CAST(SPLIT_PART(nombre, \' \', 1) AS INTEGER) ASC, SPLIT_PART(nombre, \' \', 2) ASC')->get();
         }
         if(Auth::user()->rol == 'Maestro'){
             $horarios = horario::with(['grupo', 'materia'])
                 ->where('maestro_id', Auth::user()->id)
                 ->orderBy('grupo_id')
                 ->get();
-            $grupos = grupo::whereIn('id', $horarios->pluck('grupo_id'))->orderByRaw('CAST(SUBSTRING_INDEX(nombre, " ", 1) AS UNSIGNED) ASC, SUBSTRING_INDEX(nombre, " ", -1) ASC')->get();
+            $grupos = grupo::whereIn('id', $horarios->pluck('grupo_id'))->orderByRaw('CAST(SPLIT_PART(nombre, \' \', 1) AS INTEGER) ASC, SPLIT_PART(nombre, \' \', 2) ASC')->get();
         }
 
         // Asegurar que las variables estén definidas
