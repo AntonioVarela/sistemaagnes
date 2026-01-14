@@ -843,9 +843,9 @@ class administradorController extends Controller
 
 
         $horarios = $query->with(['grupo', 'materia', 'maestro'])->get();
-        $grupos = grupo::all();
-        $materias = materia::all();
-        $usuarios = User::where('rol', 'Maestro')->get();
+        $grupos = grupo::orderByRaw('CAST(SPLIT_PART(nombre, \' \', 1) AS INTEGER) ASC, SPLIT_PART(nombre, \' \', 2) ASC')->get();
+        $materias = materia::orderBy('nombre', 'asc')->get();
+        $usuarios = User::where('rol', 'Maestro')->orderBy('name', 'asc')->get();
         return view("horarios", compact(['horarios','grupos','materias','usuarios']));
     }
 
