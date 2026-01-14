@@ -157,22 +157,22 @@ class administradorController extends Controller
         
         if(Auth::user()->rol == 'administrador'){
             $horario = horario::all();
-            $grupos = grupo::all(); 
+            $grupos = grupo::orderByRaw('CAST(SPLIT_PART(nombre, \' \', 1) AS INTEGER) ASC, SPLIT_PART(nombre, \' \', 2) ASC')->get(); 
         } else if(Auth::user()->rol == 'Coordinador Primaria'){
             // Coordinador Primaria ve todos los grupos de su sección
-            $grupos = grupo::where('seccion', 'Primaria')->get();
+            $grupos = grupo::where('seccion', 'Primaria')->orderByRaw('CAST(SPLIT_PART(nombre, \' \', 1) AS INTEGER) ASC, SPLIT_PART(nombre, \' \', 2) ASC')->get();
             $horario = horario::whereIn('grupo_id', $grupos->pluck('id'))->get();
         } else if(Auth::user()->rol == 'Coordinador Secundaria'){
             // Coordinador Secundaria ve todos los grupos de su sección
-            $grupos = grupo::where('seccion', 'Secundaria')->get();
+            $grupos = grupo::where('seccion', 'Secundaria')->orderByRaw('CAST(SPLIT_PART(nombre, \' \', 1) AS INTEGER) ASC, SPLIT_PART(nombre, \' \', 2) ASC')->get();
             $horario = horario::whereIn('grupo_id', $grupos->pluck('id'))->get();
         } else{
             $horario = horario::where('maestro_id', Auth::user()->id)->get();
-            $grupos = grupo::whereIn('id', $horario->pluck('grupo_id'))->get();
+            $grupos = grupo::whereIn('id', $horario->pluck('grupo_id'))->orderByRaw('CAST(SPLIT_PART(nombre, \' \', 1) AS INTEGER) ASC, SPLIT_PART(nombre, \' \', 2) ASC')->get();
         }
         $seccion = grupo::select('seccion')->whereIn('id', $grupos->pluck('id'))->groupBy('seccion')->get();
         
-        $materias = materia::whereIn('id', $horario->pluck('materia_id'))->get();
+        $materias = materia::whereIn('id', $horario->pluck('materia_id'))->orderBy('nombre', 'asc')->get();
         
         // Aplicar filtros
         $query = tarea::query();
