@@ -102,7 +102,10 @@ class administradorController extends Controller
         
         if(Auth::user()->rol == 'Coordinador Primaria'){
             // Buscar todos los grupos de sección Primaria
-            $grupos = grupo::where('seccion', 'Primaria')->orderBy('nombre')->get();
+            // Ordenar por número (numéricamente) y luego por letra
+            $grupos = grupo::where('seccion', 'Primaria')
+                ->orderByRaw('CAST(SUBSTRING_INDEX(nombre, " ", 1) AS UNSIGNED) ASC, SUBSTRING_INDEX(nombre, " ", -1) ASC')
+                ->get();
             
             // Obtener todos los horarios de estos grupos
             $horarios = horario::with(['grupo', 'materia'])
@@ -112,7 +115,10 @@ class administradorController extends Controller
 
         } else if(Auth::user()->rol == 'Coordinador Secundaria'){
             // Buscar todos los grupos de sección Secundaria
-            $grupos = grupo::where('seccion', 'Secundaria')->orderBy('nombre')->get();
+            // Ordenar por número (numéricamente) y luego por letra
+            $grupos = grupo::where('seccion', 'Secundaria')
+                ->orderByRaw('CAST(SUBSTRING_INDEX(nombre, " ", 1) AS UNSIGNED) ASC, SUBSTRING_INDEX(nombre, " ", -1) ASC')
+                ->get();
             
             // Obtener todos los horarios de estos grupos
             $horarios = horario::with(['grupo', 'materia'])
